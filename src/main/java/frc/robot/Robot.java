@@ -6,7 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.junit.jupiter.engine.Constants;
+import frc.lib.generic.simulation.GenericSimulation;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -15,7 +15,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;
-import static frc.robot.GlobalConstants.Mode.SIMULATION;
+import static frc.robot.RobotContainer.arm;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -49,13 +49,13 @@ public class Robot extends LoggedRobot {
         // See http://bit.ly/3YIzFZ6 for more information on timestamps in AdvantageKit.
         // Logger.disableDeterministicTimestamps()
 
-        // Start AdvantageKit logger
         Logger.start();
     }
 
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+//        armSimulation.(Rotation2d.fromDegrees(new TunableNumber("Target angle", 20).get()));
     }
 
     @Override
@@ -89,9 +89,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void teleopInit() {
-        if (autonomousCommand != null) {
-            autonomousCommand.cancel();
-        }
     }
 
     @Override
@@ -114,4 +111,23 @@ public class Robot extends LoggedRobot {
     @Override
     public void testExit() {
     }
+
+    @Override
+    public void simulationInit() {
+    }
+
+    @Override
+    public void simulationPeriodic() {
+//        armSimulation.simulationPeriodic();
+//        armSimulation.reachSetpoint();
+        arm.reachSetpoint();
+
+        GenericSimulation.updateAllSimulations();
+    }
+
+    @Override
+    public void close() {
+        super.close();
+    }
+
 }
