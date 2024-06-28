@@ -80,6 +80,16 @@ public class Feedforward {
         return calculate(0, velocity, acceleration);
     }
 
+    /**
+     * For both simple motor and elevator feed forwards. With no position or acceleration
+     *
+     * @param velocity     - unit-less, preferably in rotations per second
+     * @return - the input for the motors
+     */
+    public double calculate(double velocity) {
+        return calculate(0, velocity, 0);
+    }
+
     private void exitIfNotPresent(Object feedforward) {
         if (feedforward == null)
             throw new UnsupportedOperationException("Can't use feedforward with " + type.name() + " type");

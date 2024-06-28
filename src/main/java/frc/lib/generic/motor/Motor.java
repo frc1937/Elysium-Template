@@ -9,9 +9,13 @@ public interface Motor {
     void setOutput(MotorProperties.ControlMode controlMode, double output);
     void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward);
 
+    void setIdleMode(MotorProperties.IdleMode idleMode);
+
     void stopMotor();
 
     void setMotorPosition(double position);
+
+    int getDeviceID();
 
     /** No gearing applied*/
     double getMotorPosition();
@@ -36,7 +40,9 @@ public interface Motor {
     double getSystemVelocity();
 
     void setFollowerOf(int masterPort);
+
     void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz);
+    void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes);
 
     TalonFXSimState getSimulationState();
 

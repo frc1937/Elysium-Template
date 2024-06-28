@@ -15,7 +15,6 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;
-import static frc.robot.RobotContainer.arm;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -55,7 +54,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-//        armSimulation.(Rotation2d.fromDegrees(new TunableNumber("Target angle", 20).get()));
     }
 
     @Override
@@ -114,14 +112,28 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationInit() {
+//        final TalonFXConfiguration config = new TalonFXConfiguration();
+//
+//        config.Slot0.kP = P;
+//        config.Slot0.kI = I;
+//        config.Slot0.kD = D;
+//        config.Slot0.kG = KG;
+//        config.Slot0.kV = KV;
+//        config.Slot0.kA = KA;
+//        config.Slot0.kS = KS;
+//        config.ClosedLoopGeneral.ContinuousWrap = true;
+//        config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+//
+//        config.MotionMagic.MotionMagicCruiseVelocity = MAXIMUM_VELOCITY;
+//        config.MotionMagic.MotionMagicAcceleration = MAXIMUM_ACCELERATION;
+//
+//        talonFX.getConfigurator().apply(config);
+//
+//        Timer.delay(0.5);
     }
 
     @Override
     public void simulationPeriodic() {
-//        armSimulation.simulationPeriodic();
-//        armSimulation.reachSetpoint();
-        arm.reachSetpoint();
-
         GenericSimulation.updateAllSimulations();
     }
 
@@ -129,5 +141,4 @@ public class Robot extends LoggedRobot {
     public void close() {
         super.close();
     }
-
 }

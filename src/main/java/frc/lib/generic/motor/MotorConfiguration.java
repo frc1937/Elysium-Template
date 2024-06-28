@@ -32,6 +32,6 @@ public class MotorConfiguration {
 
     public double supplyCurrentLimit = -1, statorCurrentLimit = -1;
 
-    //Todo: Check if this is 1 / gear OR gear.
+    /** Convert between 1 system rotation to motor rotation. 1 / num*/
     public double conversionFactor = 1;
 }

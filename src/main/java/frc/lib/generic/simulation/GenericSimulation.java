@@ -1,13 +1,11 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.GenericTalonFX;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
-import frc.lib.util.TunableNumber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,22 +16,18 @@ public abstract class GenericSimulation {
     /** This instance is shared between all inheritors */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
-    private final TunableNumber volts = new TunableNumber("ngig", 0);
-
     private final Motor motor;
-    private TalonFXSimState motorSimulationState;
+    private final TalonFXSimState motorSimulationState;
 
-    GenericSimulation() {
+    protected GenericSimulation() {
         REGISTERED_SIMULATIONS.add(this);
 
         motor = new GenericTalonFX(REGISTERED_SIMULATIONS.size() - 1);
 
-        motor.setSignalUpdateFrequency(Properties.SignalType.CLOSED_LOOP_TARGET, 1.0 / ROBORIO_LOOP_TIME);
-        motor.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 1.0 / ROBORIO_LOOP_TIME);
+        //This is simulation. we don't give a damn fuck! about performance.
+        Properties.SignalType[] signalTypes = Properties.SignalType.values();
 
-        motor.setSignalUpdateFrequency(Properties.SignalType.POSITION, 1.0 / ROBORIO_LOOP_TIME);
-        motor.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 1.0 / ROBORIO_LOOP_TIME);
-        motor.setSignalUpdateFrequency(Properties.SignalType.CURRENT, 1.0 / ROBORIO_LOOP_TIME);
+        motor.setSignalsUpdateFrequency(1.0 / ROBORIO_LOOP_TIME, signalTypes);
 
         motorSimulationState = motor.getSimulationState();
         motorSimulationState.setSupplyVoltage(12); //Voltage compensation.
@@ -58,7 +52,6 @@ public abstract class GenericSimulation {
 
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
         motor.setOutput(controlMode, output);
-        SmartDashboard.putNumber("POSITION HIGHER LEVEL! 2: ", output);
     }
 
     public double getVoltage() {
@@ -66,10 +59,7 @@ public abstract class GenericSimulation {
     }
 
     private void updateSimulation() {
-        motorSimulationState = motor.getSimulationState();
-
-        setVoltage(volts.get());
-        SmartDashboard.putNumber("voltage of mtoor", motorSimulationState.getMotorVoltage());
+        setVoltage(motorSimulationState.getMotorVoltage());
         update();
 
         motorSimulationState.setRawRotorPosition(getPositionRotations());

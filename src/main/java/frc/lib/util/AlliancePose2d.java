@@ -7,10 +7,10 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
-import static edu.wpi.first.units.Units.Meters;
 import static frc.lib.util.AlliancePose2d.AllianceUtils.isBlueAlliance;
 import static frc.robot.GlobalConstants.FIELD_LENGTH_METRES;
 
+@Deprecated
 public class AlliancePose2d {
     private final Pose2d bluePose;
     private final Pose2d redPose;
@@ -24,7 +24,6 @@ public class AlliancePose2d {
             bluePose = mirrorPose(pose);
         }
     }
-
 
     /**
      * Get the correct pose based on the current alliance
@@ -111,7 +110,7 @@ public class AlliancePose2d {
                     pose.getZ(),
                     getCorrectRotation(pose.getRotation())
             );
-        } //TODO: cleanup this bullshit arse code
+        }
     }
 
     private Pose2d mirrorPose(Pose2d pose) {

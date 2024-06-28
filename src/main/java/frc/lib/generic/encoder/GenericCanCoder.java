@@ -1,13 +1,12 @@
 package frc.lib.generic.encoder;
 
+import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import frc.lib.generic.Properties;
-
-import static frc.lib.util.CTREUtil.applyConfig;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -25,13 +24,13 @@ public class GenericCanCoder extends CANcoder implements Encoder {
         velocitySignal = super.getVelocity().clone();
     }
 
-
     @Override
     public void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz) {
         switch (signalType) {
             case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
-            case TEMPERATURE, CURRENT, VOLTAGE -> throw new UnsupportedOperationException("CANCoders don't support checking for " + signalType.name());
+            case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
+                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signalType.name());
         }
     }
 
@@ -55,9 +54,20 @@ public class GenericCanCoder extends CANcoder implements Encoder {
         canCoderConfig.MagnetSensor.AbsoluteSensorRange = encoderConfiguration.sensorRange == EncoderProperties.SensorRange.ZeroToOne
                 ? AbsoluteSensorRangeValue.Unsigned_0To1 : AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
 
-        applyConfig(this, canCoderConfig);
         optimizeBusUtilization();
 
-        return false;
+        return applyConfig();
+    }
+
+    private boolean applyConfig() {
+        int counter = 10;
+        StatusCode statusCode = null;
+
+        while (statusCode != StatusCode.OK && counter > 0) {
+            statusCode = this.getConfigurator().apply(canCoderConfig);
+            counter--;
+        }
+
+        return statusCode == StatusCode.OK;
     }
 }

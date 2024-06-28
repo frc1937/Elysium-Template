@@ -9,15 +9,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.generic.Properties;
-
-import java.util.Random;
 
 public class GenericTalonFX extends TalonFX implements Motor {
     private int slotToUse = 0;
-
-    private static final TalonFX talonFX = new TalonFX(new Random().nextInt(0, 1000));
 
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -48,17 +43,9 @@ public class GenericTalonFX extends TalonFX implements Motor {
     public void setOutput(MotorProperties.ControlMode mode, double output) {
         switch (mode) { //todo: add more (NECESSARY) control types
             case PERCENTAGE_OUTPUT -> super.setControl(dutyCycleRequest.withOutput(output));
-            case VOLTAGE -> {
-                this.setControl(voltageRequest.withOutput(output).withEnableFOC(false));
-                SmartDashboard.putNumber("voltage to put into motor ##SETOUTPUT##", output);
-            }
+            case VOLTAGE -> this.setControl(voltageRequest.withOutput(output).withEnableFOC(false));
 
-            case POSITION -> {
-                super.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
-                System.out.println("Slot: " + slotToUse);
-                System.out.println("position: " + positionVoltageRequest.withPosition(output));
-                SmartDashboard.putNumber("POSITION!", positionVoltageRequest.Position);
-            }
+            case POSITION -> super.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
             case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
 
             case CURRENT ->
@@ -70,6 +57,12 @@ public class GenericTalonFX extends TalonFX implements Motor {
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         setOutput(mode, output);
         System.out.println("Phoenix v6 already does feedforward control for you !! Please use the correct method");
+    }
+
+    @Override
+    public void setIdleMode(MotorProperties.IdleMode idleMode) {
+        currentConfiguration.idleMode = idleMode;
+        configure(currentConfiguration);
     }
 
     @Override
@@ -129,12 +122,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public double getVoltage() {
-        System.out.println("Motor voltage: " + getMotorVoltage().getValue());
         return getMotorVoltage().getValue();
-
-//        System.out.println("Motor /**/voltage: " + voltageSignal.refresh().getValue());
-//
-//        return voltageSignal.refresh().getValue();
     }
 
     @Override
@@ -151,6 +139,13 @@ public class GenericTalonFX extends TalonFX implements Motor {
             case CURRENT -> currentSignal.setUpdateFrequency(updateFrequencyHz);
             case TEMPERATURE -> temperatureSignal.setUpdateFrequency(updateFrequencyHz);
             case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(updateFrequencyHz);
+        }
+    }
+
+    @Override
+    public void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes) {
+        for (Properties.SignalType type : signalTypes) {
+            setSignalUpdateFrequency(type, updateFrequencyHz);
         }
     }
 

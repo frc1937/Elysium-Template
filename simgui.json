@@ -10,15 +10,11 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Arm Sim": "Mechanism2d",
-      "/SmartDashboard/Arm Simulation": "Mechanism2d"
+      "/SmartDashboard/Arm Simulation": "Mechanism2d",
+      "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d"
     },
     "windows": {
-      "/SmartDashboard/Arm Sim": {
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Arm Simulation": {
+      "/SmartDashboard/Mechanism/Flywheel": {
         "window": {
           "visible": true
         }
@@ -28,6 +24,9 @@
   "NetworkTables": {
     "transitory": {
       "SmartDashboard": {
+        "Mechanism": {
+          "open": true
+        },
         "TunableNumbers": {
           "flywheel": {
             "open": true
@@ -45,13 +44,56 @@
     "Plot <0>": {
       "plots": [
         {
+          "axis": [
+            {
+              "autoFit": true
+            }
+          ],
           "backgroundColor": [
             0.0,
             0.0,
             0.0,
             0.8500000238418579
           ],
-          "height": 338
+          "height": 256,
+          "series": [
+            {
+              "color": [
+                0.2980392277240753,
+                0.44705885648727417,
+                0.6901960968971252,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/TunableNumbers/target pitch deg"
+            },
+            {
+              "color": [
+                0.8666667342185974,
+                0.5176470875740051,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/current pos"
+            },
+            {
+              "color": [
+                0.3333333432674408,
+                0.658823549747467,
+                0.4078431725502014,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/flywheel rpm"
+            },
+            {
+              "color": [
+                0.7686275243759155,
+                0.30588236451148987,
+                0.32156863808631897,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/flywheel target rpm"
+            }
+          ]
         }
       ]
     }
