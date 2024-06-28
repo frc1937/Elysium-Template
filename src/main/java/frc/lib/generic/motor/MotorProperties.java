@@ -19,5 +19,55 @@ public class MotorProperties {
         MAX, FLEX
     }
 
-    public record Slot(double kP, double kD, double kI, double kV, double kA, double kS, double kG, GravityTypeValue gravityType) { }
+    public static final class Slot {
+        private final double kP, kD, kI, kV, kA, kS, kG;
+        private final GravityTypeValue gravityType;
+
+        public Slot(double kP, double kD, double kI, double kV, double kA, double kS, double kG, GravityTypeValue gravityType) {
+            this.kP = kP;
+            this.kD = kD;
+            this.kI = kI;
+            this.kV = kV;
+            this.kA = kA;
+            this.kS = kS;
+            this.kG = kG;
+            this.gravityType = gravityType;
+        }
+
+        public Slot(double kP, double kD, double kI, double kV, double kA, double kS) {
+            this(kP, kD, kI, kV, kA, kS, 0, null);
+        }
+
+        public double kP() {
+            return kP;
+        }
+
+        public double kD() {
+            return kD;
+        }
+
+        public double kI() {
+            return kI;
+        }
+
+        public double kV() {
+            return kV;
+        }
+
+        public double kA() {
+            return kA;
+        }
+
+        public double kS() {
+            return kS;
+        }
+
+        public double kG() {
+            return kG;
+        }
+
+        public GravityTypeValue gravityType() {
+            return gravityType;
+        }
+    }
 }
