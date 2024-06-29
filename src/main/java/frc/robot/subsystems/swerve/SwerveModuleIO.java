@@ -3,16 +3,18 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public abstract class SwerveModuleIO {
+public class SwerveModuleIO {
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
-
     private final String name;
+
+    private SwerveModuleState targetState;
 
     public SwerveModuleIO(String name) {
         this.name = name;
+
+        targetState = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
     }
 
     public String getLoggingPath() {
@@ -20,24 +22,35 @@ public abstract class SwerveModuleIO {
     }
 
     public void periodic() {
-        updateInputs(swerveModuleInputs);
+        refreshInputs(swerveModuleInputs);
         Logger.processInputs(getLoggingPath(), swerveModuleInputs);
     }
 
     void setTargetState(SwerveModuleState state) {
-        SwerveModuleState optimizedState = SwerveModuleState.optimize(state, getCurrentAngle());
+        this.targetState = SwerveModuleState.optimize(state, getCurrentAngle());
 
-        setTargetAngle(optimizedState.angle);
-        setTargetVelocity(optimizedState.speedMetersPerSecond);
+        setTargetAngle(targetState.angle);
+        setTargetVelocity(targetState.speedMetersPerSecond);
     }
 
-    protected abstract void setTargetAngle(Rotation2d angle);
-    protected abstract void setTargetVelocity(double velocityMetresPerSecond);
+    protected Rotation2d getCurrentAngle() {
+        return Rotation2d.fromDegrees(swerveModuleInputs.steerAngleDegrees);
+    }
+
+    protected SwerveModuleState getTargetState() {
+        return targetState;
+    }
+
+    protected void setTargetAngle(Rotation2d angle) {}
+    protected void setTargetVelocity(double velocityMetresPerSecond) {}
+
+    protected SwerveModuleState getCurrentState() {
 
 
-    protected abstract Rotation2d getCurrentAngle();
+        return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
+    }
 
-    protected abstract void updateInputs(SwerveModuleInputsAutoLogged swerveModuleInputs);
+    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {}
 
     @AutoLog
     public static class SwerveModuleInputs {

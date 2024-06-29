@@ -214,6 +214,8 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
         applyCurrentLimits();
 
+        talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.ClosedLoopContinousWrap;
+
         slotToUse = configuration.slotToUse;
 
         optimizeBusUtilization();

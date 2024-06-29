@@ -30,6 +30,13 @@ public class MotorConfiguration {
      */
     public double dutyCycleCloseLoopRampPeriod = 0;
 
+    /**
+     * Wrap position error within [-0.5,+0.5) mechanism rotations. Typically used for continuous position closed-loops like swerve azimuth.
+     * This uses the mechanism rotation value. If there is a gear ratio between the sensor and the mechanism, make sure to apply a SensorToMechanismRatio so the closed loop operates on the full rotation.
+     * Default Value: False
+     */
+    public boolean ClosedLoopContinousWrap = false;
+
     public double supplyCurrentLimit = -1, statorCurrentLimit = -1;
 
     /** Convert between 1 system rotation to motor rotation. 1 / num*/

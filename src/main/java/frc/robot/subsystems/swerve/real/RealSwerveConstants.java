@@ -7,12 +7,12 @@ import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.GenericCanCoder;
 import frc.lib.generic.motor.*;
+import frc.robot.subsystems.swerve.SwerveConstants;
+import frc.robot.subsystems.swerve.SwerveModuleIO;
 
-import static edu.wpi.first.units.Units.Inch;
-import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
-public class RealSwerveConstants {
+public class RealSwerveConstants extends SwerveConstants {
     static final MotorProperties.IdleMode ANGLE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
     static final MotorProperties.IdleMode DRIVE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
 
@@ -22,8 +22,6 @@ public class RealSwerveConstants {
     static final boolean CAN_CODER_INVERT = false;
     static final boolean ANGLE_MOTOR_INVERT = true;
     static final boolean DRIVE_MOTOR_INVERT = false;
-
-    static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
     static final double MAX_SPEED_MPS = 5.1;
 
@@ -72,6 +70,16 @@ public class RealSwerveConstants {
             configureDriveMotor(DRIVE_MOTOR[i]);
             configureSteerMotor(STEER_MOTOR[i]);
         }
+    }
+
+    @Override
+    protected SwerveModuleIO[] getSwerveModules() {
+        return new SwerveModuleIO[]{
+                new RealSwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER, "ModuleFL"),
+                new RealSwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER, "ModuleFR"),
+                new RealSwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER, "ModuleRL"),
+                new RealSwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER, "ModuleRR")
+        };
     }
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {

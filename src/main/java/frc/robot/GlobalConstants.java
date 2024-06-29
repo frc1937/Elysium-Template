@@ -8,7 +8,6 @@ public class GlobalConstants {
     public static final Lock ODOMETRY_LOCK = new ReentrantLock();
 
     public static final boolean IS_TUNING_MODE = true;
-
     public static final Mode CURRENT_MODE = Mode.SIMULATION;
 
     public enum Mode {
