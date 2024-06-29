@@ -1,15 +1,12 @@
 package frc.robot.subsystems.swerve.real;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.generic.Properties;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 
-import static frc.lib.generic.Properties.SignalType.POSITION;
-import static frc.lib.generic.Properties.SignalType.VELOCITY;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.real.RealSwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.real.RealSwerveConstants.WHEEL_DIAMETER;
@@ -28,7 +25,7 @@ public class RealSwerveModule extends SwerveModuleIO {
 
     @Override
     public void periodic() {
-        steerMotor.setMotorPosition(getCurrentAngle().getRotations());
+        steerMotor.setMotorEncoderPosition(getCurrentAngle().getRotations());
     }
 
     @Override

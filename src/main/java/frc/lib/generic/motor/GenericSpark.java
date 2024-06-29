@@ -44,12 +44,16 @@ public class GenericSpark extends CANSparkBase implements Motor {
         switch (mode) { //todo: this method, correctly.
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
+            case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse,
+                    this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
+
+            case POSITION ->
+                    controller.setReference(output, ControlType.kPosition, slotToUse,
+                            this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
-        } //todo: INCORPORATE FEED FORWARD
+        }
     }
 
     @Override
@@ -58,7 +62,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setMotorPosition(double position) {
+    public void setMotorEncoderPosition(double position) {
         encoder.setPosition(position);
         //Position to set the motor to, after gear ratio is applied
     }

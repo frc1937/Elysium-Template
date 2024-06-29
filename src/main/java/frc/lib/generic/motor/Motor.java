@@ -16,22 +16,24 @@ public interface Motor {
 
     void stopMotor();
 
-    void setMotorPosition(double position);
+    void setMotorEncoderPosition(double position);
 
     int getDeviceID();
 
     /**
      * No gearing applied
+     * @Units - In rotations
      */
     double getMotorPosition();
 
     /**
      * No gearing applied
+     * @Units - In rotations per second
      */
     double getMotorVelocity();
 
     /**
-     * Get the current running through the motor (SUPPLY current)
+     * Get the current running through the motor (STATOR current)
      */
     double getCurrent();
 
@@ -46,17 +48,20 @@ public interface Motor {
     double getClosedLoopTarget();
 
     /**
-     * Get the temperature of the motor, in Celsius
+     * Get the temperature of the motor
+     * @Units - In celsius
      */
     double getTemperature();
 
     /**
      * Gearing applied
+     * @Units - In rotations
      */
     double getSystemPosition();
 
     /**
      * Gearing applied
+     * @Units - In rotations per second
      */
     double getSystemVelocity();
 

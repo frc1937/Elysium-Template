@@ -84,7 +84,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setMotorPosition(double position) {
+    public void setMotorEncoderPosition(double position) {
         talonConfigurator.setPosition(position); //TODO: Test on real robot to check if works.
     }
 

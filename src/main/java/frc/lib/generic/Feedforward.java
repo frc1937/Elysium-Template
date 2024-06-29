@@ -43,7 +43,7 @@ public class Feedforward {
     }
 
     /**
-     * @param position     - For arm ONLY. This should be in radians.
+     * @param position     - For arm ONLY. This should be in radians. For non-arms, this will not be used.
      * @param velocity     - unit-less, preferably in rotations per second
      * @param acceleration - unit-less, preferably rotations per second squared
      * @return - the input for the motors
