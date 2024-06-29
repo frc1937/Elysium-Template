@@ -5,7 +5,11 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.StrictFollower;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -43,13 +47,13 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setOutput(MotorProperties.ControlMode mode, double output) {
+    public void setInput(MotorProperties.ControlMode mode, double input) {
         switch (mode) { //todo: add more (NECESSARY) control types
-            case PERCENTAGE_OUTPUT -> super.setControl(dutyCycleRequest.withOutput(output));
-            case VOLTAGE -> this.setControl(voltageRequest.withOutput(output).withEnableFOC(false));
+            case PERCENTAGE_OUTPUT -> super.setControl(dutyCycleRequest.withOutput(input));
+            case VOLTAGE -> this.setControl(voltageRequest.withOutput(input).withEnableFOC(false));
 
-            case POSITION -> super.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
-            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
+            case POSITION -> super.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse));
+            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse));
 
             case CURRENT ->
                     throw new UnsupportedOperationException("CTRE is money hungry, and wants you to pay $150 for CURRENT control. Nuh uh!");
@@ -57,9 +61,16 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        setOutput(mode, output);
-        System.out.println("Phoenix v6 already does feedforward control for you !! Please use the correct method");
+    public void setInput(MotorProperties.ControlMode mode, double input, double feedforward) {
+        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
+            setInput(mode, input);
+
+        switch (mode) {
+            case POSITION -> super.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse)
+                    .withFeedForward(feedforward));
+            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse)
+                    .withFeedForward(feedforward));
+        }
     }
 
     @Override

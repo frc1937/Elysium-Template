@@ -8,7 +8,13 @@ public class MotorProperties {
     }
 
     public enum ControlMode {
-        CURRENT, VOLTAGE,
+        /** Current, in amps */
+        CURRENT,
+
+        /** Voltage, in volts */
+        VOLTAGE,
+
+        /** Duty cycle output. In what percentage of the cycle to input voltage. 0.5 being 50% percent.*/
         PERCENTAGE_OUTPUT,
 
         /** In rotations */

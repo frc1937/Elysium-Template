@@ -33,26 +33,22 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        setOutput(controlMode, output, 0);
+    public void setInput(MotorProperties.ControlMode controlMode, double input) {
+        setInput(controlMode, input, this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
     }
 
     @Override
-    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        closedLoopTarget = output;
+    public void setInput(MotorProperties.ControlMode mode, double input, double feedforward) {
+        closedLoopTarget = input;
 
-        switch (mode) { //todo: this method, correctly.
-            case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
+        switch (mode) { //Todo: More control types.
+            case PERCENTAGE_OUTPUT -> controller.setReference(input, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse,
-                    this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
+            case VELOCITY -> controller.setReference(input, ControlType.kVelocity, slotToUse, feedforward);
+            case POSITION -> controller.setReference(input, ControlType.kPosition, slotToUse, feedforward);
 
-            case POSITION ->
-                    controller.setReference(output, ControlType.kPosition, slotToUse,
-                            this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
-
-            case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
-            case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> controller.setReference(input, ControlType.kVoltage, slotToUse);
+            case CURRENT -> controller.setReference(input, ControlType.kCurrent, slotToUse);
         }
     }
 

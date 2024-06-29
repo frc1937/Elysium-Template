@@ -50,8 +50,8 @@ public abstract class GenericSimulation {
         motor.stopMotor();
     }
 
-    public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        motor.setOutput(controlMode, output);
+    public void setInput(MotorProperties.ControlMode controlMode, double input) {
+        motor.setInput(controlMode, input);
     }
 
     public double getVoltage() {
@@ -70,7 +70,7 @@ public abstract class GenericSimulation {
     public abstract double getVelocityRotationsPerSecond();
     public abstract double getCurrent();
 
-    //These have weaker access because they're used here only.
+    //These have weaker access because they're used in this package only.
     abstract void update();
     abstract void setVoltage(double voltage);
 }
