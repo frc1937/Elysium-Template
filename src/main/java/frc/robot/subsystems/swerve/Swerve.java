@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
@@ -30,40 +29,10 @@ public class Swerve extends SubsystemBase {
         }
     }
 
-    public void drive(double x, double y, double rotation) {
-        System.out.println("HELLO!");
-
-        System.out.println("RUNNING CMD");
-
-        System.out.println("X is: " + x);
-        Logger.recordOutput("X Supplier", x);
-        Logger.recordOutput("Y Supplier", y);
-        Logger.recordOutput("Rotation Supplier", rotation);
-
-        ChassisSpeeds speeds = new ChassisSpeeds(x, y, rotation);
-
-        SwerveModuleState[] targetStates = SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
-
-        for (int i = 0; i < swerveModules.length; i++) {
-            swerveModules[i].setTargetState(targetStates[i]);
-        }
-    }
-
     public Command drive(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {
-        System.out.println("HELLO!");
-
-        FunctionalCommand command = new FunctionalCommand(
+        return new FunctionalCommand(
+                () -> {},
                 () -> {
-                    System.out.println("has initialized command");
-                },
-                () -> {
-                    System.out.println("RUNNING CMD");
-
-                    System.out.println("X is: " + x.getAsDouble());
-                    Logger.recordOutput("X Supplier", x.getAsDouble());
-                    Logger.recordOutput("Y Supplier", y.getAsDouble());
-                    Logger.recordOutput("Rotation Supplier", rotation.getAsDouble());
-
                     ChassisSpeeds speeds = new ChassisSpeeds(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble());
 
                     SwerveModuleState[] targetStates = SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
@@ -77,8 +46,6 @@ public class Swerve extends SubsystemBase {
                 () -> false,
                 this
         );
-
-        return command;
     }
 
     private SwerveModuleIO[] getSwerveModules() {

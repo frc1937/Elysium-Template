@@ -9,12 +9,10 @@ public class SwerveModuleIO {
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
 
-    private SwerveModuleState targetState;
+    private SwerveModuleState targetState  = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
 
     public SwerveModuleIO(String name) {
         this.name = name;
-
-        targetState = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
     }
 
     public String getLoggingPath() {
@@ -44,9 +42,9 @@ public class SwerveModuleIO {
     protected void setTargetAngle(Rotation2d angle) {}
     protected void setTargetVelocity(double velocityMetresPerSecond) {}
 
+    protected void stop() {}
+
     protected SwerveModuleState getCurrentState() {
-
-
         return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
     }
 

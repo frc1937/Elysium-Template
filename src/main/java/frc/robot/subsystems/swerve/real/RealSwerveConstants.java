@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve.real;
 
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.Properties;
 import frc.lib.generic.encoder.Encoder;
@@ -13,6 +14,8 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 public class RealSwerveConstants extends SwerveConstants {
+    static final WPI_PigeonIMU GYRO = new WPI_PigeonIMU(30);
+
     static final MotorProperties.IdleMode ANGLE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
     static final MotorProperties.IdleMode DRIVE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
 
@@ -70,6 +73,8 @@ public class RealSwerveConstants extends SwerveConstants {
             configureDriveMotor(DRIVE_MOTOR[i]);
             configureSteerMotor(STEER_MOTOR[i]);
         }
+
+        GYRO.configFactoryDefault();
     }
 
     @Override

@@ -58,6 +58,12 @@ public class RealSwerveModule extends SwerveModuleIO {
     }
 
     @Override
+    public void stop() {
+        driveMotor.stopMotor();
+        steerMotor.stopMotor();
+    }
+
+    @Override
     protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
         driveMotor.refreshStatusSignals(Properties.SignalType.VELOCITY, Properties.SignalType.POSITION);
 
@@ -68,10 +74,12 @@ public class RealSwerveModule extends SwerveModuleIO {
         swerveModuleInputs.driveDistanceMeters = rotationsToMetres(driveMotor.getSystemPosition(), WHEEL_DIAMETER);
         swerveModuleInputs.driveVoltage = driveMotor.getVoltage();
 
-        swerveModuleInputs.odometryUpdatesDriveDistanceMeters =
-                drivePositionQueue.stream().mapToDouble((position) -> rotationsToMetres(position, WHEEL_DIAMETER)).toArray();
+        swerveModuleInputs.odometryUpdatesDriveDistanceMeters = drivePositionQueue.stream().mapToDouble((position) -> rotationsToMetres(position, WHEEL_DIAMETER)).toArray();
 
         swerveModuleInputs.odometryUpdatesSteerAngleDegrees = steerPositionQueue.stream().mapToDouble(Conversions::rotationsToDegrees).toArray();
+
+        drivePositionQueue.clear();
+        steerPositionQueue.clear();
     }
 
     private double getAngleDegrees() {

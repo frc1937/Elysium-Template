@@ -22,13 +22,17 @@ public class SimulatedSwerveModule extends SwerveModuleIO {
     @Override
     protected void setTargetAngle(Rotation2d angle) {
         steerMotor.setInput(MotorProperties.ControlMode.POSITION, angle.getRotations());
-        System.out.println("hsa changed angle");
     }
 
     @Override
     protected void setTargetVelocity(double velocityMetresPerSecond) {
         driveMotor.setInput(MotorProperties.ControlMode.VELOCITY, mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER));
-        System.out.println("Has put velocity");
+    }
+
+    @Override
+    public void stop() {
+        driveMotor.stop();
+        steerMotor.stop();
     }
 
     @Override
@@ -42,6 +46,5 @@ public class SimulatedSwerveModule extends SwerveModuleIO {
 
         swerveModuleInputs.odometryUpdatesDriveDistanceMeters = new double[]{swerveModuleInputs.driveDistanceMeters};
         swerveModuleInputs.odometryUpdatesSteerAngleDegrees = new double[]{swerveModuleInputs.steerAngleDegrees};
-
     }
 }

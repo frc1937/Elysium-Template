@@ -12,13 +12,6 @@
       "/SmartDashboard/Arm Sim": "Mechanism2d",
       "/SmartDashboard/Arm Simulation": "Mechanism2d",
       "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d"
-    },
-    "windows": {
-      "/SmartDashboard/Mechanism/Flywheel": {
-        "window": {
-          "visible": true
-        }
-      }
     }
   },
   "NetworkTables": {

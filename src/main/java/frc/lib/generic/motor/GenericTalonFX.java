@@ -49,11 +49,11 @@ public class GenericTalonFX extends TalonFX implements Motor {
     @Override
     public void setInput(MotorProperties.ControlMode mode, double input) {
         switch (mode) { //todo: add more (NECESSARY) control types
-            case PERCENTAGE_OUTPUT -> super.setControl(dutyCycleRequest.withOutput(input));
+            case PERCENTAGE_OUTPUT -> this.setControl(dutyCycleRequest.withOutput(input));
             case VOLTAGE -> this.setControl(voltageRequest.withOutput(input).withEnableFOC(false));
 
-            case POSITION -> super.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse));
-            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse));
+            case POSITION -> this.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse));
+            case VELOCITY -> this.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse));
 
             case CURRENT ->
                     throw new UnsupportedOperationException("CTRE is money hungry, and wants you to pay $150 for CURRENT control. Nuh uh!");
