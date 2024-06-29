@@ -1,8 +1,14 @@
 package frc.lib.generic.motor;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkRelativeEncoder;
+import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 
 public class GenericSpark extends CANSparkBase implements Motor {
@@ -12,6 +18,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     private final SparkPIDController controller;
 
     private double closedLoopTarget;
+    private Feedforward feedforward;
 
     private int slotToUse = 0;
 
@@ -42,7 +49,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
-        }
+        } //todo: INCORPORATE FEED FORWARD
     }
 
     @Override
@@ -165,8 +172,44 @@ public class GenericSpark extends CANSparkBase implements Motor {
         if (configuration.supplyCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
         configurePID(configuration);
+        configureFeedForward(configuration);
 
         return super.burnFlash() == REVLibError.kOk;
+    }
+
+    private void configureFeedForward(MotorConfiguration configuration) {
+        MotorProperties.Slot currentSlot = configuration.slot0;
+
+        switch (slotToUse) {
+            case 1 -> currentSlot = configuration.slot1;
+            case 2 -> currentSlot = configuration.slot2;
+        }
+
+        if (currentSlot.gravityType() == null) {
+            feedforward = new Feedforward(Properties.FeedforwardType.SIMPLE,
+                    currentSlot.kS(),
+                    currentSlot.kV(),
+                    currentSlot.kA()
+            );
+        }
+
+        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine) {
+            feedforward = new Feedforward(Properties.FeedforwardType.ARM,
+                    currentSlot.kS(),
+                    currentSlot.kV(),
+                    currentSlot.kA(),
+                    currentSlot.kG()
+            );
+        }
+
+        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static) {
+            feedforward = new Feedforward(Properties.FeedforwardType.ELEVATOR,
+                    currentSlot.kS(),
+                    currentSlot.kV(),
+                    currentSlot.kA(),
+                    currentSlot.kG()
+            );
+        }
     }
 
     private void configurePID(MotorConfiguration configuration) {
