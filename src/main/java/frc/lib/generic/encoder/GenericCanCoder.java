@@ -35,6 +35,16 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
+    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
+        return switch (signalType) {
+            case POSITION -> positionSignal;
+            case VELOCITY -> velocitySignal;
+            case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
+                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signalType.name());
+        };
+    }
+
+    @Override
     public double getEncoderPosition() {
         return positionSignal.refresh().getValue();
     }

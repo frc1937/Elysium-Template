@@ -8,10 +8,12 @@ public class MotorProperties {
     }
 
     public enum ControlMode {
-        CURRENT, POSITION, VOLTAGE,
+        CURRENT, VOLTAGE,
         PERCENTAGE_OUTPUT,
 
-        /** In rotations per second*/
+        /** In rotations */
+        POSITION,
+        /** In rotations per second */
         VELOCITY
     }
 
@@ -23,7 +25,7 @@ public class MotorProperties {
         private final double kP, kD, kI, kV, kA, kS, kG;
         private final GravityTypeValue gravityType;
 
-        public Slot(double kP, double kD, double kI, double kV, double kA, double kS, double kG, GravityTypeValue gravityType) {
+        public Slot(double kP, double kI, double kD, double kV, double kA, double kS, double kG, GravityTypeValue gravityType) {
             this.kP = kP;
             this.kD = kD;
             this.kI = kI;
@@ -34,8 +36,12 @@ public class MotorProperties {
             this.gravityType = gravityType;
         }
 
-        public Slot(double kP, double kD, double kI, double kV, double kA, double kS) {
-            this(kP, kD, kI, kV, kA, kS, 0, null);
+        public Slot(double kP, double kI, double kD, double kV, double kA, double kS) {
+            this(kP, kI, kD, kV, kA, kS, 0, null);
+        }
+
+        public Slot(double kP, double kI, double kD) {
+            this(kP, kI, kD, 0, 0, 0, 0, null);
         }
 
         public double kP() {

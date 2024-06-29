@@ -51,7 +51,7 @@ public class Conversions {
      * @return rotations per minute
      */
     public static double rpmFromTangentialVelocity(double tangentialVelocityMPS, double wheelDiameterMeters) {
-        return SEC_PER_MIN * metersPerSecondToRotationsPerSecond(tangentialVelocityMPS, wheelDiameterMeters);
+        return SEC_PER_MIN * mpsToRps(tangentialVelocityMPS, wheelDiameterMeters);
     }
 
     /**
@@ -83,7 +83,7 @@ public class Conversions {
      * @param wheelDiameterMeters the wheel diameter in metres
      * @return the rotations
      */
-    public static double metersPerSecondToRotationsPerSecond(double velocityMetersPerSecond, double wheelDiameterMeters) {
+    public static double mpsToRps(double velocityMetersPerSecond, double wheelDiameterMeters) {
         return metresToRotations(velocityMetersPerSecond, wheelDiameterMeters);
     }
 

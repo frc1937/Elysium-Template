@@ -1,5 +1,6 @@
 package frc.lib.generic.motor;
 
+import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.revrobotics.*;
 import frc.lib.generic.Properties;
@@ -131,6 +132,16 @@ public class GenericSpark extends CANSparkBase implements Motor {
         for (Properties.SignalType signalType : signalTypes) {
             setSignalUpdateFrequency(signalType, updateFrequencyHz);
         }
+    }
+
+    @Override
+    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
+        throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
+    }
+
+    @Override
+    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
+        throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 
     @Override

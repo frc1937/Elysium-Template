@@ -37,7 +37,7 @@ public class ElevatorSimulation extends GenericSimulation {
 
     @Override
     public double getVelocityRotationsPerSecond() {
-        return Conversions.metersPerSecondToRotationsPerSecond(elevatorSimulation.getVelocityMetersPerSecond(), drumDiameterMetres);
+        return Conversions.mpsToRps(elevatorSimulation.getVelocityMetersPerSecond(), drumDiameterMetres);
     }
 
 

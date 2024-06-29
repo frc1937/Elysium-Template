@@ -85,6 +85,12 @@ public class CustomLEDPatterns {
         return generateSingleColourBuffer(interpolateColours(firstColour, secondColour, cosInterpolate(x)));
     }
 
+
+    /**
+     * Circle N colours across the whole LEDStrip. Utilizes a smooth effect. Needs to be called periodic.
+     * @param colours - The colours
+     * @return - The filled buffer
+     */
     public static Color8Bit[] generateNewCirclingBuffer(Color8Bit... colours) {
         int colorsLength = colours.length;
         float timerValue = (float) timer.get(); // Get current timer value
@@ -125,7 +131,6 @@ public class CustomLEDPatterns {
      * @param colour - the colour to use
      * @return - The current state of the buffer
      */
-
     public static Color8Bit[] generateOutwardsPointsBuffer(Color8Bit colour) {
         buffer = generateSingleColourBuffer(new Color8Bit(Color.kBlack));
 

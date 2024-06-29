@@ -1,5 +1,6 @@
 package frc.lib.generic.motor;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -10,6 +11,8 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
+
+import java.util.ArrayList;
 
 public class GenericTalonFX extends TalonFX implements Motor {
     private int slotToUse = 0;
@@ -34,7 +37,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
         positionSignal = super.getPosition().clone();
         velocitySignal = super.getVelocity().clone();
         voltageSignal = super.getMotorVoltage().clone();
-        currentSignal = super.getSupplyCurrent().clone();
+        currentSignal = super.getStatorCurrent().clone();
         temperatureSignal = super.getDeviceTemp().clone();
         closedLoopTarget = super.getClosedLoopReference().clone();
     }
@@ -147,6 +150,29 @@ public class GenericTalonFX extends TalonFX implements Motor {
         for (Properties.SignalType type : signalTypes) {
             setSignalUpdateFrequency(type, updateFrequencyHz);
         }
+    }
+
+    @Override
+    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
+        return switch (signalType) {
+            case VELOCITY -> velocitySignal;
+            case POSITION -> positionSignal;
+            case VOLTAGE -> voltageSignal;
+            case CURRENT -> currentSignal;
+            case TEMPERATURE -> temperatureSignal;
+            case CLOSED_LOOP_TARGET -> closedLoopTarget;
+        };
+    }
+
+    @Override
+    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
+        ArrayList<BaseStatusSignal> signals = new ArrayList<>();
+
+        for (Properties.SignalType signalType : signalTypes) {
+            signals.add(getRawStatusSignal(signalType));
+        }
+
+        BaseStatusSignal.refreshAll(signals.toArray(new BaseStatusSignal[0]));
     }
 
     @Override

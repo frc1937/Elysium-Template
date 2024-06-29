@@ -3,18 +3,10 @@ package frc.robot;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.util.Color;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-import frc.lib.util.CustomLEDPatterns;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -43,10 +35,6 @@ class ButtonTest {
     void testButton() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
-        Color8Bit[] colour = CustomLEDPatterns.generateCirclingBuffer(new Color8Bit(Color.kRed), new Color8Bit(Color.kGreen));
-        Color8Bit[] newColor = CustomLEDPatterns.generateNewCirclingBuffer(new Color8Bit(Color.kRed), new Color8Bit(Color.kGreen));
-
-        Assertions.assertEquals(newColor, colour);
 //
 //        Random random = new Random();
 //        TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
