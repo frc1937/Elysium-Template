@@ -11,6 +11,7 @@
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Arm Sim": "Mechanism2d",
       "/SmartDashboard/Arm Simulation": "Mechanism2d",
+      "/SmartDashboard/AutoChooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d"
     }

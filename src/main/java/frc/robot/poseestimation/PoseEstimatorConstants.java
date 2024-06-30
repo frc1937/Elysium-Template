@@ -7,6 +7,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N3;
 import frc.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
 import org.photonvision.estimation.TargetModel;
@@ -15,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PoseEstimatorConstants {
+    static final Pose2d DEFAULT_POSE = new Pose2d(0, 0, new Rotation2d(0));
+
     /**
      * The vector represents how ambiguous each value is.
      * The first value represents how ambiguous is the x,

@@ -71,6 +71,9 @@ public class PoseEstimator implements AutoCloseable {
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
     public Pose2d getCurrentPose() {
+        if(poseEstimator6328.getEstimatedPose() == null)
+            return DEFAULT_POSE;
+
         return poseEstimator6328.getEstimatedPose();
     }
 

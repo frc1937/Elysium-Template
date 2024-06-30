@@ -42,7 +42,7 @@ public abstract class Mirrorable<T> {
     }
 
     /**
-     * @return whether the robot is on the red alliance. This is cached every 0.5 seconds
+     * @return whether the robot is on the red alliance. This is cached every 1.5 seconds
      */
     public static boolean isRedAlliance() {
         return cachedIsRedAlliance;

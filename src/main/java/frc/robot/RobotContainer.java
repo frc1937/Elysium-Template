@@ -4,12 +4,13 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.util.Controller;
 import frc.robot.poseestimation.PoseEstimator;
 import frc.robot.subsystems.swerve.Swerve;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.DoubleSupplier;
 
@@ -17,12 +18,16 @@ import static frc.lib.util.Controller.Axis.*;
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 
 public class RobotContainer {
-    public static final Swerve SWERVE = new Swerve();
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
+    public static final Swerve SWERVE = new Swerve();
 
     private final Controller driveController = new Controller(0);
 
+    private final LoggedDashboardChooser<Command> autoChooser;
+
     public RobotContainer() {
+        autoChooser = new LoggedDashboardChooser<>("AutoChooser", AutoBuilder.buildAutoChooser("Teared down Crown"));
+
         configureBindings();
     }
 
@@ -46,6 +51,6 @@ public class RobotContainer {
     }
 
     public Command getAutonomousCommand() {
-        return Commands.print("No autonomous command configured");
+        return autoChooser.get();
     }
 }
