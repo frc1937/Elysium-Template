@@ -11,15 +11,17 @@ import static frc.robot.poseestimation.PoseEstimatorConstants.EMPTY_POSE_LIST;
  */
 public class RobotPoseSource {
     protected final String name;
+
     private final RobotPoseSourceInputsAutoLogged inputs = new RobotPoseSourceInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
     private final RobotPoseSourceIO robotPoseSourceIO;
+
     private double lastUpdatedTimestamp;
     private Pose2d cachedPose = null;
 
     public RobotPoseSource(String name, Transform3d robotCenterToCamera) {
         this.name = name;
-        this.robotCenterToCamera = new Transform3d();
+        this.robotCenterToCamera = robotCenterToCamera;
 
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
             robotPoseSourceIO = new PhotonCameraIO(name, robotCenterToCamera);

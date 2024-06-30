@@ -10,6 +10,19 @@ import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
 public class SingleJointedArmSimulation extends GenericSimulation {
     private final SingleJointedArmSim armSimulation;
 
+    public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMomentOfInertia, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity, boolean simulateInertia) {
+        armSimulation = new SingleJointedArmSim(
+                gearbox,
+                gearRatio,
+                armMomentOfInertia,
+                armLengthMeters,
+                minimumAngle.getRadians(),
+                maximumAngle.getRadians(),
+                simulateGravity,
+                minimumAngle.getRadians()
+        );
+    }
+
     public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMassKilograms, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity) {
         armSimulation = new SingleJointedArmSim(
                 gearbox,

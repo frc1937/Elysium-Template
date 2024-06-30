@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.List;
 
 import static frc.lib.generic.simulation.mechanisms.MechanismConstants.MECHANISM_LINE_LENGTH;
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.MECHANISM_WIDTH_RATIO;
 import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.generateLigaments;
 
 /**
@@ -25,22 +24,18 @@ public class SingleJointedArmMechanism2d {
             targetPositionLigament;
 
     public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
-        this(key, MechanismConstants.MECHANISM_LINE_LENGTH, mechanismColor);
-    }
-
-    public SingleJointedArmMechanism2d(String key, double armLength, Color8Bit mechanismColor) {
         this.key = key;
 
-        this.mechanism = new Mechanism2d(2 * MechanismConstants.MECHANISM_WIDTH_RATIO * armLength,
+        this.mechanism = new Mechanism2d(2 * MECHANISM_LINE_LENGTH,
                 2 * MECHANISM_LINE_LENGTH);
 
         MechanismRoot2d root = mechanism.getRoot(
                 "AngleRoot",
-                armLength,
-                MECHANISM_WIDTH_RATIO * MECHANISM_LINE_LENGTH
+                MECHANISM_LINE_LENGTH,
+                MECHANISM_LINE_LENGTH
         );
 
-        List<MechanismLigament2d> ligaments = generateLigaments(mechanismColor, armLength);
+        List<MechanismLigament2d> ligaments = generateLigaments(mechanismColor, MECHANISM_LINE_LENGTH);
 
         this.currentPositionLigament = root.append(ligaments.get(0));
         this.targetPositionLigament = root.append(ligaments.get(1));

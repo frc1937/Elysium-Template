@@ -13,7 +13,15 @@
       "/SmartDashboard/Arm Simulation": "Mechanism2d",
       "/SmartDashboard/AutoChooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
-      "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d"
+      "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/ArmMechanism": "Mechanism2d"
+    },
+    "windows": {
+      "/SmartDashboard/Mechanisms/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      }
     }
   },
   "NetworkTables": {

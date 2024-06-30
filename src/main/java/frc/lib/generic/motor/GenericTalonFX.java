@@ -227,6 +227,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
         talonConfig.Slot0.kP = currentConfiguration.slot0.kP();
         talonConfig.Slot0.kI = currentConfiguration.slot0.kI();
         talonConfig.Slot0.kD = currentConfiguration.slot0.kD();
+
         talonConfig.Slot0.kA = currentConfiguration.slot0.kA();
         talonConfig.Slot0.kS = currentConfiguration.slot0.kS();
         talonConfig.Slot0.kV = currentConfiguration.slot0.kV();

@@ -5,21 +5,26 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.Controller;
 import frc.robot.poseestimation.PoseEstimator;
+import frc.robot.subsystems.shooter.Arm;
 import frc.robot.subsystems.swerve.Swerve;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.*;
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
+import static frc.robot.poseestimation.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
     public static final Swerve SWERVE = new Swerve();
+    public static final Arm ARM = new Arm();
 
     private final Controller driveController = new Controller(0);
 
@@ -32,6 +37,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+
         DriverStation.silenceJoystickConnectionWarning(true);
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
@@ -40,14 +46,21 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(RIGHT_X) //todo: figure out how to do rot in sim lol
+                () -> -driveController.getRawAxis(RIGHT_X)
         ));
 
-        driveController.getButton(Controller.Inputs.Y).onTrue(SWERVE.resetGyro());
+        driveController.getDPad(Controller.DPad.DOWN)
+                .whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(50)));
+
+        ARM.setDefaultCommand(ARM.setTargetPosition(Rotation2d.fromDegrees(0)));
+
+        driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());
 
         driveController.getButton(Controller.Inputs.A).whileTrue(SWERVE.driveWhilstRotatingToTarget(
                 translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d()
         ));
+
+        Logger.recordOutput("SpeakerPOS", BLUE_SPEAKER);
     }
 
     public Command getAutonomousCommand() {

@@ -5,17 +5,24 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import frc.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
+import frc.robot.poseestimation.robotposesources.RobotPoseSource;
 import org.photonvision.estimation.TargetModel;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PoseEstimatorConstants {
+    static final Transform3d ROBOT_TO_FRONT_CAMERA = new Transform3d(
+            0.5, 0.175245, 0.46,
+            new Rotation3d(0, Units.degreesToRadians(-36 + 10), 0)
+    );
+
+    public static final RobotPoseSource FRONT_CAMERA = new RobotPoseSource("Front1937", ROBOT_TO_FRONT_CAMERA);
+
     static final Pose2d DEFAULT_POSE = new Pose2d(0, 0, new Rotation2d(0));
 
     /**
