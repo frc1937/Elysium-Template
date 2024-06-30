@@ -22,6 +22,8 @@ public class SwerveModuleIO {
     public void periodic() {
         refreshInputs(swerveModuleInputs);
         Logger.processInputs(getLoggingPath(), swerveModuleInputs);
+
+        modulePeriodic();
     }
 
     void setTargetState(SwerveModuleState state) {
@@ -41,6 +43,7 @@ public class SwerveModuleIO {
 
     protected void setTargetAngle(Rotation2d angle) {}
     protected void setTargetVelocity(double velocityMetresPerSecond) {}
+    protected void modulePeriodic() {}
 
     protected void stop() {}
 

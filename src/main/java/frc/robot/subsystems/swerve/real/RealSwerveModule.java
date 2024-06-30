@@ -37,7 +37,7 @@ public class RealSwerveModule extends SwerveModuleIO {
     }
 
     @Override
-    public void periodic() {
+    public void modulePeriodic() {
         steerMotor.setMotorEncoderPosition(degreesToRotations(getAngleDegrees()));
     }
 

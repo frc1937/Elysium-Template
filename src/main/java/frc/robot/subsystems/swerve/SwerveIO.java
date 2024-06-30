@@ -28,7 +28,6 @@ public class SwerveIO {
     @AutoLog
     protected static class SwerveInputs {
         public double gyroYawDegrees = 0;
-        public double gyroPitchDegrees = 0;
 
         public double[] odometryUpdatesTimestamp = new double[0];
         public double[] odometryUpdatesYawDegrees = new double[0];

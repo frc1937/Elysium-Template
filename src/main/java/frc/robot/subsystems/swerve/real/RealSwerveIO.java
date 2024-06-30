@@ -24,7 +24,6 @@ public class RealSwerveIO extends SwerveIO {
 
     @Override
     protected void refreshInputs(SwerveInputsAutoLogged swerveInputs) {
-        swerveInputs.gyroPitchDegrees = GYRO.getPitch();
         swerveInputs.gyroYawDegrees = GYRO.getYaw();
 
         swerveInputs.odometryUpdatesTimestamp = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();

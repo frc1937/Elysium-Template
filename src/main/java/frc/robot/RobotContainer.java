@@ -10,7 +10,8 @@ import frc.lib.util.Controller;
 import frc.robot.subsystems.swerve.Swerve;
 
 public class RobotContainer {
-    private final Swerve swerve = new Swerve();
+    public static final Swerve SWERVE = new Swerve();
+
     private final Controller controller = new Controller(0);
 
     public RobotContainer() {
@@ -18,7 +19,7 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        swerve.setDefaultCommand(swerve.drive(
+        SWERVE.setDefaultCommand(SWERVE.drive(
                 () -> -controller.getRawAxis(Controller.Axis.LEFT_X),
                 () -> controller.getRawAxis(Controller.Axis.LEFT_Y),
                 () -> 0//controller.getRawAxis(Controller.Axis.LEFT_X)

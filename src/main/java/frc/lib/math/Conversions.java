@@ -97,6 +97,15 @@ public class Conversions {
         return metres / (wheelDiameter * Math.PI);
     }
 
+    public static double proportionalPowerToMps(double power, double maxMps) {
+        return power * maxMps;
+    }
+
+    public static double proportionalPowerToRotation(double thetaPower, double maxRotation) {
+        return Math.pow(thetaPower, 2) * Math.signum(thetaPower) * maxRotation;
+    }
+
+
 
     /**
      * Converts a target output percentage output to voltage when voltage compensation is enabled.

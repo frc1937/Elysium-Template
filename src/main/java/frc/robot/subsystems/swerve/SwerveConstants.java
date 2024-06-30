@@ -23,9 +23,12 @@ public abstract class SwerveConstants {
 
     public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
 
+    static final double MAX_SPEED_MPS = 5.1;
+    static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
+
 
     static SwerveConstants generateConstants() {
-        if(GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             return new SimulatedSwerveConstants();
         }
 
