@@ -28,6 +28,8 @@ import edu.wpi.first.math.geometry.Pose3d;
 
 import java.util.List;
 
+import org.photonvision.targeting.PhotonTrackedTarget;
+
 /**
  * An estimated pose based on pipeline result
  *
