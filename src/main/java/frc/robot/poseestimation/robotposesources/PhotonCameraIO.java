@@ -19,8 +19,6 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
     private final PhotonCamera photonCamera;
     private final PhotonPoseEstimator photonPoseEstimator;
 
-    //todo: Cleanup class
-
     protected PhotonCameraIO(String cameraName, Transform3d robotCenterToCamera) {
         photonCamera = new PhotonCamera(cameraName);
 
@@ -35,13 +33,12 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
         photonPoseEstimator.setTagModel(TAG_MODEL);
     }
 
-    private void logVisibleTags(boolean hasResult, Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
-        if (!hasResult) {
+    private void logVisibleTags(boolean hasResult, EstimatedRobotPose estimatedRobotPose) {
+        if (!hasResult || estimatedRobotPose == null) {
             Logger.recordOutput("VisibleTags/" + photonCamera.getName());
             return;
         }
 
-        final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
         final Pose2d[] visibleTagPoses = new Pose2d[estimatedRobotPose.targetsUsed().size()];
 
         for (int i = 0; i < visibleTagPoses.length; i++) {
@@ -54,12 +51,8 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
         Logger.recordOutput("VisibleTags/" + photonCamera.getName(), visibleTagPoses);
     }
 
-    private boolean hasResult(Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
-        final boolean isEmpty = optionalEstimatedRobotPose.isEmpty();
-
-        if (isEmpty) return false;
-
-        final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
+    private boolean hasResult(EstimatedRobotPose estimatedRobotPose) {
+        if (estimatedRobotPose == null) return false;
 
         if (estimatedRobotPose.strategy() == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             return true;
@@ -84,7 +77,7 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
         final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
         Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(latestResult);
 
-        inputs.hasResult = hasResult(optionalEstimatedRobotPose);
+        inputs.hasResult = hasResult(optionalEstimatedRobotPose.orElse(null));
 
         if (inputs.hasResult) {
             final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
@@ -98,6 +91,6 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
             inputs.cameraPose = new double[0];
         }
 
-        logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose);
+        logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose.orElse(null));
     }
 }

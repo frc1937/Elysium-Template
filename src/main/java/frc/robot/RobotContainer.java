@@ -37,7 +37,6 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-
         DriverStation.silenceJoystickConnectionWarning(true);
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
@@ -46,7 +45,8 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(RIGHT_X)
+                () -> -driveController.getRawAxis(RIGHT_Y),
+                driveController.getButton(Controller.Inputs.LEFT_BUMPER)
         ));
 
         driveController.getDPad(Controller.DPad.DOWN)
@@ -56,9 +56,11 @@ public class RobotContainer {
 
         driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(SWERVE.driveWhilstRotatingToTarget(
-                translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d()
-        ));
+        driveController.getButton(Controller.Inputs.A).whileTrue(
+                SWERVE.driveWhilstRotatingToTarget(
+                        translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(),
+                        driveController.getButton(Controller.Inputs.LEFT_BUMPER)
+                ));
 
         Logger.recordOutput("SpeakerPOS", BLUE_SPEAKER);
     }

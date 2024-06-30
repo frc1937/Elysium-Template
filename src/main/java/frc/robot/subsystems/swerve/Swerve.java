@@ -23,6 +23,7 @@ import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.math.Conversions.proportionalPowerToMps;
@@ -55,11 +56,12 @@ public class Swerve extends SubsystemBase {
         refreshRotationController();
     }
 
-    public Command driveWhilstRotatingToTarget(DoubleSupplier x, DoubleSupplier y, Pose2d target) {
+    public Command driveWhilstRotatingToTarget(DoubleSupplier x, DoubleSupplier y, Pose2d target, BooleanSupplier robotCentric) {
         return new FunctionalCommand(
                 this::resetRotationController,
-                () -> driveFieldRelative(x.getAsDouble(), y.getAsDouble(), target),
-                (interrupt) -> {},
+                () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
+                (interrupt) -> {
+                },
                 ROTATION_CONTROLLER::atGoal,
                 this
         );
@@ -68,18 +70,24 @@ public class Swerve extends SubsystemBase {
     public Command rotateToTarget(Pose2d target) {
         return new FunctionalCommand(
                 this::resetRotationController,
-                () -> driveFieldRelative(0, 0, target),
-                (interrupt) -> {},
+                () -> driveWithTarget(0, 0, target, false),
+                (interrupt) -> {
+                },
                 ROTATION_CONTROLLER::atGoal,
                 this
         );
     }
 
-    public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {
+    public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new FunctionalCommand(
                 () -> {
                 },
-                () -> driveFieldRelative(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble()),
+                () -> {
+                    if(robotCentric.getAsBoolean())
+                        driveSelfRelative(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble());
+                    else
+                        driveFieldRelative(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble());
+                },
                 (interrupt) -> {
                 },
                 () -> false,
@@ -109,7 +117,7 @@ public class Swerve extends SubsystemBase {
         return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    private void driveFieldRelative(double xPower, double yPower, Pose2d target) {
+    private void driveWithTarget(double xPower, double yPower, Pose2d target, boolean robotCentric) {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
         final Rotation2d targetAngle = getAngleFromPoseToPose(RobotContainer.POSE_ESTIMATOR.getCurrentPose(), target);
 
@@ -118,13 +126,21 @@ public class Swerve extends SubsystemBase {
                 targetAngle.getRadians()
         );
 
-        driveFieldRelative(xPower, yPower, controllerOutput);
+        if(robotCentric)
+            driveSelfRelative(xPower, yPower, controllerOutput);
+        else
+            driveFieldRelative(xPower, yPower, controllerOutput);
     }
 
     private void driveFieldRelative(double xPower, double yPower, double thetaPower) {
         ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
 
+        driveSelfRelative(speeds);
+    }
+
+    private void driveSelfRelative(double xPower, double yPower, double thetaPower) {
+        ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
         driveSelfRelative(speeds);
     }
 

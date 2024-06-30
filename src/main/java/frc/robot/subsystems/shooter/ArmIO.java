@@ -18,10 +18,7 @@ public class ArmIO {
         return new ArmIO();
     }
 
-    public void periodic() {
-
-    }
-
+    public void periodic() { }
 
     public void setTargetPosition(Rotation2d targetPosition) { }
     public void refreshInputs(ArmInputsAutoLogged armInputs) { }
