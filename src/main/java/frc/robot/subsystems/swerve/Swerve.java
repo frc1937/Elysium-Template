@@ -3,16 +3,13 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.math.Optimizations;
 import frc.robot.GlobalConstants;
 import frc.robot.RobotContainer;
@@ -23,6 +20,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
+import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.real.RealSwerveConstants.SWERVE_KINEMATICS;
@@ -36,7 +34,6 @@ public class Swerve extends SubsystemBase {
 
     private double lastTimestamp = 0;
 
-
     @Override
     public void periodic() {
         ODOMETRY_LOCK.lock();
@@ -47,34 +44,21 @@ public class Swerve extends SubsystemBase {
         refreshRotationController();
     }
 
-    //Todo:
-    // Drive while rotating to target COMMAND
-    // Field relative drive
-    // Optimizations for isStill thing.
+    public Command driveWhilstRotatingToTarget(DoubleSupplier x, DoubleSupplier y, Pose2d target) {
+        return new FunctionalCommand(
+                this::resetRotationController,
+                () -> driveFieldRelative(x.getAsDouble(), y.getAsDouble(), target),
+                (interrupt) -> {},
+                ROTATION_CONTROLLER::atGoal,
+                this
+        );
+    }
 
     public Command rotateToTarget(Pose2d target) {
         return new FunctionalCommand(
-                () -> ROTATION_CONTROLLER.reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians()),
-                () -> {
-                    Translation2d robotTranslation = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getTranslation();
-                    Translation2d differenceInXY = target.getTranslation().minus(robotTranslation);
-
-                    Rotation2d targetAngle = Rotation2d.fromRadians(Math.atan2(
-                            differenceInXY.getY(),
-                            differenceInXY.getX()));
-
-                    Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
-
-                    Logger.recordOutput("ANGLE ACurrentAngle", currentAngle.getDegrees());
-                    Logger.recordOutput("ANGLE ATargetAngle", targetAngle.getDegrees());
-
-                    final double result = ROTATION_CONTROLLER.calculate(currentAngle.getRadians(), targetAngle.getRadians());
-                    driveSelfRelative(0, 0, result);
-
-                    Logger.recordOutput("ANGLE Result", result);
-                },
-                (interrupt) -> {
-                },
+                this::resetRotationController,
+                () -> driveFieldRelative(0, 0, target),
+                (interrupt) -> {},
                 ROTATION_CONTROLLER::atGoal,
                 this
         );
@@ -84,12 +68,16 @@ public class Swerve extends SubsystemBase {
         return new FunctionalCommand(
                 () -> {
                 },
-                () -> driveSelfRelative(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble()),
+                () -> driveFieldRelative(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble()),
                 (interrupt) -> {
                 },
                 () -> false,
                 this
         );
+    }
+
+    public Command resetGyro() {
+        return Commands.runOnce(() -> swerve.setGyroHeading(Rotation2d.fromDegrees(0)), this);
     }
 
     public void setGyroHeading(Rotation2d heading) {
@@ -110,8 +98,30 @@ public class Swerve extends SubsystemBase {
         return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    private void driveSelfRelative(double xPower, double yPower, double thetaPower) {
+    private void driveFieldRelative(double xPower, double yPower, Pose2d target) {
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
+        final Rotation2d targetAngle = getAngleFromPoseToPose(RobotContainer.POSE_ESTIMATOR.getCurrentPose(), target);
+
+        final double controllerOutput = ROTATION_CONTROLLER.calculate(
+                currentAngle.getRadians(),
+                targetAngle.getRadians()
+        );
+
+        driveFieldRelative(xPower, yPower, controllerOutput);
+    }
+
+    private void driveFieldRelative(double xPower, double yPower, double thetaPower) {
         ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
+
+        driveSelfRelative(speeds);
+    }
+
+    private void driveSelfRelative(ChassisSpeeds speeds) {
+        if (Optimizations.isStill(speeds)) {
+            stop();
+            return;
+        }
 
         speeds = Optimizations.discretize(speeds, lastTimestamp);
 
@@ -210,5 +220,9 @@ public class Swerve extends SubsystemBase {
                 ROTATION_MAX_VELOCITY.get(),
                 ROTATION_MAX_ACCELERATION.get())
         );
+    }
+
+    private void resetRotationController() {
+        ROTATION_CONTROLLER.reset(RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians());
     }
 }

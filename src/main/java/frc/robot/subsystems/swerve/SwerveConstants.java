@@ -14,10 +14,14 @@ import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
 public abstract class SwerveConstants {
+    public static final double
+            DRIVE_NEUTRAL_DEADBAND = 0.2,
+            ROTATION_NEUTRAL_DEADBAND = 0.2;
+
     static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1);
 
     static final LoggedTunableNumber ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI / 2);
+            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI );
 
     /** Units of RADIANS for everything. */
     protected static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(

@@ -3,6 +3,7 @@ package frc.lib.math;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.subsystems.swerve.SwerveConstants;
 
 public class Optimizations {
     /**
@@ -33,5 +34,17 @@ public class Optimizations {
         final double difference = currentTimestamp - lastTimestamp;
 
         return ChassisSpeeds.discretize(chassisSpeeds, difference);
+    }
+
+    /**
+     * Returns whether the given chassis speeds are considered to be "still" by the swerve neutral deadband.
+     *
+     * @param chassisSpeeds the chassis speeds to check
+     * @return true if the chassis speeds are considered to be "still"
+     */
+    public static boolean isStill(ChassisSpeeds chassisSpeeds) {
+        return Math.abs(chassisSpeeds.vxMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
+                Math.abs(chassisSpeeds.vyMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
+                Math.abs(chassisSpeeds.omegaRadiansPerSecond) <= SwerveConstants.ROTATION_NEUTRAL_DEADBAND;
     }
 }

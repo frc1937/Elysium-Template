@@ -1,8 +1,20 @@
 package frc.lib.math;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+
 public class MathUtils {
     public static double round(double value, int places) {
-        double scale = Math.pow(10, places);
+        final double scale = Math.pow(10, places);
         return Math.round(value * scale) / scale;
+    }
+
+    public static Rotation2d getAngleFromPoseToPose(Pose2d firstPose, Pose2d secondPose) {
+        final Translation2d differenceInXY = secondPose.getTranslation().minus(firstPose.getTranslation());
+
+        return Rotation2d.fromRadians(Math.atan2(
+                differenceInXY.getY(),
+                differenceInXY.getX()));
     }
 }
