@@ -7,22 +7,32 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.util.Controller;
+import frc.robot.poseestimation.PoseEstimator;
 import frc.robot.subsystems.swerve.Swerve;
+
+import static frc.lib.util.Controller.Axis.*;
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 
 public class RobotContainer {
     public static final Swerve SWERVE = new Swerve();
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
 
-    private final Controller controller = new Controller(0);
+    private final Controller driveController = new Controller(0);
 
     public RobotContainer() {
         configureBindings();
     }
 
     private void configureBindings() {
-        SWERVE.setDefaultCommand(SWERVE.drive(
-                () -> -controller.getRawAxis(Controller.Axis.LEFT_X),
-                () -> controller.getRawAxis(Controller.Axis.LEFT_Y),
-                () -> 0//controller.getRawAxis(Controller.Axis.LEFT_X)
+        SWERVE.setDefaultCommand(SWERVE.driveTeleop(
+                () -> -driveController.getRawAxis(LEFT_Y),
+                () -> -driveController.getRawAxis(LEFT_X),
+                () -> -driveController.getRawAxis(RIGHT_X) //todo: figure out how to do rot in sim lol
+        ));
+
+
+        driveController.getButton(Controller.Inputs.A).onTrue(SWERVE.rotateToTarget(
+                BLUE_SPEAKER.toPose2d()
         ));
     }
 

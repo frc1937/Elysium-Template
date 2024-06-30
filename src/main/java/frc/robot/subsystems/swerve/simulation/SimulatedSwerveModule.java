@@ -25,7 +25,7 @@ public class SimulatedSwerveModule extends SwerveModuleIO {
     }
 
     @Override
-    protected void setTargetVelocity(double velocityMetresPerSecond) {
+    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
         driveMotor.setInput(MotorProperties.ControlMode.VELOCITY, mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER));
     }
 

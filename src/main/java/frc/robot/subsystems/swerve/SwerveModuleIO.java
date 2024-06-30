@@ -1,11 +1,15 @@
 package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import frc.lib.math.Optimizations;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModuleIO {
+    private boolean openLoop = true;
+
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
 
@@ -29,8 +33,24 @@ public class SwerveModuleIO {
     void setTargetState(SwerveModuleState state) {
         this.targetState = SwerveModuleState.optimize(state, getCurrentAngle());
 
+        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
+
         setTargetAngle(targetState.angle);
-        setTargetVelocity(targetState.speedMetersPerSecond);
+        setTargetVelocity(optimizedVelocity, openLoop);
+    }
+
+    /**
+     * The odometry thread can update itself faster than the main code loop (which is 50 hertz).
+     * Instead of using the latest odometry update, the accumulated odometry positions since the last loop to get a more accurate position.
+     *
+     * @param odometryUpdateIndex the index of the odometry update
+     * @return the position of the module at the given odometry update index
+     */
+    SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+        return new SwerveModulePosition(
+                swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
+                Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])
+        );
     }
 
     protected Rotation2d getCurrentAngle() {
@@ -41,8 +61,12 @@ public class SwerveModuleIO {
         return targetState;
     }
 
+    protected void setOpenLoop(boolean shouldBeOpenLoop) {
+        openLoop = shouldBeOpenLoop;
+    }
+
     protected void setTargetAngle(Rotation2d angle) {}
-    protected void setTargetVelocity(double velocityMetresPerSecond) {}
+    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {}
     protected void modulePeriodic() {}
 
     protected void stop() {}

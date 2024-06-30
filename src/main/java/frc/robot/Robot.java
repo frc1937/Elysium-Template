@@ -18,6 +18,7 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
+    private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
 
     @Override
@@ -53,7 +54,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        CommandScheduler.getInstance().run();
+        commandScheduler.run();
+        RobotContainer.POSE_ESTIMATOR.periodic();
     }
 
     @Override

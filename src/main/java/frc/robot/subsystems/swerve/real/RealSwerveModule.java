@@ -18,8 +18,6 @@ import static frc.robot.subsystems.swerve.real.RealSwerveConstants.MAX_SPEED_MPS
 import static frc.robot.subsystems.swerve.real.RealSwerveConstants.WHEEL_DIAMETER;
 
 public class RealSwerveModule extends SwerveModuleIO {
-    private boolean OPEN_LOOP = true;
-
     private final Motor driveMotor, steerMotor;
     private final Encoder steerEncoder;
 
@@ -47,8 +45,8 @@ public class RealSwerveModule extends SwerveModuleIO {
     }
 
     @Override
-    public void setTargetVelocity(double velocityMetresPerSecond) {
-        if (OPEN_LOOP) {
+    public void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
+        if (openLoop) {
             final double targetPowerOpenLoop = VOLTAGE_COMPENSATION_SATURATION * velocityMetresPerSecond / MAX_SPEED_MPS;
             driveMotor.setInput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
         } else {

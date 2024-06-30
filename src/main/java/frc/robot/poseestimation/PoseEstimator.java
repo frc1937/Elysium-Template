@@ -1,7 +1,6 @@
 package frc.robot.poseestimation;
 
 
-import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -13,7 +12,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
-import org.littletonrobotics.junction.Logger;
+import frc.robot.poseestimation.robotposesources.RobotPoseSource;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -29,7 +28,6 @@ public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
     private final RobotPoseSource[] robotPoseSources;
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
-    private final Pose2d robotPose = PoseEstimatorConstants.DEFAULT_POSE;
 
     /**
      * Constructs a new PoseEstimator.
@@ -43,10 +41,10 @@ public class PoseEstimator implements AutoCloseable {
 
         SmartDashboard.putData("Field", field);
 
-        PathPlannerLogging.setLogActivePathCallback((pose) -> {
-            field.getObject("path").setPoses(pose);
-            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
-        });
+//        PathPlannerLogging.setLogActivePathCallback((pose) -> {
+//            field.getObject("path").setPoses(pose);
+//            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
+//        });
     }
 
     @Override

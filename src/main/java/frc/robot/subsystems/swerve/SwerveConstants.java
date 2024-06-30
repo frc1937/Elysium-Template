@@ -1,7 +1,11 @@
 package frc.robot.subsystems.swerve;
 
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
+import frc.lib.util.LoggedTunableNumber;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.real.RealSwerveConstants;
 import frc.robot.subsystems.swerve.simulation.SimulatedSwerveConstants;
@@ -10,6 +14,16 @@ import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
 public abstract class SwerveConstants {
+    static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1);
+
+    static final LoggedTunableNumber ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
+            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI / 2);
+
+    /** Units of RADIANS for everything. */
+    protected static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
+            ROTATION_KP.get(), 0, 0.015, new TrapezoidProfile.Constraints(ROTATION_MAX_VELOCITY.get(), ROTATION_MAX_ACCELERATION.get())
+    );
+
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
     static final double WHEEL_BASE = 0.565;
@@ -28,6 +42,9 @@ public abstract class SwerveConstants {
 
 
     static SwerveConstants generateConstants() {
+        ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
+        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
+
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             return new SimulatedSwerveConstants();
         }

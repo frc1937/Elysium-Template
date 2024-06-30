@@ -35,7 +35,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.poseestimation.PoseEstimator5990;
+import frc.robot.RobotContainer;
 import org.photonvision.PhotonCamera;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.estimation.VisionEstimation;
@@ -52,9 +52,6 @@ import java.util.Set;
  * below. Example usage can be found in our apriltagExample example project.
  */
 public class PhotonPoseEstimator {
-
-    private final PoseEstimator5990 poseEstimator5990;
-
     private static int InstanceCount = 0;
 
     /**
@@ -132,12 +129,11 @@ public class PhotonPoseEstimator {
             AprilTagFieldLayout fieldTags,
             PoseStrategy strategy,
             PhotonCamera camera,
-            Transform3d robotToCamera, PoseEstimator5990 poseEstimator5990) {
+            Transform3d robotToCamera) {
         this.fieldTags = fieldTags;
         this.primaryStrategy = strategy;
         this.camera = camera;
         this.robotToCamera = robotToCamera;
-        this.poseEstimator5990 = poseEstimator5990;
 
         HAL.report(tResourceType.kResourceType_PhotonPoseEstimator, InstanceCount);
         InstanceCount++;
@@ -429,7 +425,7 @@ public class PhotonPoseEstimator {
     private Optional<EstimatedRobotPose> closestToHeadingStrategy(PhotonPipelineResult result) {
         double smallestAngleDifferenceRadians;
         EstimatedRobotPose closestAngleTarget;
-        double currentHeadingRadians = poseEstimator5990.getCurrentPose().getBluePose().getRotation().getRadians();
+        double currentHeadingRadians = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians();
 
         PhotonTrackedTarget target = result.getBestTarget();
         int targetFiducialId = target.getFiducialId();

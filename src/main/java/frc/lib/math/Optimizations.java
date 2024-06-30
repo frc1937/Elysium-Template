@@ -11,7 +11,7 @@ public class Optimizations {
      *
      * @param targetVelocityMPS the target velocity, in meters per second
      * @param targetSteerAngle  the target steer angle
-     * @return the reduced target velocity in revolutions per second
+     * @return the reduced target velocity in metres per second
      */
     public static double reduceSkew(double targetVelocityMPS, Rotation2d targetSteerAngle, Rotation2d currentAngle) {
         final double closedLoopError = targetSteerAngle.getRadians() - currentAngle.getRadians();
