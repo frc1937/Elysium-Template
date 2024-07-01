@@ -12,12 +12,31 @@
       "/SmartDashboard/Arm Sim": "Mechanism2d",
       "/SmartDashboard/Arm Simulation": "Mechanism2d",
       "/SmartDashboard/AutoChooser": "String Chooser",
+      "/SmartDashboard/Debug-Field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d",
-      "/SmartDashboard/Mechanisms/ArmMechanism": "Mechanism2d"
+      "/SmartDashboard/Mechanisms/ArmMechanism": "Mechanism2d",
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
-      "/SmartDashboard/Mechanisms/ArmMechanism": {
+      "/SmartDashboard/Debug-Field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/VisionSystemSim-main/Sim Field": {
+        "bottom": 1476,
+        "height": 8.210550308227539,
+        "left": 150,
+        "right": 2961,
+        "top": 79,
+        "width": 16.541748046875,
         "window": {
           "visible": true
         }
@@ -134,7 +153,10 @@
             }
           ]
         }
-      ]
+      ],
+      "window": {
+        "visible": false
+      }
     }
   }
 }
