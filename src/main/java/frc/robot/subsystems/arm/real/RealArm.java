@@ -1,11 +1,12 @@
-package frc.robot.subsystems.shooter.real;
+package frc.robot.subsystems.arm.real;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.motor.MotorProperties;
-import frc.robot.subsystems.shooter.ArmIO;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmInputsAutoLogged;
 
-import static frc.robot.subsystems.shooter.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
-import static frc.robot.subsystems.shooter.real.RealArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
+import static frc.robot.subsystems.arm.real.RealArmConstants.ARM_MOTOR;
 
 public class RealArm extends ArmIO {
 

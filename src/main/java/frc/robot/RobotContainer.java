@@ -10,9 +10,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.util.Controller;
 import frc.robot.poseestimation.PoseEstimator;
-import frc.robot.subsystems.shooter.Arm;
+import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.swerve.Swerve;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.DoubleSupplier;
@@ -25,7 +24,6 @@ public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
-
 
     private final Controller driveController = new Controller(0);
 
@@ -62,8 +60,6 @@ public class RobotContainer {
                         translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(),
                         driveController.getButton(Controller.Inputs.LEFT_BUMPER)
                 ));
-
-        Logger.recordOutput("SpeakerPOS", BLUE_SPEAKER);
     }
 
     public Command getAutonomousCommand() {

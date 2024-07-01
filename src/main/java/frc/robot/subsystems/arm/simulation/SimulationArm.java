@@ -1,11 +1,12 @@
-package frc.robot.subsystems.shooter.simulation;
+package frc.robot.subsystems.arm.simulation;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.motor.MotorProperties;
-import frc.robot.subsystems.shooter.ArmIO;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmInputsAutoLogged;
 
-import static frc.robot.subsystems.shooter.simulation.SimulationArmConstants.ARM_MECHANISM;
-import static frc.robot.subsystems.shooter.simulation.SimulationArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.simulation.SimulationArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.arm.simulation.SimulationArmConstants.ARM_MOTOR;
 
 public class SimulationArm extends ArmIO {
     private Rotation2d targetAngle;

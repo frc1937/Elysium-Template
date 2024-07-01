@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooter.real;
+package frc.robot.subsystems.arm.real;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
