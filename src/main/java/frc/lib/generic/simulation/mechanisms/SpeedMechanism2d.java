@@ -28,14 +28,20 @@ public class SpeedMechanism2d {
     private MechanismLigament2d currentVelocityBottomArrowLigament;
 
     private final double deadband;
+    private final boolean inverted;
 
-    public SpeedMechanism2d(String key, double maximumDisplayableVelocity) {
-        this(key, maximumDisplayableVelocity, 0.001);
+    public SpeedMechanism2d(String key, double maximumDisplayableVelocity, boolean inverted) {
+        this(key, maximumDisplayableVelocity, 0.001, inverted);
     }
 
-    public SpeedMechanism2d(String key, double maximumDisplayableVelocity, double deadband) {
+    public SpeedMechanism2d(String key, double maximumDisplayableVelocity) {
+        this(key, maximumDisplayableVelocity, 0.001, false);
+    }
+
+    public SpeedMechanism2d(String key, double maximumDisplayableVelocity, double deadband, boolean inverted) {
         this.deadband = deadband;
         this.key = key;
+        this.inverted = inverted;
 
         initializeMechanism(maximumDisplayableVelocity);
     }
@@ -57,13 +63,15 @@ public class SpeedMechanism2d {
      * @param velocity the current velocity
      */
     public void updateMechanism(double velocity) {
+//        velocity = inverted ? -velocity : velocity;
+
         buildArrowAtLigament(velocity, currentVelocityTopArrowLigament, currentVelocityBottomArrowLigament);
 
         currentVelocityLigament.setLength(velocity);
 
         setCurrentLigamentColor(velocityToColor(velocity));
 
-        SmartDashboard.putData("Mechanism/" + key, mechanism);
+        SmartDashboard.putData("Mechanisms/" + key, mechanism);
     }
 
     /**
@@ -72,6 +80,8 @@ public class SpeedMechanism2d {
      * @param targetVelocity the target velocity
      */
     public void setTargetVelocity(double targetVelocity) {
+        targetVelocity = inverted ? -targetVelocity : targetVelocity;
+
         buildArrowAtLigament(targetVelocity, targetVelocityTopArrowLigament, targetVelocityBottomArrowLigament);
         targetVelocityLigament.setLength(targetVelocity);
     }

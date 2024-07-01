@@ -27,11 +27,21 @@ public class FlywheelIO {
     public void periodic() {
         refreshInputs(flywheelInputs);
         Logger.processInputs("Flywheel/" + name + "/", flywheelInputs);
+
+        flywheelPeriodic();
     }
 
-    public void setTargetVelocity(double velocityRotationsPerSecond) {}
+    protected void stop() { }
 
-    public void refreshInputs(FlywheelInputsAutoLogged flywheelInputs) {}
+    protected void flywheelPeriodic() { }
+
+    protected boolean hasReachedTarget() {
+        return false;
+    }
+
+    protected void setTargetVelocity(double velocityRotationsPerSecond) { }
+
+    protected void refreshInputs(FlywheelInputsAutoLogged flywheelInputs) { }
 
     @AutoLog
     public static class FlywheelInputs {

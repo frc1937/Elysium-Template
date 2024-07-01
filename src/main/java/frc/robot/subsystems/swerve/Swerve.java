@@ -47,6 +47,7 @@ public class Swerve extends SubsystemBase {
 
     @Override
     public void periodic() {
+
         ODOMETRY_LOCK.lock();
         refreshAllInputs();
         ODOMETRY_LOCK.unlock();

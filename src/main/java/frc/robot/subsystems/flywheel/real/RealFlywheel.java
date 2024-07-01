@@ -5,6 +5,8 @@ import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelInputsAutoLogged;
 
+import static frc.robot.subsystems.flywheel.FlywheelConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
+
 public class RealFlywheel extends FlywheelIO {
     private final Motor motor;
 
@@ -16,7 +18,17 @@ public class RealFlywheel extends FlywheelIO {
 
     @Override
     public void setTargetVelocity(double velocityRotationsPerSecond) {
-        motor.setInput(MotorProperties.ControlMode.VELOCITY, velocityRotationsPerSecond);
+        motor.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRotationsPerSecond);
+    }
+
+    @Override
+    public boolean hasReachedTarget() {
+        return Math.abs(motor.getClosedLoopTarget() - motor.getSystemPosition()) < TOLERANCE_ROTATIONS_PER_SECONDS;
+    }
+
+    @Override
+    public void stop() {
+        motor.stopMotor();
     }
 
     @Override

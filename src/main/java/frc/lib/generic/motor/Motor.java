@@ -5,6 +5,7 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
+//TODO: Add talonSRX
 /**
  * Custom Motor class to allow switching and replacing motors quickly,
  * in addition of better uniformity across the code.
@@ -14,25 +15,25 @@ public interface Motor {
 
     /**
      * Put voltage to the motor according to the mode. Utilize the built-in feedforward and PID controller.
-     * If you need to you use something more advanced (E.G TrapezoidalProfile) use {@link Motor#setInput(MotorProperties.ControlMode, double, double)}
+     * If you need to you use something more advanced (E.G TrapezoidalProfile) use {@link Motor#setOutput(MotorProperties.ControlMode, double, double)}
      * With a custom feedforward.
      * <p>
      * Feedforward only works for POSITION and VELOCITY control
      *
-     * @param controlMode The type of input
-     * @param input      The input for the voltage
+     * @param controlMode The type of output
+     * @param output      The output for the voltage
      */
-    void setInput(MotorProperties.ControlMode controlMode, double input);
+    void setOutput(MotorProperties.ControlMode controlMode, double output);
 
     /**
      * Put voltage to the motor according to the mode. Use custom feedforward for the motor.
      * Feedforward only works for POSITION and VELOCITY control.
      *
-     * @param controlMode - The type of input
-     * @param input      - The input for the voltage
-     * @param feedforward - The custom feedforward to input the motor
+     * @param controlMode - The type of output
+     * @param output      - The output for the voltage
+     * @param feedforward - The custom feedforward to output the motor
      */
-    void setInput(MotorProperties.ControlMode controlMode, double input, double feedforward);
+    void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward);
 
     void setIdleMode(MotorProperties.IdleMode idleMode);
 

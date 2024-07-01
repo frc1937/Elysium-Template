@@ -47,13 +47,13 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setInput(MotorProperties.ControlMode mode, double input) {
+    public void setOutput(MotorProperties.ControlMode mode, double output) {
         switch (mode) { //todo: add more (NECESSARY) control types
-            case PERCENTAGE_OUTPUT -> this.setControl(dutyCycleRequest.withOutput(input));
-            case VOLTAGE -> this.setControl(voltageRequest.withOutput(input).withEnableFOC(false));
+            case PERCENTAGE_OUTPUT -> this.setControl(dutyCycleRequest.withOutput(output));
+            case VOLTAGE -> this.setControl(voltageRequest.withOutput(output).withEnableFOC(false));
 
-            case POSITION -> this.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse));
-            case VELOCITY -> this.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse));
+            case POSITION -> this.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
+            case VELOCITY -> this.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
 
             case CURRENT ->
                     throw new UnsupportedOperationException("CTRE is money hungry, and wants you to pay $150 for CURRENT control. Nuh uh!");
@@ -61,14 +61,14 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setInput(MotorProperties.ControlMode mode, double input, double feedforward) {
+    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
-            setInput(mode, input);
+            setOutput(mode, output);
 
         switch (mode) {
-            case POSITION -> super.setControl(positionVoltageRequest.withPosition(input).withSlot(slotToUse)
+            case POSITION -> super.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse)
                     .withFeedForward(feedforward));
-            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(input).withSlot(slotToUse)
+            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse)
                     .withFeedForward(feedforward));
         }
     }

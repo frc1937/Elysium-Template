@@ -33,22 +33,22 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setInput(MotorProperties.ControlMode controlMode, double input) {
-        setInput(controlMode, input, this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
+    public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        setOutput(controlMode, output, this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
     }
 
     @Override
-    public void setInput(MotorProperties.ControlMode mode, double input, double feedforward) {
-        closedLoopTarget = input;
+    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
+        closedLoopTarget = output;
 
         switch (mode) { //Todo: More control types.
-            case PERCENTAGE_OUTPUT -> controller.setReference(input, ControlType.kDutyCycle);
+            case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(input, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> controller.setReference(input, ControlType.kPosition, slotToUse, feedforward);
+            case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse, feedforward);
+            case POSITION -> controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
 
-            case VOLTAGE -> controller.setReference(input, ControlType.kVoltage, slotToUse);
-            case CURRENT -> controller.setReference(input, ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
+            case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
         }
     }
 

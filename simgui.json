@@ -15,7 +15,11 @@
       "/SmartDashboard/Debug-Field": "Field2d",
       "/SmartDashboard/Field": "Field2d",
       "/SmartDashboard/Mechanism/Flywheel": "Mechanism2d",
+      "/SmartDashboard/Mechanism/FlywheelLeftSim": "Mechanism2d",
+      "/SmartDashboard/Mechanism/FlywheelRightSim": "Mechanism2d",
       "/SmartDashboard/Mechanisms/ArmMechanism": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/FlywheelLeftSim": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/FlywheelRightSim": "Mechanism2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
@@ -26,6 +30,11 @@
         "right": 2961,
         "top": 79,
         "width": 16.541748046875,
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Mechanism/FlywheelLeftSim": {
         "window": {
           "visible": true
         }

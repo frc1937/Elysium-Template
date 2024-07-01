@@ -41,17 +41,17 @@ public class RealSwerveModule extends SwerveModuleIO {
 
     @Override
     public void setTargetAngle(Rotation2d angle) {
-        steerMotor.setInput(MotorProperties.ControlMode.POSITION, angle.getRotations());
+        steerMotor.setOutput(MotorProperties.ControlMode.POSITION, angle.getRotations());
     }
 
     @Override
     public void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
         if (openLoop) {
             final double targetPowerOpenLoop = VOLTAGE_COMPENSATION_SATURATION * velocityMetresPerSecond / MAX_SPEED_MPS;
-            driveMotor.setInput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
+            driveMotor.setOutput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
         } else {
             final double targetVelocityRPSClosedLoop = Conversions.mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER);
-            driveMotor.setInput(MotorProperties.ControlMode.VELOCITY, targetVelocityRPSClosedLoop);
+            driveMotor.setOutput(MotorProperties.ControlMode.VELOCITY, targetVelocityRPSClosedLoop);
         }
     }
 

@@ -21,7 +21,7 @@ public class SimulationArm extends ArmIO {
     public void setTargetPosition(Rotation2d targetPosition) {
         targetAngle = targetPosition;
 
-        ARM_MOTOR.setInput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
     }
 
     @Override

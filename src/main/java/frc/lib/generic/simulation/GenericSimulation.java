@@ -50,8 +50,8 @@ public abstract class GenericSimulation {
         motor.stopMotor();
     }
 
-    public void setInput(MotorProperties.ControlMode controlMode, double input) {
-        motor.setInput(controlMode, input);
+    public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        motor.setOutput(controlMode, output);
     }
 
     public double getVoltage() {
