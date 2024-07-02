@@ -63,7 +63,7 @@ public class RobotContainer {
         ARM.setDefaultCommand(ARM.setTargetPosition(Rotation2d.fromDegrees(0)));
 
         new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
-                INTAKE.setIntakeSpeed(0.5)
+                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)
         );
 
         driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());

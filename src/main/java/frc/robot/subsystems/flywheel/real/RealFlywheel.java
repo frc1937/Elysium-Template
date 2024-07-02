@@ -9,11 +9,18 @@ import static frc.robot.subsystems.flywheel.FlywheelConstants.TOLERANCE_ROTATION
 
 public class RealFlywheel extends FlywheelIO {
     private final Motor motor;
+    private final double diameter;
 
-    public RealFlywheel(Motor motor, String name) {
+    public RealFlywheel(Motor motor, String name, double diameter) {
         super(name);
 
         this.motor = motor;
+        this.diameter = diameter;
+    }
+
+    @Override
+    public double getFlywheelDiameter() {
+        return diameter;
     }
 
     @Override

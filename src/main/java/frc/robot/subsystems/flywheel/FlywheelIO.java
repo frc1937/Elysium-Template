@@ -31,6 +31,8 @@ public class FlywheelIO {
         flywheelPeriodic();
     }
 
+    protected double getFlywheelDiameter() { return 0; }
+
     protected void stop() { }
 
     protected void flywheelPeriodic() { }

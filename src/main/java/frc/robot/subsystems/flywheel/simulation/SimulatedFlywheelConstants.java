@@ -39,8 +39,8 @@ public class SimulatedFlywheelConstants extends FlywheelConstants {
 
     public static FlywheelIO[] getFlywheels() {
         return new FlywheelIO[]{
-                new SimulatedFlywheel(LEFT_MOTOR, "LeftSim", LEFT_MOTOR_INVERT),
-                new SimulatedFlywheel(RIGHT_MOTOR, "RightSim", RIGHT_MOTOR_INVERT)
+                new SimulatedFlywheel(LEFT_MOTOR, "LeftSim", LEFT_MOTOR_INVERT, LEFT_FLYWHEEL_DIAMETER),
+                new SimulatedFlywheel(RIGHT_MOTOR, "RightSim", RIGHT_MOTOR_INVERT, RIGHT_FLYWHEEL_DIAMETER)
         };
     }
 }

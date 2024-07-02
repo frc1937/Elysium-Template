@@ -43,8 +43,8 @@ public class RealFlywheelConstants extends FlywheelConstants {
 
     public static FlywheelIO[] getFlywheels() {
         return new RealFlywheel[]{
-                new RealFlywheel(LEFT_FLYWHEEL_MOTOR, "LeftReal"),
-                new RealFlywheel(RIGHT_FLYWHEEL_MOTOR, "RightReal")
+                new RealFlywheel(LEFT_FLYWHEEL_MOTOR, "LeftReal", LEFT_FLYWHEEL_DIAMETER),
+                new RealFlywheel(RIGHT_FLYWHEEL_MOTOR, "RightReal", RIGHT_FLYWHEEL_DIAMETER)
         };
     }
 }

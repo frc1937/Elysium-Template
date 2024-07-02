@@ -13,14 +13,23 @@ public class SimulatedFlywheel extends FlywheelIO {
     private final FlywheelSimulation motor;
     private final SpeedMechanism2d speedMechanism2d;
 
+    private final double diameter;
+
     private double targetRPS = 0;
 
-    public SimulatedFlywheel(FlywheelSimulation motor, String name, boolean inverted) {
+
+    public SimulatedFlywheel(FlywheelSimulation motor, String name, boolean inverted, double diameter) {
         super(name);
 
         speedMechanism2d = new SpeedMechanism2d("Flywheel" + name, MAXIMUM_VELOCITY_RPM / 60, inverted);
 
         this.motor = motor;
+        this.diameter = diameter;
+    }
+
+    @Override
+    public double getFlywheelDiameter() {
+        return diameter;
     }
 
     @Override
