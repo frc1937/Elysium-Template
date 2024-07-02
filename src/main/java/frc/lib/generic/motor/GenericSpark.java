@@ -41,7 +41,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
 
-        switch (mode) { //Todo: More control types.
+        switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
             case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse, feedforward);
@@ -49,6 +49,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
+
+            case PROFILED_POSITION, PROFILED_VELOCITY ->
+                    throw new UnsupportedOperationException("Use normal VOLTAGE control and create the profile outside the motor.");
         }
     }
 

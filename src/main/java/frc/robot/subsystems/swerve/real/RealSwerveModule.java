@@ -51,7 +51,7 @@ public class RealSwerveModule extends SwerveModuleIO {
             driveMotor.setOutput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
         } else {
             final double targetVelocityRPSClosedLoop = Conversions.mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER);
-            driveMotor.setOutput(MotorProperties.ControlMode.VELOCITY, targetVelocityRPSClosedLoop);
+            driveMotor.setOutput(MotorProperties.ControlMode.PROFILED_VELOCITY, targetVelocityRPSClosedLoop);
         }
     }
 

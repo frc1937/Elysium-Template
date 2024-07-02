@@ -5,11 +5,7 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.controls.StrictFollower;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -33,6 +29,9 @@ public class GenericTalonFX extends TalonFX implements Motor {
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0);
     private final VelocityVoltage velocityVoltageRequest = new VelocityVoltage(0);
 
+    private final MotionMagicVoltage positionMMRequest = new MotionMagicVoltage(0);
+    private final MotionMagicVelocityVoltage velocityMMRequest = new MotionMagicVelocityVoltage(0);
+
     public GenericTalonFX(int deviceId) {
         super(deviceId);
 
@@ -48,15 +47,17 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
-        switch (mode) { //todo: add more (NECESSARY) control types
+        switch (mode) {
             case PERCENTAGE_OUTPUT -> this.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> this.setControl(voltageRequest.withOutput(output).withEnableFOC(false));
 
             case POSITION -> this.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
             case VELOCITY -> this.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
 
-            case CURRENT ->
-                    throw new UnsupportedOperationException("CTRE is money hungry, and wants you to pay $150 for CURRENT control. Nuh uh!");
+            case PROFILED_POSITION -> this.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
+            case PROFILED_VELOCITY -> this.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse));
+
+            case CURRENT -> throw new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.");
         }
     }
 
@@ -66,10 +67,11 @@ public class GenericTalonFX extends TalonFX implements Motor {
             setOutput(mode, output);
 
         switch (mode) {
-            case POSITION -> super.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse)
-                    .withFeedForward(feedforward));
-            case VELOCITY -> super.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse)
-                    .withFeedForward(feedforward));
+            case POSITION -> this.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
+            case VELOCITY -> this.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
+
+            case PROFILED_POSITION -> this.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
+            case PROFILED_VELOCITY -> this.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
         }
     }
 
