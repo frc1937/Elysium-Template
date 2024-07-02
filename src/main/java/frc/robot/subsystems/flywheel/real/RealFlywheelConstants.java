@@ -31,7 +31,7 @@ public class RealFlywheelConstants extends FlywheelConstants {
         configuration.supplyCurrentLimit = 80;
         configuration.statorCurrentLimit = 100;
 
-        configuration.slot0 = slot;
+        configuration.slot0 = new MotorProperties.Slot(0.001, 0, 0, 0, 0, 0);// slot;
 
         motor.configure(configuration);
 

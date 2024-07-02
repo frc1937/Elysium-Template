@@ -13,7 +13,7 @@ public class SwerveModuleIO {
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
 
-    private SwerveModuleState targetState  = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
+    private SwerveModuleState targetState = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
 
     public SwerveModuleIO(String name) {
         this.name = name;
@@ -47,6 +47,10 @@ public class SwerveModuleIO {
      * @return the position of the module at the given odometry update index
      */
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+        if (swerveModuleInputs.odometryUpdatesDriveDistanceMeters.length == 0 ||
+                swerveModuleInputs.odometryUpdatesSteerAngleDegrees.length <= odometryUpdateIndex)
+            return new SwerveModulePosition();
+
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])
@@ -65,17 +69,24 @@ public class SwerveModuleIO {
         openLoop = shouldBeOpenLoop;
     }
 
-    protected void setTargetAngle(Rotation2d angle) {}
-    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {}
-    protected void modulePeriodic() {}
+    protected void setTargetAngle(Rotation2d angle) {
+    }
 
-    protected void stop() {}
+    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
+    }
+
+    protected void modulePeriodic() {
+    }
+
+    protected void stop() {
+    }
 
     protected SwerveModuleState getCurrentState() {
         return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
     }
 
-    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {}
+    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
+    }
 
     @AutoLog
     public static class SwerveModuleInputs {

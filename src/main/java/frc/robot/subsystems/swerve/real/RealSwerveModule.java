@@ -73,7 +73,6 @@ public class RealSwerveModule extends SwerveModuleIO {
         swerveModuleInputs.driveVoltage = driveMotor.getVoltage();
 
         swerveModuleInputs.odometryUpdatesDriveDistanceMeters = drivePositionQueue.stream().mapToDouble((position) -> rotationsToMetres(position, WHEEL_DIAMETER)).toArray();
-
         swerveModuleInputs.odometryUpdatesSteerAngleDegrees = steerPositionQueue.stream().mapToDouble(Conversions::rotationsToDegrees).toArray();
 
         drivePositionQueue.clear();

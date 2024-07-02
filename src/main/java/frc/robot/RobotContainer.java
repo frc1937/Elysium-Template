@@ -58,8 +58,8 @@ public class RobotContainer {
                 driveController.getButton(Controller.Inputs.LEFT_BUMPER)
         ));
 
-//        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
-//
+        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
+
         ARM.setDefaultCommand(ARM.setTargetPosition(Rotation2d.fromDegrees(0)));
 
 //        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(

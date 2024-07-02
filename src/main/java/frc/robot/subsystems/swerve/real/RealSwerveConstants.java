@@ -103,7 +103,9 @@ public class RealSwerveConstants extends SwerveConstants {
         driveMotor.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, ODOMETRY_FREQUENCY_HERTZ);
         driveMotor.setSignalUpdateFrequency(Properties.SignalType.POSITION, ODOMETRY_FREQUENCY_HERTZ);
 
+        driveMotor.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
         driveMotor.setSignalUpdateFrequency(Properties.SignalType.TEMPERATURE, 50);
+
         driveMotor.configure(driveMotorConfiguration);
     }
 

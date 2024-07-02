@@ -23,7 +23,7 @@ public class Controller {
     }
 
     public enum Stick {
-        LEFT_STICK(2), RIGHT_STICK(5);
+        LEFT_STICK(2), RIGHT_STICK(3);
         public final int value;
 
         Stick(int value) {

@@ -29,14 +29,15 @@ public class SparkOdometryThread {
         if (instance == null) {
             instance = new SparkOdometryThread();
         }
+
         return instance;
     }
 
     private SparkOdometryThread() {
-        try(Notifier notifier = new Notifier(this::periodic)) {
-            notifier.setName("SparkMaxOdometryThread");
-            notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
-        }
+        Notifier notifier = new Notifier(this::periodic);
+
+        notifier.setName("SparkMaxOdometryThread");
+        notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
     }
 
     public Queue<Double> getTimestamps() {

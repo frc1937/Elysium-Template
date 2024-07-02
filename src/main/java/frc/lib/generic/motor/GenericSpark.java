@@ -34,9 +34,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-//        System.out.println(getSystemPosition() + " is pos, also; " + getSystemVelocity());
-
-        setOutput(controlMode, output, this.feedforward.calculate(getSystemPosition(), getSystemVelocity(), 0));
+        setOutput(controlMode, output,
+                this.feedforward.calculate(getSystemPosition(), getSystemVelocity(), 0));
     }
 
     @Override
@@ -46,7 +45,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(output, ControlType.kVelocity, slotToUse, feedforward);
+            case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
             case POSITION -> controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
@@ -85,7 +84,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getMotorVelocity() {
-        return encoder.getVelocity() / encoder.getVelocityConversionFactor();
+        return encoder.getVelocity() / 60 * encoder.getVelocityConversionFactor();
     }
 
     @Override
@@ -105,7 +104,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemVelocity() {
-        return encoder.getVelocity();
+        return encoder.getVelocity() / 60;
     }
 
     @Override
