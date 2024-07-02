@@ -31,7 +31,7 @@ public class SwerveModuleIO {
     }
 
     void setTargetState(SwerveModuleState state) {
-        this.targetState = SwerveModuleState.optimize(state, getCurrentAngle());
+        this.targetState = Optimizations.optimize(state, getCurrentAngle());
 
         final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
 

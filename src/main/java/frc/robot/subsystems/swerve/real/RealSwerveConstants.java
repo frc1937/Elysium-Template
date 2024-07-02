@@ -129,7 +129,7 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfiguration.slot0 = new MotorProperties.Slot(1, 0, 0, 1, 0, 0);
+        steerMotorConfiguration.slot0 = new MotorProperties.Slot(5, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
         steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;

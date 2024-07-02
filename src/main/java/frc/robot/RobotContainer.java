@@ -8,7 +8,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.PoseEstimator;
@@ -21,8 +20,9 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.DoubleSupplier;
 
-import static frc.lib.util.Controller.Axis.*;
-import static frc.robot.GlobalConstants.BLUE_SPEAKER;
+import static frc.lib.util.Controller.Axis.LEFT_X;
+import static frc.lib.util.Controller.Axis.LEFT_Y;
+import static frc.lib.util.Controller.Axis.RIGHT_X;
 import static frc.robot.poseestimation.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
@@ -54,25 +54,25 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(RIGHT_Y),
+                () -> -driveController.getRawAxis(RIGHT_X),
                 driveController.getButton(Controller.Inputs.LEFT_BUMPER)
         ));
 
-        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
-
+//        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
+//
         ARM.setDefaultCommand(ARM.setTargetPosition(Rotation2d.fromDegrees(0)));
 
-        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
-                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)
-        );
+//        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
+//                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)
+//        );
 
-        driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());
+//        driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(
-                SWERVE.driveWhilstRotatingToTarget(
-                        translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(),
-                        driveController.getButton(Controller.Inputs.LEFT_BUMPER)
-                ));
+//        driveController.getButton(Controller.Inputs.A).whileTrue(
+//                SWERVE.driveWhilstRotatingToTarget(
+//                        translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(),
+//                        driveController.getButton(Controller.Inputs.LEFT_BUMPER)
+//                ));
     }
 
     public Command getAutonomousCommand() {

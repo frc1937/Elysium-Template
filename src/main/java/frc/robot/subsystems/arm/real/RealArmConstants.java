@@ -57,14 +57,17 @@ public class RealArmConstants {
         motorConfiguration.supplyCurrentLimit = 40;
 
         motorConfiguration.slot0 = new MotorProperties.Slot(
-                PITCH_KP,
-                PITCH_KI,
-                PITCH_KD,
-                PITCH_KV,
-                PITCH_KA,
-                PITCH_KS,
-                PITCH_KG,
+                1, 0, 0,
+                0, 0, 0, 0.1,
                 GravityTypeValue.Arm_Cosine
+//                PITCH_KP,
+//                PITCH_KI,
+//                PITCH_KD,
+//                PITCH_KV,
+//                PITCH_KA,
+//                PITCH_KS,
+//                PITCH_KG,
+//                GravityTypeValue.Arm_Cosine
         );
 
         ARM_MOTOR.configure(motorConfiguration);

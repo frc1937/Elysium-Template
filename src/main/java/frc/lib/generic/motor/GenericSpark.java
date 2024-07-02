@@ -34,7 +34,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        setOutput(controlMode, output, this.feedforward.calculate(getSystemPosition(), getSystemVelocity()));
+//        System.out.println(getSystemPosition() + " is pos, also; " + getSystemVelocity());
+
+        setOutput(controlMode, output, this.feedforward.calculate(getSystemPosition(), getSystemVelocity(), 0));
     }
 
     @Override
