@@ -1,19 +1,15 @@
 package frc.robot.subsystems.swerve_old;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.math.Optimizations;
-import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.GlobalConstants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -26,7 +22,9 @@ import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
-import static frc.robot.subsystems.swerve_old.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
+import static frc.robot.subsystems.swerve_old.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+import static frc.robot.subsystems.swerve_old.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve_old.real.RealSwerveConstants.SWERVE_KINEMATICS;
 
 public class Swerve extends SubsystemBase {
@@ -238,11 +236,11 @@ public class Swerve extends SubsystemBase {
     }
 
     private void refreshRotationController() {
-        ROTATION_CONTROLLER.setP(ROTATION_KP.get());
-        ROTATION_CONTROLLER.setConstraints(new TrapezoidProfile.Constraints(
-                ROTATION_MAX_VELOCITY.get(),
-                ROTATION_MAX_ACCELERATION.get())
-        );
+//        ROTATION_CONTROLLER.setP(ROTATION_KP.get());
+//        ROTATION_CONTROLLER.setConstraints(new TrapezoidProfile.Constraints(
+//                ROTATION_MAX_VELOCITY.get(),
+//                ROTATION_MAX_ACCELERATION.get())
+//        );
     }
 
     private void resetRotationController() {
@@ -250,19 +248,19 @@ public class Swerve extends SubsystemBase {
     }
 
     private void configurePathPlanner() {
-        AutoBuilder.configureHolonomic(
-                RobotContainer.POSE_ESTIMATOR::getCurrentPose,
-                RobotContainer.POSE_ESTIMATOR::resetPose,
-
-                this::getSelfRelativeSpeeds,
-                this::driveSelfRelative,
-
-                new HolonomicPathFollowerConfig(
-                        MAX_SPEED_MPS, DRIVE_BASE_RADIUS, new ReplanningConfig(true, true)
-                ),
-
-                Mirrorable::isRedAlliance,
-                this
-        );
+//        AutoBuilder.configureHolonomic(
+//                RobotContainer.POSE_ESTIMATOR::getCurrentPose,
+//                RobotContainer.POSE_ESTIMATOR::resetPose,
+//
+//                this::getSelfRelativeSpeeds,
+//                this::driveSelfRelative,
+//
+//                new HolonomicPathFollowerConfig(
+//                        MAX_SPEED_MPS, DRIVE_BASE_RADIUS, new ReplanningConfig(true, true)
+//                ),
+//
+//                Mirrorable::isRedAlliance,
+//                this
+//        );
     }
 }

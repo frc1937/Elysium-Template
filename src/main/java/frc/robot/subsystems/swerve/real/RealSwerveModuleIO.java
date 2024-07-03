@@ -5,7 +5,6 @@ import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.PhoenixOdometryThread;
@@ -35,7 +34,7 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
     }
 
     @Override
-    protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
+    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
         refreshStatusSignals();
 
         inputs.steerAngleDegrees = getAngleDegrees();
@@ -45,7 +44,6 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
         inputs.driveDistanceMeters = toDriveDistance(moduleConstants.drivePositionSignal.getValue());
         inputs.odometryUpdatesDriveDistanceMeters = drivePositionQueue.stream().mapToDouble(this::toDriveDistance).toArray();
         inputs.driveVelocityMetersPerSecond = toDriveDistance(moduleConstants.driveVelocitySignal.getValue());
-        inputs.driveCurrent = moduleConstants.driveStatorCurrentSignal.getValue();
         inputs.driveVoltage = moduleConstants.driveVoltageSignal.getValue();
 
         steerPositionQueue.clear();
@@ -62,6 +60,7 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
                 RealSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
                 RealSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );
+
         driveMotor.setControl(driveVoltageRequest.withOutput(voltage));
     }
 
@@ -85,13 +84,6 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
     protected void stop() {
         steerMotor.stopMotor();
         driveMotor.stopMotor();
-    }
-
-    @Override
-    protected void setBrake(boolean brake) {
-        final NeutralModeValue neutralModeValue = brake ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-        driveMotor.setNeutralMode(neutralModeValue);
-        steerMotor.setNeutralMode(neutralModeValue);
     }
 
     private double getAngleDegrees() {

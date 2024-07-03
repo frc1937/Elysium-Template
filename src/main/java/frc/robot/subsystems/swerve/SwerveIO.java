@@ -20,10 +20,10 @@ public class SwerveIO {
         return new SwerveIO();
     }
 
-    protected void updateInputs(SwerveInputsAutoLogged inputs) {
+    protected void refreshInputs(SwerveInputsAutoLogged inputs) {
     }
 
-    protected void setHeading(Rotation2d heading) {
+    protected void setGyroHeading(Rotation2d heading) {
     }
 
     @AutoLog

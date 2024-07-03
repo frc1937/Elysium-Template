@@ -22,6 +22,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
 import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 
 public class Swerve extends SubsystemBase {
@@ -36,7 +37,6 @@ public class Swerve extends SubsystemBase {
     public Swerve() {
         modulesIO = getModulesIO();
         configurePathPlanner();
-        constants.getProfiledRotationController().enableContinuousInput(-180, 180);
     }
 
     @Override
@@ -74,7 +74,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public void setGyroHeading(Rotation2d heading) {
-        swerveIO.setHeading(heading);
+        swerveIO.setGyroHeading(heading);
     }
 
     public ChassisSpeeds getSelfRelativeVelocity() {
@@ -146,7 +146,7 @@ public class Swerve extends SubsystemBase {
     }
 
     void resetRotationController() {
-        constants.getProfiledRotationController().reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
     }
 
     void setClosedLoop(boolean closedLoop) {
@@ -165,7 +165,7 @@ public class Swerve extends SubsystemBase {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         Logger.recordOutput("Swerve/AnglePID/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
-        Logger.recordOutput("Swerve/AnglePID/AngleSetpoint", MathUtil.inputModulus(constants.getProfiledRotationController().getSetpoint().position, 0, 360));
+        Logger.recordOutput("Swerve/AnglePID/AngleSetpoint", MathUtil.inputModulus(ROTATION_CONTROLLER.getSetpoint().position, 0, 360));
         Logger.recordOutput("Swerve/AnglePID/CurrentAngle", MathUtil.inputModulus(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
 
         selfRelativeDrive(speeds);
@@ -206,7 +206,7 @@ public class Swerve extends SubsystemBase {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
         Logger.recordOutput("Stuff/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
-        Logger.recordOutput("Stuff/AngleSetpoint", MathUtil.inputModulus(constants.getProfiledRotationController().getSetpoint().position, 0, 360));
+        Logger.recordOutput("Stuff/AngleSetpoint", MathUtil.inputModulus(ROTATION_CONTROLLER.getSetpoint().position, 0, 360));
         Logger.recordOutput("Stuff/CurrentAngle", MathUtil.inputModulus(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
 
         selfRelativeDrive(speeds);
@@ -214,17 +214,16 @@ public class Swerve extends SubsystemBase {
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
         chassisSpeeds = discretize(chassisSpeeds);
+
         if (isStill(chassisSpeeds)) {
             stop();
             return;
         }
 
         final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
-        setTargetModuleStates(swerveModuleStates);
-    }
 
-    private void setTargetModuleStates(SwerveModuleState[] swerveModuleStates) {
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, constants.getMaxSpeedMetersPerSecond());
+
         for (int i = 0; i < modulesIO.length; i++)
             modulesIO[i].setTargetState(swerveModuleStates[i]);
     }
@@ -264,7 +263,7 @@ public class Swerve extends SubsystemBase {
     }
 
     private void updateAllInputs() {
-        swerveIO.updateInputs(swerveInputs);
+        swerveIO.refreshInputs(swerveInputs);
         Logger.processInputs("Swerve", swerveInputs);
 
         for (SwerveModuleIO currentModule : modulesIO)
@@ -293,7 +292,7 @@ public class Swerve extends SubsystemBase {
 
     private double calculateProfiledAngleSpeedToTargetAngle(MirrorableRotation2d targetAngle) {
         final Rotation2d currentAngle = POSE_ESTIMATOR.getCurrentPose().getRotation();
-        return Units.degreesToRadians(constants.getProfiledRotationController().calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
+        return Units.degreesToRadians(ROTATION_CONTROLLER.calculate(currentAngle.getDegrees(), targetAngle.get().getDegrees()));
     }
 
     private ChassisSpeeds selfRelativeSpeedsFromFieldRelativePowers(double xPower, double yPower, double thetaPower) {

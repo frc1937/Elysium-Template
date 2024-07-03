@@ -19,7 +19,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     }
 
     @Override
-    protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
+    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
         inputs.steerAngleDegrees = Conversions.rotationsToDegrees(steerMotor.getPositionRotations());
         inputs.odometryUpdatesSteerAngleDegrees = new double[]{inputs.steerAngleDegrees};
         inputs.steerVoltage = steerMotor.getVoltage();
@@ -27,7 +27,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
         inputs.driveDistanceMeters = Conversions.rotationsToMetres(driveMotor.getPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
         inputs.odometryUpdatesDriveDistanceMeters = new double[]{inputs.driveDistanceMeters};
         inputs.driveVelocityMetersPerSecond = Conversions.rpsToMps(driveMotor.getVelocityRotationsPerSecond(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveCurrent = driveMotor.getCurrent();
         inputs.driveVoltage = driveMotor.getVoltage();
     }
 

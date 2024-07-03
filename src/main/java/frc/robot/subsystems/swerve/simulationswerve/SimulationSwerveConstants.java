@@ -1,12 +1,10 @@
 package frc.robot.subsystems.swerve.simulationswerve;
 
-import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.simulation.GyroSimulation;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
@@ -34,19 +32,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
             PROFILED_ROTATION_PID_CONSTANTS = new PIDConstants(12, 0, 0),
             AUTO_TRANSLATION_PID_CONSTANTS = new PIDConstants(9, 0, 0),
             AUTO_ROTATION_PID_CONSTANTS = new PIDConstants(8.9, 0, 0);
-    private static final double
-            MAX_ROTATION_VELOCITY = 720,
-            MAX_ROTATION_ACCELERATION = 720;
-    private static final TrapezoidProfile.Constraints ROTATION_CONSTRAINTS = new TrapezoidProfile.Constraints(
-            MAX_ROTATION_VELOCITY,
-            MAX_ROTATION_ACCELERATION
-    );
-    private static final ProfiledPIDController PROFILED_ROTATION_PID_CONTROLLER = new ProfiledPIDController(
-            PROFILED_ROTATION_PID_CONSTANTS.kP,
-            PROFILED_ROTATION_PID_CONSTANTS.kI,
-            PROFILED_ROTATION_PID_CONSTANTS.kD,
-            ROTATION_CONSTRAINTS
-    );
+
     private static final PIDController TRANSLATION_PID_CONTROLLER = new PIDController(
             TRANSLATION_PID_CONSTANTS.kP,
             TRANSLATION_PID_CONSTANTS.kI,
@@ -66,12 +52,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
     );
 
     @Override
-    public double getDriveRadiusMeters() {
-        return DRIVE_RADIUS_METERS;
-    }
-
-    @Override
-    protected Optional<Pigeon2> getPigeon() {
+    protected Optional<WPI_PigeonIMU> getPigeon() {
         return Optional.empty();
     }
 
@@ -93,11 +74,6 @@ public class SimulationSwerveConstants extends SwerveConstants {
     @Override
     protected double getMaxRotationalSpeedRadiansPerSecond() {
         return MAX_ROTATIONAL_SPEED_RADIANS_PER_SECOND;
-    }
-
-    @Override
-    protected ProfiledPIDController getProfiledRotationController() {
-        return PROFILED_ROTATION_PID_CONTROLLER;
     }
 
     @Override

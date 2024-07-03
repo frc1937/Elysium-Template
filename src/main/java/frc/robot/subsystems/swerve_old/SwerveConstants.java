@@ -15,22 +15,9 @@ import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
 
 public abstract class SwerveConstants {
-    public static final double
-            DRIVE_NEUTRAL_DEADBAND = 0.2,
-            ROTATION_NEUTRAL_DEADBAND = 0.2;
-
-    static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1);
-
-    static final LoggedTunableNumber ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI );
-
-    /** Units of RADIANS for everything. */
-    protected static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            ROTATION_KP.get(), 0, 0.015, new TrapezoidProfile.Constraints(ROTATION_MAX_VELOCITY.get(), ROTATION_MAX_ACCELERATION.get())
-    );
-
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
     static final double WHEEL_BASE = 0.565;
