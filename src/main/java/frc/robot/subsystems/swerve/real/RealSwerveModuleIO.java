@@ -13,6 +13,8 @@ import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 
 import java.util.Queue;
 
+import static frc.lib.math.Optimizations.removeCouplingFromRevolutions;
+
 public class RealSwerveModuleIO extends SwerveModuleIO {
     private final TalonFX steerMotor, driveMotor;
     private final RealSwerveModuleConstants moduleConstants;
@@ -67,11 +69,13 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
     @Override
     protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
         final double targetVelocityRevolutionsPerSeconds = Conversions.metresToRotations(targetVelocityMetersPerSecond, RealSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+
         final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(
                 targetVelocityRevolutionsPerSeconds,
                 Rotation2d.fromRotations(moduleConstants.steerVelocitySignal.getValue()),
                 RealSwerveModuleConstants.COUPLING_RATIO
         );
+
         driveMotor.setControl(driveVelocityRequest.withVelocity(optimizedVelocityRevolutionsPerSecond));
     }
 

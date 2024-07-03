@@ -23,6 +23,19 @@ public class Optimizations {
     }
 
     /**
+     * When the steer motor moves, the drive motor moves as well due to the coupling.
+     * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
+     *
+     * @param drivePositionRevolutions the position in revolutions
+     * @param moduleAngle              the angle of the module
+     * @return the distance without the coupling
+     */
+    public static double removeCouplingFromRevolutions(double drivePositionRevolutions, Rotation2d moduleAngle, double couplingRatio) {
+        final double coupledAngle = moduleAngle.getRotations() * couplingRatio;
+        return drivePositionRevolutions - coupledAngle;
+    }
+
+    /**
      * When the robot drives while rotating it skews a bit to the side.
      * This should fix the chassis speeds, so they won't make the robot skew while rotating.
      *

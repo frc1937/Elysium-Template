@@ -26,6 +26,9 @@ public abstract class SwerveConstants {
     static final double WHEEL_BASE = 0.565;
     static final double TRACK_WIDTH = 0.615;
 
+    public static final double MAX_SPEED_MPS = 5.1;
+    public static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
+
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
@@ -73,8 +76,4 @@ public abstract class SwerveConstants {
     protected abstract Optional<SwerveModuleIO[]> getModulesIO();
 
     protected abstract HolonomicPathFollowerConfig getPathFollowerConfig();
-
-    protected abstract double getMaxSpeedMetersPerSecond();
-
-    protected abstract double getMaxRotationalSpeedRadiansPerSecond();
 }

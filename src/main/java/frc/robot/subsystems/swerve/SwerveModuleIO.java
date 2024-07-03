@@ -44,22 +44,10 @@ public class SwerveModuleIO {
 
     protected double velocityToOpenLoopVoltage(double velocityMetersPerSecond, double wheelDiameterMeters, double steerVelocityRevolutionsPerSecond, double couplingRatio, double maxSpeedRevolutionsPerSecond, double voltageCompensationSaturation) {
         final double velocityRevolutionsPerSecond = Conversions.metresToRotations(velocityMetersPerSecond, wheelDiameterMeters);
-        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRevolutionsPerSecond), couplingRatio);
+        final double optimizedVelocityRevolutionsPerSecond = Optimizations.removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRevolutionsPerSecond), couplingRatio);
         final double power = optimizedVelocityRevolutionsPerSecond / maxSpeedRevolutionsPerSecond;
-        return Conversions.compensatedPowerToVoltage(power, voltageCompensationSaturation);
-    }
 
-    /**
-     * When the steer motor moves, the drive motor moves as well due to the coupling.
-     * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
-     *
-     * @param drivePositionRevolutions the position in revolutions
-     * @param moduleAngle              the angle of the module
-     * @return the distance without the coupling
-     */
-    protected double removeCouplingFromRevolutions(double drivePositionRevolutions, Rotation2d moduleAngle, double couplingRatio) {
-        final double coupledAngle = moduleAngle.getRotations() * couplingRatio;
-        return drivePositionRevolutions - coupledAngle;
+        return Conversions.compensatedPowerToVoltage(power, voltageCompensationSaturation);
     }
 
     /**
@@ -69,7 +57,7 @@ public class SwerveModuleIO {
      * @param odometryUpdateIndex the index of the odometry update
      * @return the position of the module at the given odometry update index
      */
-    SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+    protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])

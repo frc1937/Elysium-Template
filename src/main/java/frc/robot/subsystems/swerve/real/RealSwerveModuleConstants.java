@@ -16,7 +16,6 @@ public class RealSwerveModuleConstants {
     static final double WHEEL_DIAMETER_METERS = 0.049149 * 2;
     static final double MAX_SPEED_REVOLUTIONS_PER_SECOND = Conversions.metresToRotations(RealSwerveConstants.MAX_SPEED_METERS_PER_SECOND, WHEEL_DIAMETER_METERS);
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
-    static final boolean ENABLE_FOC = true;
 
     static final double
             DRIVE_GEAR_RATIO = 6.12,
