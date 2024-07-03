@@ -36,6 +36,7 @@ public abstract class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
+
             new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0));
 
