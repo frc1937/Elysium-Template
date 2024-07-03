@@ -110,8 +110,7 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static void configureSteerMotor(Motor steerMotor) {
-        steerMotor.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
-
+        steerMotor.setSignalUpdateFrequency(Properties.SignalType.POSITION, ODOMETRY_FREQUENCY_HERTZ);
         steerMotor.configure(steerMotorConfiguration);
     }
 
@@ -138,5 +137,7 @@ public class RealSwerveConstants extends SwerveConstants {
         steerMotorConfiguration.idleMode = ANGLE_NEUTRAL_MODE;
 
         steerMotorConfiguration.conversionFactor = ANGLE_GEAR_RATIO;
+
+        steerMotorConfiguration.ClosedLoopContinousWrap = true;
     }
 }

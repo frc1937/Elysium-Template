@@ -19,13 +19,9 @@ public class SwerveModuleIO {
         this.name = name;
     }
 
-    public String getLoggingPath() {
-        return "Swerve/" + name + "/";
-    }
-
     public void periodic() {
         refreshInputs(swerveModuleInputs);
-        Logger.processInputs(getLoggingPath(), swerveModuleInputs);
+        Logger.processInputs("Swerve/" + name + "/", swerveModuleInputs);
 
         modulePeriodic();
     }
@@ -47,10 +43,6 @@ public class SwerveModuleIO {
      * @return the position of the module at the given odometry update index
      */
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-        if (swerveModuleInputs.odometryUpdatesDriveDistanceMeters.length == 0 ||
-                swerveModuleInputs.odometryUpdatesSteerAngleDegrees.length <= odometryUpdateIndex)
-            return new SwerveModulePosition();
-
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])

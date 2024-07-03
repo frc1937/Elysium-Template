@@ -5,9 +5,10 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
@@ -19,52 +20,76 @@ import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
  * blocking thread. A Notifier thread is used to gather samples with consistent timing.
  */
 public class SparkOdometryThread {
-    private final List<DoubleSupplier> signals = new ArrayList<>();
-    private final List<Queue<Double>> queues = new ArrayList<>();
-    private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
+    private List<Supplier<OptionalDouble>> signals = new ArrayList<>();
+    private List<Queue<Double>> queues = new ArrayList<>();
+    private List<Queue<Double>> timestampQueues = new ArrayList<>();
 
+    private final Notifier notifier;
     private static SparkOdometryThread instance = null;
 
     public static SparkOdometryThread getInstance() {
         if (instance == null) {
             instance = new SparkOdometryThread();
         }
-
         return instance;
     }
 
     private SparkOdometryThread() {
-        Notifier notifier = new Notifier(this::periodic);
-
+        notifier = new Notifier(this::periodic);
         notifier.setName("SparkMaxOdometryThread");
-        notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
     }
 
-    public Queue<Double> getTimestamps() {
-        return timestamps;
+    public void start() {
+        if (timestampQueues.size() > 0) {
+            notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
+        }
     }
 
-    public Queue<Double> registerSignal(DoubleSupplier signal) {
-        Queue<Double> queue = new ArrayBlockingQueue<>(100);
+    public Queue<Double> registerSignal(Supplier<OptionalDouble> signal) {
+        Queue<Double> queue = new ArrayBlockingQueue<>(20);
         ODOMETRY_LOCK.lock();
-
         try {
             signals.add(signal);
             queues.add(queue);
         } finally {
             ODOMETRY_LOCK.unlock();
         }
+        return queue;
+    }
 
+    public Queue<Double> makeTimestampQueue() {
+        Queue<Double> queue = new ArrayBlockingQueue<>(20);
+        ODOMETRY_LOCK.lock();
+        try {
+            timestampQueues.add(queue);
+        } finally {
+            ODOMETRY_LOCK.unlock();
+        }
         return queue;
     }
 
     private void periodic() {
         ODOMETRY_LOCK.lock();
-        timestamps.offer(Logger.getRealTimestamp() / 1.0e6);
-
+        double timestamp = Logger.getRealTimestamp() / 1e6;
         try {
+            double[] values = new double[signals.size()];
+            boolean isValid = true;
             for (int i = 0; i < signals.size(); i++) {
-                queues.get(i).offer(signals.get(i).getAsDouble());
+                OptionalDouble value = signals.get(i).get();
+                if (value.isPresent()) {
+                    values[i] = value.getAsDouble();
+                } else {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (isValid) {
+                for (int i = 0; i < queues.size(); i++) {
+                    queues.get(i).offer(values[i]);
+                }
+                for (int i = 0; i < timestampQueues.size(); i++) {
+                    timestampQueues.get(i).offer(timestamp);
+                }
             }
         } finally {
             ODOMETRY_LOCK.unlock();

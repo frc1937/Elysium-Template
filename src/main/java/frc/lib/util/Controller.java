@@ -31,7 +31,7 @@ public class Controller {
         }
     }
     public enum Axis {
-        LEFT_X(0), RIGHT_X(4), LEFT_Y(1), RIGHT_Y(3);
+        LEFT_X(0), RIGHT_X(4), LEFT_Y(1), RIGHT_Y(3), LEFT_STICK(2), RIGHT_STICK(5);
         public final int value;
 
         Axis(int value) {

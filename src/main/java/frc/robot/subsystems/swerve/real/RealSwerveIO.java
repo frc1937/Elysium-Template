@@ -5,6 +5,7 @@ import frc.lib.util.threads.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveIO;
 import frc.robot.subsystems.swerve.SwerveInputsAutoLogged;
 
+import java.util.OptionalDouble;
 import java.util.Queue;
 
 import static frc.robot.subsystems.swerve.real.RealSwerveConstants.GYRO;
@@ -13,8 +14,8 @@ public class RealSwerveIO extends SwerveIO {
     Queue<Double> signalQueue, timestampQueue;
 
     public RealSwerveIO() {
-        signalQueue = SparkOdometryThread.getInstance().registerSignal(GYRO::getYaw);
-        timestampQueue = SparkOdometryThread.getInstance().getTimestamps();
+        signalQueue = SparkOdometryThread.getInstance().registerSignal(() -> OptionalDouble.of(GYRO.getYaw()));
+        timestampQueue = SparkOdometryThread.getInstance().makeTimestampQueue();
     }
 
     @Override

@@ -22,7 +22,6 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
-import static frc.lib.util.Controller.Axis.RIGHT_X;
 import static frc.robot.poseestimation.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
@@ -54,7 +53,7 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(RIGHT_X),
+                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK),
                 driveController.getButton(Controller.Inputs.LEFT_BUMPER)
         ));
 
