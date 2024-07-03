@@ -27,6 +27,10 @@ public class Arm extends SubsystemBase {
         routine = new SysIdRoutine(SYSID_CONFIG, mechanism);
     }
 
+    public boolean hasReachedTarget() {
+        return armIO.hasReachedTarget();
+    }
+
     public Command setTargetPosition(Rotation2d targetPosition) {
         return Commands.run(() -> armIO.setTargetPosition(targetPosition), this);
     }

@@ -21,6 +21,9 @@ public class ArmIO {
 
     protected void setRawVoltage(double voltage) { }
     protected void setTargetPosition(Rotation2d targetPosition) { }
+
+    protected boolean hasReachedTarget() { return false; }
+
     protected void refreshInputs(ArmInputsAutoLogged armInputs) { }
 
     @AutoLog

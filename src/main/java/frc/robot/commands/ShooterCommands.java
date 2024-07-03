@@ -13,16 +13,25 @@ public class ShooterCommands {
                 .alongWith(
                         FLYWHEEL.setFlywheelTarget(-15),
                         INTAKE.setIntakeSpeed(0.5),
-                        KICKER.setKickerPercentageOutput(0.5) //TODO idk what direction.. needs testing
+                        KICKER.setKickerPercentageOutput(0.5)
                 );
     }
 
-//    public Command shootToTarget(Pose2d target, double tangentialVelocity) {
-//        return
-//                SWERVE.rotateToTarget(target)
-//                        .alongWith(
-//                        FLYWHEEL.setFlywheelTargetTangentialVelocity(tangentialVelocity),
-//                        ARM.setTargetPosition(Rotation2d.fromDegrees(-20)) //todo: get from physics
-//                );
-//    }
+    public Command shootToTargetWithPhysics(Pose2d target, double tangentialVelocity) {
+        return SWERVE.rotateToTarget(target).alongWith(
+                FLYWHEEL.setFlywheelTargetTangentialVelocity(tangentialVelocity),
+                ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
+        );
+    }
+
+    public Command shootWithoutPhysics(double tangentialVelocity, Rotation2d armAngle) {
+
+        return ARM.setTargetPosition(armAngle)
+                .alongWith(FLYWHEEL.setFlywheelTarget(15))
+
+                .until(FLYWHEEL::hasReachedTarget)
+                .until(ARM::hasReachedTarget)
+
+                .andThen(KICKER.setKickerPercentageOutput(0.5));
+    }
 }

@@ -5,10 +5,12 @@ import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmInputsAutoLogged;
 
+import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ARM_MOTOR;
 
 public class RealArm extends ArmIO {
+    private Rotation2d targetPosition = new Rotation2d();
 
     @Override
     public void periodic() {
@@ -17,8 +19,15 @@ public class RealArm extends ArmIO {
 
     @Override
     public void setTargetPosition(Rotation2d targetPosition) {
+        this.targetPosition = targetPosition;
+
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,
                 targetPosition.getRotations());
+    }
+
+    @Override
+    public boolean hasReachedTarget() {
+        return Math.abs(ABSOLUTE_ARM_ENCODER.getEncoderPosition() - targetPosition.getRotations()) < TOLERANCE_ROTATIONS;
     }
 
     @Override
