@@ -19,8 +19,9 @@ public class ArmIO {
 
     public void periodic() {}
 
-    public void setTargetPosition(Rotation2d targetPosition) { }
-    public void refreshInputs(ArmInputsAutoLogged armInputs) { }
+    protected void setRawVoltage(double voltage) { }
+    protected void setTargetPosition(Rotation2d targetPosition) { }
+    protected void refreshInputs(ArmInputsAutoLogged armInputs) { }
 
     @AutoLog
     public static class ArmInputs {

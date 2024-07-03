@@ -18,6 +18,11 @@ public class SimulationArm extends ArmIO {
     }
 
     @Override
+    public void setRawVoltage(double voltage) {
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
+    @Override
     public void setTargetPosition(Rotation2d targetPosition) {
         targetAngle = targetPosition;
 

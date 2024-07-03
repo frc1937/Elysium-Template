@@ -22,6 +22,11 @@ public class RealArm extends ArmIO {
     }
 
     @Override
+    public void setRawVoltage(double voltage) {
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
+    @Override
     public void refreshInputs(ArmInputsAutoLogged armInputs) {
         armInputs.positionRotations = ABSOLUTE_ARM_ENCODER.getEncoderPosition();
         armInputs.velocityRotationsPerSecond = ABSOLUTE_ARM_ENCODER.getEncoderVelocity();
