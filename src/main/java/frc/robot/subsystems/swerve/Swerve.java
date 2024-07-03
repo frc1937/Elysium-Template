@@ -6,7 +6,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -18,6 +17,7 @@ import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
@@ -30,8 +30,6 @@ public class Swerve extends SubsystemBase {
 
     private final SwerveConstants constants = SwerveConstants.generateConstants();
     private final SwerveModuleIO[] modulesIO = getModulesIO();
-
-    private double lastTimestamp = 0;
 
     public Swerve() {
         configurePathPlanner();
@@ -53,10 +51,19 @@ public class Swerve extends SubsystemBase {
         );
     }
 
-    public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation) {
+    public Command resetGyro() {
+        return Commands.runOnce(() -> this.setGyroHeading(Rotation2d.fromDegrees(0)), this);
+    }
+
+    public Command driveTeleop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
-                () -> selfRelativeDrive(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble()),
+                () -> {
+                    if(robotCentric.getAsBoolean())
+                        selfRelativeDrive(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble());
+                    else
+                        fieldRelativeDrive(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble());
+                },
                 (interrupt) -> {},
                 () -> false,
                 this
@@ -112,6 +119,7 @@ public class Swerve extends SubsystemBase {
     void fieldRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
         final ChassisSpeeds speeds = selfRelativeSpeedsFromFieldRelativePowers(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
+
         Logger.recordOutput("Swerve/AnglePID/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
         Logger.recordOutput("Swerve/AnglePID/AngleSetpoint", MathUtil.inputModulus(ROTATION_CONTROLLER.getSetpoint().position, 0, 360));
         Logger.recordOutput("Swerve/AnglePID/CurrentAngle", MathUtil.inputModulus(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
@@ -153,6 +161,7 @@ public class Swerve extends SubsystemBase {
     void selfRelativeDrive(double xPower, double yPower, MirrorableRotation2d targetAngle) {
         final ChassisSpeeds speeds = powersToSpeeds(xPower, yPower, 0);
         speeds.omegaRadiansPerSecond = calculateProfiledAngleSpeedToTargetAngle(targetAngle);
+
         Logger.recordOutput("Stuff/TargetAngle", MathUtil.inputModulus(targetAngle.get().getDegrees(), 0, 360));
         Logger.recordOutput("Stuff/AngleSetpoint", MathUtil.inputModulus(ROTATION_CONTROLLER.getSetpoint().position, 0, 360));
         Logger.recordOutput("Stuff/CurrentAngle", MathUtil.inputModulus(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), 0, 360));
@@ -161,7 +170,7 @@ public class Swerve extends SubsystemBase {
     }
 
     private void selfRelativeDrive(ChassisSpeeds chassisSpeeds) {
-        chassisSpeeds = discretize(chassisSpeeds);
+//        chassisSpeeds = Optimizations.discretize(chassisSpeeds, lastTimestamp); //todo: THis is stupid
 
         if (Optimizations.isStill(chassisSpeeds)) {
             stop();
@@ -176,22 +185,9 @@ public class Swerve extends SubsystemBase {
             modulesIO[i].setTargetState(swerveModuleStates[i]);
     }
 
-    /**
-     * When the robot drives while rotating it skews a bit to the side.
-     * This should fix the chassis speeds, so they won't make the robot skew while rotating.
-     *
-     * @param chassisSpeeds the chassis speeds to fix skewing for
-     * @return the fixed speeds
-     */
-    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
-        final double currentTimestamp = Timer.getFPGATimestamp();
-        final double difference = currentTimestamp - lastTimestamp;
-        lastTimestamp = currentTimestamp;
-        return ChassisSpeeds.discretize(chassisSpeeds, difference);
-    }
-
     private void updatePoseEstimatorStates() {
         final int odometryUpdates = swerveInputs.odometryUpdatesYawDegrees.length;
+
         final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
@@ -205,8 +201,10 @@ public class Swerve extends SubsystemBase {
 
     private SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
         final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[modulesIO.length];
+
         for (int i = 0; i < modulesIO.length; i++)
             swerveModulePositions[i] = modulesIO[i].getOdometryPosition(odometryUpdateIndex);
+
         return new SwerveDriveWheelPositions(swerveModulePositions);
     }
 

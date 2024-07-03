@@ -51,7 +51,8 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(Controller.Axis.RIGHT_Y)
+                () -> -driveController.getRawAxis(Controller.Axis.RIGHT_Y),
+                () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
         ));
 
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());

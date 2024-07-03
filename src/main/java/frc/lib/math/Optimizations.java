@@ -3,8 +3,8 @@ package frc.lib.math;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.wpilibj.Timer;
 import frc.robot.subsystems.swerve.SwerveConstants;
+import org.littletonrobotics.junction.Logger;
 
 public class Optimizations {
     /**
@@ -44,7 +44,7 @@ public class Optimizations {
      * @return the fixed speeds
      */
     public static ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds, double lastTimestamp) {
-        final double currentTimestamp = Timer.getFPGATimestamp();
+        final double currentTimestamp = Logger.getTimestamp();
         final double difference = currentTimestamp - lastTimestamp;
 
         return ChassisSpeeds.discretize(chassisSpeeds, difference);
