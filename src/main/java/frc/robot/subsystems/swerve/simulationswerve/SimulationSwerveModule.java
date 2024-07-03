@@ -10,10 +10,10 @@ import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
 
-public class SimulationSwerveModuleIO extends SwerveModuleIO {
+public class SimulationSwerveModule extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;
 
-    SimulationSwerveModuleIO(SimulationSwerveModuleConstants moduleConstants, String moduleName) {
+    SimulationSwerveModule(SimulationSwerveModuleConstants moduleConstants, String moduleName) {
         super(moduleName);
 
         driveMotor = moduleConstants.driveMotor;

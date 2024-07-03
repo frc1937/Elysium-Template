@@ -9,7 +9,7 @@ import frc.robot.subsystems.swerve.SwerveInputsAutoLogged;
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 import static frc.robot.RobotContainer.SWERVE;
 
-public class SimulationSwerveIO extends SwerveIO {
+public class SimulationSwerve extends SwerveIO {
     private final GyroSimulation gyro = SimulationSwerveConstants.GYRO;
 
     @Override

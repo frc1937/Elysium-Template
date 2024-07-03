@@ -2,8 +2,8 @@ package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.real.RealSwerveIO;
-import frc.robot.subsystems.swerve.simulationswerve.SimulationSwerveIO;
+import frc.robot.subsystems.swerve.real.RealSwerve;
+import frc.robot.subsystems.swerve.simulationswerve.SimulationSwerve;
 import org.littletonrobotics.junction.AutoLog;
 
 public class SwerveIO {
@@ -12,10 +12,10 @@ public class SwerveIO {
             return new SwerveIO();
 
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return new SimulationSwerveIO();
+            return new SimulationSwerve();
 
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
-            return new RealSwerveIO();
+            return new RealSwerve();
 
         return new SwerveIO();
     }

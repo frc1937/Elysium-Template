@@ -15,8 +15,8 @@ import static frc.lib.generic.Properties.SignalType.POSITION;
 import static frc.lib.generic.Properties.SignalType.VELOCITY;
 import static frc.lib.math.Conversions.*;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.swerve_old.SwerveConstants.WHEEL_DIAMETER;
-import static frc.robot.subsystems.swerve_old.real.RealSwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class RealSwerveModule extends SwerveModuleIO {
     private final Motor driveMotor, steerMotor;

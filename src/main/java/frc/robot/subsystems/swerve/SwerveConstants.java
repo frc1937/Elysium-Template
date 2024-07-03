@@ -17,7 +17,12 @@ import frc.robot.subsystems.swerve.simulationswerve.SimulationSwerveConstants;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static edu.wpi.first.units.Units.Inch;
+import static edu.wpi.first.units.Units.Meters;
+
 public abstract class SwerveConstants {
+    public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
+
     static final double TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
