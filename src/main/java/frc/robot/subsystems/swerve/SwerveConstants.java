@@ -26,11 +26,6 @@ public abstract class SwerveConstants {
 
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
-    static final double TRANSLATION_TOLERANCE_METERS = 0.05,
-            ROTATION_TOLERANCE_DEGREES = 2,
-            TRANSLATION_VELOCITY_TOLERANCE = 0.05,
-            ROTATION_VELOCITY_TOLERANCE = 0.3;
-
     static final double WHEEL_BASE = 0.565;
     static final double TRACK_WIDTH = 0.615;
 
@@ -53,7 +48,7 @@ public abstract class SwerveConstants {
     static final LoggedTunableNumber
             ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1),
             ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI);
+            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI / 2);
 
     /**
      * Units of RADIANS for everything.
@@ -65,7 +60,7 @@ public abstract class SwerveConstants {
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
             new PIDConstants(1, 0, 0),
-            new PIDConstants(ROTATION_CONTROLLER.getP(), 0, 0),
+            new PIDConstants(2, 0, 0),
             MAX_SPEED_MPS,
             DRIVE_BASE_RADIUS,
             new ReplanningConfig(true, false)
