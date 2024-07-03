@@ -47,15 +47,6 @@ public class SwerveModuleIO {
      * @return the position of the module at the given odometry update index
      */
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-        counter++;
-        System.out.println("Odometry update index: " + odometryUpdateIndex  + " counter: " + counter);
-
-        if (swerveModuleInputs.odometryUpdatesDriveDistanceMeters.length <= odometryUpdateIndex) {
-            counter2++;
-            System.out.println("Counter of how many updates were missed: " + counter2);
-            return new SwerveModulePosition(0, Rotation2d.fromDegrees(0));
-        }
-
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])

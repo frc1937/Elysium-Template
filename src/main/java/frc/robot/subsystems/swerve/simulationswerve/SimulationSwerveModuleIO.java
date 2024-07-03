@@ -20,20 +20,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
         steerMotor = moduleConstants.steerMotor;
     }
 
-    @Override
-    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
-        inputs.steerAngleDegrees = Conversions.rotationsToDegrees(steerMotor.getPositionRotations());
-        inputs.odometryUpdatesSteerAngleDegrees = new double[]{inputs.steerAngleDegrees};
-        inputs.steerVoltage = steerMotor.getVoltage();
-
-        inputs.driveDistanceMeters = Conversions.rotationsToMetres(driveMotor.getPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.odometryUpdatesDriveDistanceMeters = new double[]{inputs.driveDistanceMeters};
-        inputs.driveVelocityMetersPerSecond = Conversions.rpsToMps(driveMotor.getVelocityRotationsPerSecond(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveVoltage = driveMotor.getVoltage();
-    }
-
-    @Override
-    protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
+    protected void setTargetVelocity(double targetVelocityMetersPerSecond, boolean openLoop) {
         final double voltage = velocityToOpenLoopVoltage(
                 targetVelocityMetersPerSecond,
                 SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS,
@@ -48,11 +35,6 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     }
 
     @Override
-    protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
-        setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
-    }
-
-    @Override
     protected void setTargetAngle(Rotation2d angle) {
         steerMotor.setOutput(MotorProperties.ControlMode.POSITION, angle.getRotations());
     }
@@ -61,5 +43,18 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
     protected void stop() {
         driveMotor.stop();
         steerMotor.stop();
+    }
+
+    @Override
+    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
+        inputs.steerAngleDegrees = Conversions.rotationsToDegrees(steerMotor.getPositionRotations());
+        inputs.steerVoltage = steerMotor.getVoltage();
+
+        inputs.driveDistanceMeters = Conversions.rotationsToMetres(driveMotor.getPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveVelocityMetersPerSecond = Conversions.rpsToMps(driveMotor.getVelocityRotationsPerSecond(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveVoltage = driveMotor.getVoltage();
+
+        inputs.odometryUpdatesSteerAngleDegrees = new double[]{inputs.steerAngleDegrees};
+        inputs.odometryUpdatesDriveDistanceMeters = new double[]{inputs.driveDistanceMeters};
     }
 }

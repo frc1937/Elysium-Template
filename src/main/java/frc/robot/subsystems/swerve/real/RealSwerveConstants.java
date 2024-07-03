@@ -82,10 +82,10 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static final Optional<SwerveModuleIO[]> MODULES_IO = ofReplayable(() -> new SwerveModuleIO[]{
-            new RealSwerveModuleIO(, "FrontLeft"),
-            new RealSwerveModuleIO(RealSwerveModuleConstants.FRONT_RIGHT_SWERVE_MODULE_CONSTANTS, "FrontRight"),
-            new RealSwerveModuleIO(RealSwerveModuleConstants.REAR_LEFT_SWERVE_MODULE_CONSTANTS, "RearLeft"),
-            new RealSwerveModuleIO(RealSwerveModuleConstants.REAR_RIGHT_SWERVE_MODULE_CONSTANTS, "RearRight")
+            new RealSwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER, "ModuleFL"),
+            new RealSwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER, "ModuleFR"),
+            new RealSwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER, "ModuleRL"),
+            new RealSwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER, "ModuleRR")
     });
 
     @Override

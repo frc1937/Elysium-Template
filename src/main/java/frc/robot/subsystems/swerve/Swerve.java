@@ -150,7 +150,7 @@ public class Swerve extends SubsystemBase {
 
     void setClosedLoop(boolean closedLoop) {
         for (SwerveModuleIO currentModule : modulesIO)
-            currentModule.setDriveMotorClosedLoop(closedLoop);
+            currentModule.setOpenLoop(closedLoop);
     }
 
     /**

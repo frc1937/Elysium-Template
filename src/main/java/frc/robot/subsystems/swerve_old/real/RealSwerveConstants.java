@@ -29,7 +29,7 @@ public class RealSwerveConstants extends SwerveConstants {
     static final boolean ANGLE_MOTOR_INVERT = true;
     static final boolean DRIVE_MOTOR_INVERT = false;
 
-    static final double MAX_SPEED_MPS = 5.1;
+    public static final double MAX_SPEED_MPS = 5.1;
 
     static final int ANGLE_CURRENT_LIMIT = 30;
     static final int DRIVE_SUPPLY_CURRENT_LIMIT = 35;

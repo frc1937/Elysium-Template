@@ -13,7 +13,7 @@ public class SwerveModuleIO {
     private final String name;
 
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean driveMotorClosedLoop = false;
+    private boolean openLoop = false;
 
     public SwerveModuleIO(String name) {
         this.name = name;
@@ -25,17 +25,24 @@ public class SwerveModuleIO {
     public void periodic() {
         refreshInputs(swerveModuleInputs);
         Logger.processInputs(getLoggingPath(), swerveModuleInputs);
+
+        modulePeriodic();
     }
 
-    public void setDriveMotorClosedLoop(boolean closedLoop) {
-        driveMotorClosedLoop = closedLoop;
+    public void setOpenLoop(boolean openLoop) {
+        this.openLoop = openLoop;
     }
 
-    public void setTargetState(SwerveModuleState targetState) {
-        this.targetState = Optimizations.optimize(targetState, getCurrentAngle());
+    void setTargetState(SwerveModuleState state) {
+        this.targetState = Optimizations.optimize(state, getCurrentAngle());
 
-        setTargetAngle(this.targetState.angle);
-        setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
+        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
+
+        setTargetAngle(targetState.angle);
+        setTargetVelocity(optimizedVelocity, openLoop);
+    }
+
+    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
     }
 
     protected String getLoggingPath() {
@@ -68,40 +75,22 @@ public class SwerveModuleIO {
         return swerveModuleInputs.odometryUpdatesSteerAngleDegrees.length - 1;
     }
 
-    SwerveModuleState getCurrentState() {
+    protected SwerveModuleState getCurrentState() {
         return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
     }
 
-    SwerveModuleState getTargetState() {
+    protected SwerveModuleState getTargetState() {
         return targetState;
     }
 
-    /**
-     * Sets the target velocity for the module.
-     *
-     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
-     * @param targetSteerAngle              the target steer angle, to calculate for skew reduction
-     */
-    private void setTargetVelocity(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
-        targetVelocityMetersPerSecond = Optimizations.reduceSkew(targetVelocityMetersPerSecond, getCurrentAngle(), targetSteerAngle);
+    protected void modulePeriodic() { }
 
-        if (driveMotorClosedLoop)
-            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
-        else
-            setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
-    }
 
     private Rotation2d getCurrentAngle() {
         return Rotation2d.fromDegrees(swerveModuleInputs.steerAngleDegrees);
     }
 
     protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
-    }
-
-    protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
-    }
-
-    protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
     }
 
     protected void setTargetAngle(Rotation2d angle) {
