@@ -1,13 +1,13 @@
-package frc.robot.subsystems.swerve.simulation;
+package frc.robot.subsystems.swerve_old.simulation;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Timer;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.swerve.SwerveIO;
-import frc.robot.subsystems.swerve.SwerveInputsAutoLogged;
+import frc.robot.subsystems.swerve_old.SwerveIO;
+import frc.robot.subsystems.swerve_old.SwerveInputsAutoLogged;
 
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
-import static frc.robot.subsystems.swerve.simulation.SimulatedSwerveConstants.GYRO;
+import static frc.robot.subsystems.swerve_old.simulation.SimulatedSwerveConstants.GYRO;
 
 public class SimulationSwerveIO extends SwerveIO {
 
@@ -18,7 +18,7 @@ public class SimulationSwerveIO extends SwerveIO {
 
     @Override
     public void refreshInputs(SwerveInputsAutoLogged swerveInputs) {
-        GYRO.update(RobotContainer.SWERVE.getSelfRelativeSpeeds().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
+        GYRO.update(RobotContainer.SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
 
         swerveInputs.gyroYawDegrees = GYRO.getGyroYawDegrees();
 

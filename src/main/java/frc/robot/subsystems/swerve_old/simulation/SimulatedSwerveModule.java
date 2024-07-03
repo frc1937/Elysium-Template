@@ -1,14 +1,14 @@
-package frc.robot.subsystems.swerve.simulation;
+package frc.robot.subsystems.swerve_old.simulation;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
-import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
+import frc.robot.subsystems.swerve_old.OLDSwerveModuleInputsAutoLogged;
+import frc.robot.subsystems.swerve_old.SwerveModuleIO;
 
 import static frc.lib.math.Conversions.*;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.simulation.SimulatedSwerveConstants.WHEEL_DIAMETER;
+import static frc.robot.subsystems.swerve_old.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve_old.simulation.SimulatedSwerveConstants.WHEEL_DIAMETER;
 
 public class SimulatedSwerveModule extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;
@@ -37,7 +37,7 @@ public class SimulatedSwerveModule extends SwerveModuleIO {
     }
 
     @Override
-    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
+    protected void refreshInputs(OLDSwerveModuleInputsAutoLogged swerveModuleInputs) {
         swerveModuleInputs.driveDistanceMeters = rotationsToMetres(driveMotor.getPositionRotations(), WHEEL_DIAMETER);
         swerveModuleInputs.driveVoltage = driveMotor.getVoltage();
         swerveModuleInputs.driveVelocityMetersPerSecond = rpsToMps(driveMotor.getVelocityRotationsPerSecond(), WHEEL_DIAMETER);

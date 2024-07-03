@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.real;
+package frc.robot.subsystems.swerve_old.real;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.encoder.Encoder;
@@ -6,8 +6,8 @@ import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.PhoenixOdometryThread;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
-import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
+import frc.robot.subsystems.swerve_old.SwerveModuleIO;
+import frc.robot.subsystems.swerve_old.OLDSwerveModuleInputsAutoLogged;
 
 import java.util.Queue;
 
@@ -15,8 +15,8 @@ import static frc.lib.generic.Properties.SignalType.POSITION;
 import static frc.lib.generic.Properties.SignalType.VELOCITY;
 import static frc.lib.math.Conversions.*;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.swerve.real.RealSwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.real.RealSwerveConstants.WHEEL_DIAMETER;
+import static frc.robot.subsystems.swerve_old.real.RealSwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve_old.real.RealSwerveConstants.WHEEL_DIAMETER;
 
 public class RealSwerveModule extends SwerveModuleIO {
     private final Motor driveMotor, steerMotor;
@@ -63,7 +63,7 @@ public class RealSwerveModule extends SwerveModuleIO {
     }
 
     @Override
-    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
+    protected void refreshInputs(OLDSwerveModuleInputsAutoLogged swerveModuleInputs) {
         driveMotor.refreshStatusSignals(VELOCITY, POSITION);
         steerEncoder.refreshStatusSignals(POSITION);
 

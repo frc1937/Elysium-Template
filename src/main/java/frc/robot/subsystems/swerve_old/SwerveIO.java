@@ -1,29 +1,29 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.swerve_old;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.real.RealSwerveIO;
-import frc.robot.subsystems.swerve.simulationswerve.SimulationSwerveIO;
+import frc.robot.subsystems.swerve_old.real.RealSwerveIO;
+import frc.robot.subsystems.swerve_old.simulation.SimulationSwerveIO;
 import org.littletonrobotics.junction.AutoLog;
 
 public class SwerveIO {
-    static SwerveIO generateIO() {
+    static SwerveIO generateSwerve() {
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return new SwerveIO();
-
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return new SimulationSwerveIO();
 
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
             return new RealSwerveIO();
 
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+            return new SimulationSwerveIO();
+
         return new SwerveIO();
     }
 
-    protected void updateInputs(SwerveInputsAutoLogged inputs) {
+    protected void refreshInputs(SwerveInputsAutoLogged swerveInputs) {
     }
 
-    protected void setHeading(Rotation2d heading) {
+    protected void setGyroHeading(Rotation2d angle) {
     }
 
     @AutoLog

@@ -17,12 +17,12 @@ public class ShooterCommands {
                 );
     }
 
-    public Command shootToTarget(Pose2d target, double tangentialVelocity) {
-        return
-                SWERVE.rotateToTarget(target)
-                        .alongWith(
-                        FLYWHEEL.setFlywheelTargetTangentialVelocity(tangentialVelocity),
-                        ARM.setTargetPosition(Rotation2d.fromDegrees(-20)) //todo: get from physics
-                );
-    }
+//    public Command shootToTarget(Pose2d target, double tangentialVelocity) {
+//        return
+//                SWERVE.rotateToTarget(target)
+//                        .alongWith(
+//                        FLYWHEEL.setFlywheelTargetTangentialVelocity(tangentialVelocity),
+//                        ARM.setTargetPosition(Rotation2d.fromDegrees(-20)) //todo: get from physics
+//                );
+//    }
 }

@@ -1,12 +1,12 @@
-package frc.robot.subsystems.swerve.simulation;
+package frc.robot.subsystems.swerve_old.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.GyroSimulation;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
-import frc.robot.subsystems.swerve.SwerveConstants;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.swerve_old.SwerveConstants;
+import frc.robot.subsystems.swerve_old.SwerveModuleIO;
 
 import java.util.Optional;
 

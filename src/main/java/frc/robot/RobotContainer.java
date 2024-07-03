@@ -48,14 +48,11 @@ public class RobotContainer {
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
 
-        INTAKE.setDefaultCommand(INTAKE.setIntakeSpeed(0.5));
-
-//        SWERVE.setDefaultCommand(SWERVE.driveTeleop(
-//                translationSupplier,
-//                strafeSupplier,
-//                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK),
-//                driveController.getButton(Controller.Inputs.LEFT_BUMPER)
-//        ));
+        SWERVE.setDefaultCommand(SWERVE.driveTeleop(
+                translationSupplier,
+                strafeSupplier,
+                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK)
+        ));
 //
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
 //

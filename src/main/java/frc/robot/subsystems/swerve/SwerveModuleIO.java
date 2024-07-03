@@ -3,40 +3,60 @@ package frc.robot.subsystems.swerve;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import frc.lib.math.Optimizations;
+import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModuleIO {
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
-
-    private int counter = 0;
-    private int counter2 = 0;
-
+    private boolean driveMotorClosedLoop = false;
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean openLoop = true;
 
     public SwerveModuleIO(String name) {
         this.name = name;
     }
 
+    /**
+     * This method should be called periodically to update the inputs and network tables of the module.
+     */
     public void periodic() {
-        refreshInputs(swerveModuleInputs);
-        Logger.processInputs("Swerve/" + name + "/", swerveModuleInputs);
-        System.out.println("Inputs: " + swerveModuleInputs.driveDistanceMeters);
-        System.out.println("UPDATING INPUTS #2");
-
-        modulePeriodic();
+        updateInputs(swerveModuleInputs);
+        Logger.processInputs(getLoggingPath(), swerveModuleInputs);
     }
 
-    void setTargetState(SwerveModuleState state) {
-        this.targetState = Optimizations.optimize(state, getCurrentAngle());
+    public void setDriveMotorClosedLoop(boolean closedLoop) {
+        driveMotorClosedLoop = closedLoop;
+    }
 
-        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
+    public void setTargetState(SwerveModuleState targetState) {
+        this.targetState = SwerveModuleState.optimize(targetState, getCurrentAngle());
+        setTargetAngle(this.targetState.angle);
+        setTargetVelocity(this.targetState.speedMetersPerSecond, this.targetState.angle);
+    }
 
-        setTargetAngle(targetState.angle);
-        setTargetVelocity(optimizedVelocity, openLoop);
+    protected String getLoggingPath() {
+        return "Swerve/" + name + "/";
+    }
+
+    protected double velocityToOpenLoopVoltage(double velocityMetersPerSecond, double wheelDiameterMeters, double steerVelocityRevolutionsPerSecond, double couplingRatio, double maxSpeedRevolutionsPerSecond, double voltageCompensationSaturation) {
+        final double velocityRevolutionsPerSecond = Conversions.metresToRotations(velocityMetersPerSecond, wheelDiameterMeters);
+        final double optimizedVelocityRevolutionsPerSecond = removeCouplingFromRevolutions(velocityRevolutionsPerSecond, Rotation2d.fromDegrees(steerVelocityRevolutionsPerSecond), couplingRatio);
+        final double power = optimizedVelocityRevolutionsPerSecond / maxSpeedRevolutionsPerSecond;
+        return Conversions.compensatedPowerToVoltage(power, voltageCompensationSaturation);
+    }
+
+    /**
+     * When the steer motor moves, the drive motor moves as well due to the coupling.
+     * This will affect the current position of the drive motor, so we need to remove the coupling from the position.
+     *
+     * @param drivePositionRevolutions the position in revolutions
+     * @param moduleAngle              the angle of the module
+     * @return the distance without the coupling
+     */
+    protected double removeCouplingFromRevolutions(double drivePositionRevolutions, Rotation2d moduleAngle, double couplingRatio) {
+        final double coupledAngle = moduleAngle.getRotations() * couplingRatio;
+        return drivePositionRevolutions - coupledAngle;
     }
 
     /**
@@ -47,62 +67,90 @@ public class SwerveModuleIO {
      * @return the position of the module at the given odometry update index
      */
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-        counter++;
-        System.out.println("Odometry update index: " + odometryUpdateIndex  + " counter: " + counter);
-
-        if (swerveModuleInputs.odometryUpdatesDriveDistanceMeters.length <= odometryUpdateIndex) {
-            counter2++;
-            System.out.println("Counter of how many updates were missed: " + counter2);
-            return new SwerveModulePosition(0, Rotation2d.fromDegrees(0));
-        }
-
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])
         );
     }
 
-    protected Rotation2d getCurrentAngle() {
-        return Rotation2d.fromDegrees(swerveModuleInputs.steerAngleDegrees);
+    protected int getLastOdometryUpdateIndex() {
+        return swerveModuleInputs.odometryUpdatesSteerAngleDegrees.length - 1;
     }
 
-    protected SwerveModuleState getTargetState() {
+    SwerveModuleState getCurrentState() {
+        return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
+    }
+
+    SwerveModuleState getTargetState() {
         return targetState;
     }
 
-    protected void setOpenLoop(boolean shouldBeOpenLoop) {
-        openLoop = shouldBeOpenLoop;
+    /**
+     * Sets the target velocity for the module.
+     *
+     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetSteerAngle              the target steer angle, to calculate for skew reduction
+     */
+    private void setTargetVelocity(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
+        targetVelocityMetersPerSecond = reduceSkew(targetVelocityMetersPerSecond, targetSteerAngle);
+
+        if (driveMotorClosedLoop)
+            setTargetClosedLoopVelocity(targetVelocityMetersPerSecond);
+        else
+            setTargetOpenLoopVelocity(targetVelocityMetersPerSecond);
+    }
+
+    /**
+     * When changing direction, the module will skew since the angle motor is not at its target angle.
+     * This method will counter that by reducing the target velocity according to the angle motor's error cosine.
+     *
+     * @param targetVelocityMetersPerSecond the target velocity, in meters per second
+     * @param targetSteerAngle              the target steer angle
+     * @return the reduced target velocity in revolutions per second
+     */
+    private double reduceSkew(double targetVelocityMetersPerSecond, Rotation2d targetSteerAngle) {
+        final double closedLoopError = targetSteerAngle.getRadians() - getCurrentAngle().getRadians();
+        final double cosineScalar = Math.abs(Math.cos(closedLoopError));
+        return targetVelocityMetersPerSecond * cosineScalar;
+    }
+
+    private Rotation2d getCurrentAngle() {
+        return Rotation2d.fromDegrees(swerveModuleInputs.steerAngleDegrees);
+    }
+
+    protected void updateInputs(SwerveModuleInputsAutoLogged inputs) {
+    }
+
+    protected void setTargetOpenLoopVelocity(double targetVelocityMetersPerSecond) {
+    }
+
+    protected void setTargetClosedLoopVelocity(double targetVelocityMetersPerSecond) {
     }
 
     protected void setTargetAngle(Rotation2d angle) {
     }
 
-    protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
-    }
-
-    protected void modulePeriodic() {
-    }
-
     protected void stop() {
     }
 
-    protected SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(swerveModuleInputs.driveVelocityMetersPerSecond, getCurrentAngle());
-    }
-
-    protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
+    /**
+     * Sets whether the module's motors should brake or coast.
+     *
+     * @param brake whether the drive motors should brake or coast
+     */
+    protected void setBrake(boolean brake) {
     }
 
     @AutoLog
     public static class SwerveModuleInputs {
         public double steerAngleDegrees = 0;
+        public double[] odometryUpdatesSteerAngleDegrees = new double[0];
         public double steerVoltage = 0;
 
         public double driveVelocityMetersPerSecond = 0;
         public double driveDistanceMeters = 0;
-        public double driveVoltage = 0;
-
         public double[] odometryUpdatesDriveDistanceMeters = new double[0];
-        public double[] odometryUpdatesSteerAngleDegrees = new double[0];
+        public double driveCurrent = 0;
+        public double driveVoltage = 0;
     }
 }
