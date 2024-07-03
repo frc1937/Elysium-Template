@@ -21,6 +21,9 @@ import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
 public abstract class SwerveConstants {
+    public static final double DRIVE_GEAR_RATIO = (6.75);
+    public static final double ANGLE_GEAR_RATIO = (7.0 / 150.0);
+
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
     static final double TRANSLATION_TOLERANCE_METERS = 0.05,

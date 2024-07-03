@@ -35,9 +35,6 @@ public class RealSwerveConstants extends SwerveConstants {
     static final int DRIVE_SUPPLY_CURRENT_LIMIT = 35;
     static final int DRIVE_STATOR_CURRENT_LIMIT = 50;
 
-    static final double DRIVE_GEAR_RATIO = (6.75);
-    static final double ANGLE_GEAR_RATIO = (7.0 / 150.0);
-
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(0.053067, 0.0, 0.0,
             0.10861,
             0.023132,

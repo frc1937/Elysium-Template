@@ -13,6 +13,11 @@ public class SimulationSwerve extends SwerveIO {
     private final GyroSimulation gyro = SimulationSwerveConstants.GYRO;
 
     @Override
+    protected void setGyroHeading(Rotation2d heading) {
+        gyro.setHeading(heading);
+    }
+
+    @Override
     protected void refreshInputs(SwerveInputsAutoLogged inputs) {
         gyro.update(SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
 
@@ -20,10 +25,5 @@ public class SimulationSwerve extends SwerveIO {
 
         inputs.odometryUpdatesYawDegrees = new double[]{inputs.gyroYawDegrees};
         inputs.odometryUpdatesTimestamp = new double[]{Timer.getFPGATimestamp()};
-    }
-
-    @Override
-    protected void setGyroHeading(Rotation2d heading) {
-        gyro.setHeading(heading);
     }
 }

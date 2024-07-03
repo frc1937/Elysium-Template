@@ -8,7 +8,9 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
+import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class SimulationSwerveModule extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;
@@ -23,11 +25,11 @@ public class SimulationSwerveModule extends SwerveModuleIO {
     protected void setTargetVelocity(double targetVelocityMetersPerSecond, boolean openLoop) {
         final double voltage = velocityToOpenLoopVoltage(
                 targetVelocityMetersPerSecond,
-                SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS,
+                WHEEL_DIAMETER,
                 steerMotor.getVelocityRotationsPerSecond(),
                 0,
                 MAX_ROTATION_RAD_PER_S,
-                SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
+                VOLTAGE_COMPENSATION_SATURATION
         );
 
         Logger.recordOutput(getLoggingPath() + "driveVoltage", driveMotor.getVoltage());
@@ -50,8 +52,8 @@ public class SimulationSwerveModule extends SwerveModuleIO {
         inputs.steerAngleDegrees = Conversions.rotationsToDegrees(steerMotor.getPositionRotations());
         inputs.steerVoltage = steerMotor.getVoltage();
 
-        inputs.driveDistanceMeters = Conversions.rotationsToMetres(driveMotor.getPositionRotations(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
-        inputs.driveVelocityMetersPerSecond = Conversions.rpsToMps(driveMotor.getVelocityRotationsPerSecond(), SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS);
+        inputs.driveDistanceMeters = Conversions.rotationsToMetres(driveMotor.getPositionRotations(), WHEEL_DIAMETER);
+        inputs.driveVelocityMetersPerSecond = Conversions.rpsToMps(driveMotor.getVelocityRotationsPerSecond(), WHEEL_DIAMETER);
         inputs.driveVoltage = driveMotor.getVoltage();
 
         inputs.odometryUpdatesSteerAngleDegrees = new double[]{inputs.steerAngleDegrees};
