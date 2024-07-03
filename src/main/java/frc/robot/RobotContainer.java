@@ -51,8 +51,10 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(SWERVE.driveTeleop(
                 translationSupplier,
                 strafeSupplier,
-                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK)
+                () -> -driveController.getRawAxis(Controller.Axis.RIGHT_Y)
         ));
+
+        driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 //
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
 //

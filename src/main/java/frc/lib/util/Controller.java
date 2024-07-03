@@ -1,5 +1,6 @@
 package frc.lib.util;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
@@ -86,8 +87,15 @@ public class Controller {
         return new JoystickButton(xboxController, button.id);
     }
 
+    /**
+     * Returns the value of the axis, after applying deadband.
+     * We assume no deviation is ever wanted in the controller, womp womp.
+     *
+     * @param axis - The axis to return
+     * @return - The deadbanded value of the axis
+     */
     public double getRawAxis(Axis axis) {
-        return DriverStation.getStickAxis(port, axis.value);
+        return MathUtil.applyDeadband(DriverStation.getStickAxis(port, axis.value), 0.02);
     }
 
     public void rumble(double intensity, double durationSeconds) {
