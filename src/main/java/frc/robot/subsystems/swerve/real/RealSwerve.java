@@ -29,5 +29,4 @@ public class RealSwerve extends SwerveIO {
         yawQueue.clear();
         timestampQueue.clear();
     }
-
 }

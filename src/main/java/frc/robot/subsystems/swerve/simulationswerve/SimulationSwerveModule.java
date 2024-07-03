@@ -15,11 +15,11 @@ import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 public class SimulationSwerveModule extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;
 
-    SimulationSwerveModule(SimulationSwerveModuleConstants moduleConstants, String moduleName) {
-        super(moduleName);
+    SimulationSwerveModule(SimpleMotorSimulation driveMotor, SimpleMotorSimulation steerMotor, String name) {
+        super(name);
 
-        driveMotor = moduleConstants.driveMotor;
-        steerMotor = moduleConstants.steerMotor;
+        this.driveMotor = driveMotor;
+        this.steerMotor = steerMotor;
     }
 
     protected void setTargetVelocity(double targetVelocityMetersPerSecond, boolean openLoop) {

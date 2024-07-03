@@ -29,12 +29,11 @@ public class Swerve extends SubsystemBase {
     private final SwerveIO swerveIO = SwerveIO.generateIO();
 
     private final SwerveConstants constants = SwerveConstants.generateConstants();
-    private final SwerveModuleIO[] modulesIO;
+    private final SwerveModuleIO[] modulesIO = getModulesIO();
 
     private double lastTimestamp = 0;
 
     public Swerve() {
-        modulesIO = getModulesIO();
         configurePathPlanner();
     }
 
