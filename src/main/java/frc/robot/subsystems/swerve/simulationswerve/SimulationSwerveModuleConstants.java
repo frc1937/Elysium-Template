@@ -4,11 +4,9 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
-import frc.lib.math.Conversions;
 
 public class SimulationSwerveModuleConstants {
     static final double WHEEL_DIAMETER_METERS = 0.1016;
-    static final double MAX_SPEED_REVOLUTIONS_PER_SECOND = Conversions.metresToRotations(SimulationSwerveConstants.MAX_SPEED_METERS_PER_SECOND, WHEEL_DIAMETER_METERS);
     static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
     static final double

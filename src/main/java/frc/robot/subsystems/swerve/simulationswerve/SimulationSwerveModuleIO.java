@@ -8,6 +8,8 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+
 public class SimulationSwerveModuleIO extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;
 
@@ -37,7 +39,7 @@ public class SimulationSwerveModuleIO extends SwerveModuleIO {
                 SimulationSwerveModuleConstants.WHEEL_DIAMETER_METERS,
                 steerMotor.getVelocityRotationsPerSecond(),
                 0,
-                SimulationSwerveModuleConstants.MAX_SPEED_REVOLUTIONS_PER_SECOND,
+                MAX_ROTATION_RAD_PER_S,
                 SimulationSwerveModuleConstants.VOLTAGE_COMPENSATION_SATURATION
         );
 

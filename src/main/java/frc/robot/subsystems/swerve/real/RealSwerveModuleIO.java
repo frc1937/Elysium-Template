@@ -20,10 +20,6 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
     private final RealSwerveModuleConstants moduleConstants;
     private final Queue<Double> steerPositionQueue, drivePositionQueue;
 
-    private final VelocityTorqueCurrentFOC driveVelocityRequest = new VelocityTorqueCurrentFOC(0);
-    private final VoltageOut driveVoltageRequest = new VoltageOut(0).withEnableFOC(RealSwerveModuleConstants.ENABLE_FOC);
-    private final PositionVoltage steerPositionRequest = new PositionVoltage(0).withEnableFOC(RealSwerveModuleConstants.ENABLE_FOC);
-
     RealSwerveModuleIO(RealSwerveModuleConstants moduleConstants, String moduleName) {
         super(moduleName);
 
@@ -33,23 +29,6 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
 
         steerPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(moduleConstants.steerPositionSignal);
         drivePositionQueue = PhoenixOdometryThread.getInstance().registerSignal(moduleConstants.drivePositionSignal);
-    }
-
-    @Override
-    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
-        refreshStatusSignals();
-
-        inputs.steerAngleDegrees = getAngleDegrees();
-        inputs.odometryUpdatesSteerAngleDegrees = steerPositionQueue.stream().mapToDouble(Conversions::rotationsToDegrees).toArray();
-        inputs.steerVoltage = moduleConstants.steerVoltageSignal.getValue();
-
-        inputs.driveDistanceMeters = toDriveDistance(moduleConstants.drivePositionSignal.getValue());
-        inputs.odometryUpdatesDriveDistanceMeters = drivePositionQueue.stream().mapToDouble(this::toDriveDistance).toArray();
-        inputs.driveVelocityMetersPerSecond = toDriveDistance(moduleConstants.driveVelocitySignal.getValue());
-        inputs.driveVoltage = moduleConstants.driveVoltageSignal.getValue();
-
-        steerPositionQueue.clear();
-        drivePositionQueue.clear();
     }
 
     @Override
@@ -104,5 +83,22 @@ public class RealSwerveModuleIO extends SwerveModuleIO {
                 moduleConstants.driveVelocitySignal,
                 moduleConstants.driveStatorCurrentSignal
         );
+    }
+
+    @Override
+    protected void refreshInputs(SwerveModuleInputsAutoLogged inputs) {
+        refreshStatusSignals();
+
+        inputs.steerAngleDegrees = getAngleDegrees();
+        inputs.odometryUpdatesSteerAngleDegrees = steerPositionQueue.stream().mapToDouble(Conversions::rotationsToDegrees).toArray();
+        inputs.steerVoltage = moduleConstants.steerVoltageSignal.getValue();
+
+        inputs.driveDistanceMeters = toDriveDistance(moduleConstants.drivePositionSignal.getValue());
+        inputs.odometryUpdatesDriveDistanceMeters = drivePositionQueue.stream().mapToDouble(this::toDriveDistance).toArray();
+        inputs.driveVelocityMetersPerSecond = toDriveDistance(moduleConstants.driveVelocitySignal.getValue());
+        inputs.driveVoltage = moduleConstants.driveVoltageSignal.getValue();
+
+        steerPositionQueue.clear();
+        drivePositionQueue.clear();
     }
 }

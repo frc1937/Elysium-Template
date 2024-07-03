@@ -22,8 +22,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 public class Swerve extends SubsystemBase {
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
@@ -222,7 +221,7 @@ public class Swerve extends SubsystemBase {
 
         final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, constants.getMaxSpeedMetersPerSecond());
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_SPEED_MPS);
 
         for (int i = 0; i < modulesIO.length; i++)
             modulesIO[i].setTargetState(swerveModuleStates[i]);
@@ -278,7 +277,7 @@ public class Swerve extends SubsystemBase {
                 },
                 this::getSelfRelativeVelocity,
                 this::selfRelativeDrive,
-                constants.getPathFollowerConfig(),
+                HOLONOMIC_PATH_FOLLOWER_CONFIG,
                 Mirrorable::isRedAlliance,
                 this
         );
@@ -311,9 +310,9 @@ public class Swerve extends SubsystemBase {
 
     private ChassisSpeeds powersToSpeeds(double xPower, double yPower, double thetaPower) {
         return new ChassisSpeeds(
-                xPower * constants.getMaxSpeedMetersPerSecond(),
-                yPower * constants.getMaxSpeedMetersPerSecond(),
-                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * constants.getMaxRotationalSpeedRadiansPerSecond()
+                xPower * MAX_SPEED_MPS,
+                yPower * MAX_SPEED_MPS,
+                Math.pow(thetaPower, 2) * Math.signum(thetaPower) * MAX_ROTATION_RAD_PER_S
         );
     }
 

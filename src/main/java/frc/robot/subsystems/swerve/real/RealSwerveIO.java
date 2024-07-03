@@ -15,6 +15,11 @@ public class RealSwerveIO extends SwerveIO {
             timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
     @Override
+    protected void setGyroHeading(Rotation2d heading) {
+        GYRO.get().setYaw(heading.getDegrees());
+    }
+
+    @Override
     protected void refreshInputs(SwerveInputsAutoLogged inputs) {
         inputs.gyroYawDegrees = GYRO.get().getYaw();
 
@@ -25,8 +30,4 @@ public class RealSwerveIO extends SwerveIO {
         timestampQueue.clear();
     }
 
-    @Override
-    protected void setGyroHeading(Rotation2d heading) {
-        GYRO.get().setYaw(heading.getDegrees());
-    }
 }

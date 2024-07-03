@@ -2,7 +2,8 @@ package frc.robot.subsystems.swerve;
 
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
-import edu.wpi.first.math.controller.PIDController;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -17,8 +18,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 public abstract class SwerveConstants {
-    static final double
-            TRANSLATION_TOLERANCE_METERS = 0.05,
+    static final double TRANSLATION_TOLERANCE_METERS = 0.05,
             ROTATION_TOLERANCE_DEGREES = 2,
             TRANSLATION_VELOCITY_TOLERANCE = 0.05,
             ROTATION_VELOCITY_TOLERANCE = 0.3;
@@ -28,6 +28,8 @@ public abstract class SwerveConstants {
 
     public static final double MAX_SPEED_MPS = 5.1;
     public static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
+
+    public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
 
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
@@ -40,20 +42,31 @@ public abstract class SwerveConstants {
             DRIVE_NEUTRAL_DEADBAND = 0.2,
             ROTATION_NEUTRAL_DEADBAND = 0.2;
 
-    static final LoggedTunableNumber ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1);
+    static final LoggedTunableNumber
+            ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1),
+            ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
+            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI);
 
-    static final LoggedTunableNumber ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI );
-
-    /** Units of RADIANS for everything. */
+    /**
+     * Units of RADIANS for everything.
+     */
     public static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
             ROTATION_KP.get(), 0, 0.015,
             new TrapezoidProfile.Constraints(ROTATION_MAX_VELOCITY.get(), ROTATION_MAX_ACCELERATION.get())
     );
 
+    public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+            new PIDConstants(1, 0, 0),
+            new PIDConstants(ROTATION_CONTROLLER.getP(), 0, 0),
+            MAX_SPEED_MPS,
+            DRIVE_BASE_RADIUS,
+            new ReplanningConfig(true, false)
+    );
+
     protected static <T> Optional<T> ofReplayable(Supplier<T> value) {
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return Optional.empty();
+
         return Optional.of(value.get());
     }
 
@@ -67,13 +80,6 @@ public abstract class SwerveConstants {
         return new SimulationSwerveConstants();
     }
 
-    public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
-
     protected abstract Optional<WPI_PigeonIMU> getPigeon();
-
-    protected abstract PIDController getTranslationsController();
-
     protected abstract Optional<SwerveModuleIO[]> getModulesIO();
-
-    protected abstract HolonomicPathFollowerConfig getPathFollowerConfig();
 }
