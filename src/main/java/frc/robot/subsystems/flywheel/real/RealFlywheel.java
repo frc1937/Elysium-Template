@@ -31,6 +31,11 @@ public class RealFlywheel extends FlywheelIO {
     }
 
     @Override
+    public void setRawVoltage(double voltage) {
+        motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
+    @Override
     public boolean hasReachedTarget() {
         return Math.abs(motor.getClosedLoopTarget() - motor.getSystemPosition()) < TOLERANCE_ROTATIONS_PER_SECONDS;
     }

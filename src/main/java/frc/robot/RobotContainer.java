@@ -5,9 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.PoseEstimator;
@@ -59,7 +59,7 @@ public class RobotContainer {
 
         driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
 
-        ARM.setDefaultCommand(ARM.setTargetPosition(Rotation2d.fromDegrees(0)));
+        FLYWHEEL.sysIdDynamicTest(SysIdRoutine.Direction.kForward);
 
 //        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
 //                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)

@@ -1,15 +1,32 @@
 package frc.robot.subsystems.flywheel;
 
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.math.Conversions;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.flywheel.real.RealFlywheelConstants;
 import frc.robot.subsystems.flywheel.simulation.SimulatedFlywheelConstants;
 
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.flywheel.FlywheelConstants.SYSID_CONFIG;
+
 public class Flywheel extends SubsystemBase {
     private final FlywheelIO[] flywheels = generateFlywheels();
+
+    private final SysIdRoutine routine;
+
+    public Flywheel() {
+        SysIdRoutine.Mechanism mechanism = new SysIdRoutine.Mechanism(
+                (voltage) -> setRawVoltage(0, voltage.in(Volts)),
+                (SysIdRoutineLog log) -> sysIdLogFlywheel(0, log),
+                this
+        );
+
+        routine = new SysIdRoutine(SYSID_CONFIG, mechanism);
+    }
 
     public Command setFlywheelTarget(double velocityRotationsPerSecond) {
         return Commands.startEnd(
@@ -17,6 +34,14 @@ public class Flywheel extends SubsystemBase {
                 this::stop,
                 this
         );
+    }
+
+    public Command sysIdQuastaticTest(SysIdRoutine.Direction direction) {
+        return routine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamicTest(SysIdRoutine.Direction direction) {
+        return routine.dynamic(direction);
     }
 
     public Command setFlywheelTargetTangentialVelocity(double velocityMetersPerSecond) {
@@ -37,6 +62,26 @@ public class Flywheel extends SubsystemBase {
         return true;
     }
 
+    @Override
+    public void periodic() {
+        for (FlywheelIO flywheel : flywheels) {
+            flywheel.periodic();
+        }
+    }
+
+    private void setRawVoltage(int flywheelIndex, double voltage) {
+        flywheels[flywheelIndex].setRawVoltage(voltage);
+    }
+
+    private void sysIdLogFlywheel(int flywheelIndex, SysIdRoutineLog log) {
+        FlywheelIO currentFlywheel = flywheels[flywheelIndex];
+
+        log.motor(currentFlywheel.getName())
+                .voltage(Volts.of(currentFlywheel.getVoltage()))
+                .angularVelocity(RotationsPerSecond.of(currentFlywheel.getVelocityRotationsPerSecond())
+        );
+    }
+
     private void setFlywheelTangentialVelocity(double velocityMetersPerSecond) {
         for (FlywheelIO flywheel : flywheels) {
             flywheel.setTargetVelocity(Conversions.mpsToRps(velocityMetersPerSecond, flywheel.getFlywheelDiameter()));
@@ -53,13 +98,6 @@ public class Flywheel extends SubsystemBase {
         for (FlywheelIO flywheel : flywheels) {
             flywheel.stop();
             flywheel.setTargetVelocity(0);
-        }
-    }
-
-    @Override
-    public void periodic() {
-        for (FlywheelIO flywheel : flywheels) {
-            flywheel.periodic();
         }
     }
 

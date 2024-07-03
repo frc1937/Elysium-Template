@@ -18,19 +18,41 @@ public class FlywheelIO {
         flywheelPeriodic();
     }
 
-    protected double getFlywheelDiameter() { return 0; }
+    protected double getFlywheelDiameter() {
+        return 0;
+    }
 
-    protected void stop() { }
+    protected void stop() {
+    }
 
-    protected void flywheelPeriodic() { }
+    protected void flywheelPeriodic() {
+    }
 
     protected boolean hasReachedTarget() {
         return false;
     }
 
-    protected void setTargetVelocity(double velocityRotationsPerSecond) { }
+    protected void setRawVoltage(double voltage) {
+    }
 
-    protected void refreshInputs(FlywheelInputsAutoLogged flywheelInputs) { }
+    protected void setTargetVelocity(double velocityRotationsPerSecond) {
+    }
+
+    protected void refreshInputs(FlywheelInputsAutoLogged flywheelInputs) {
+    }
+
+    protected String getName() {
+        return name;
+    }
+
+    protected double getVoltage() {
+        return flywheelInputs.voltage;
+    }
+
+    protected double getVelocityRotationsPerSecond() {
+        return flywheelInputs.velocityRotationsPerSecond;
+    }
+
 
     @AutoLog
     public static class FlywheelInputs {

@@ -56,6 +56,11 @@ public class SimulatedFlywheel extends FlywheelIO {
     }
 
     @Override
+    public void setRawVoltage(double voltage) {
+        motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
+    @Override
     public void refreshInputs(FlywheelInputsAutoLogged flywheelInputs) {
         flywheelInputs.temperature = 0;
         flywheelInputs.velocityRotationsPerSecond = motor.getVelocityRotationsPerSecond();
