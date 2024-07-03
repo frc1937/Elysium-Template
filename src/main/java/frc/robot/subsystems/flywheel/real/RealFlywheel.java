@@ -4,6 +4,7 @@ import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.flywheel.FlywheelIO;
 import frc.robot.subsystems.flywheel.FlywheelInputsAutoLogged;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.flywheel.FlywheelConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
 
@@ -25,6 +26,7 @@ public class RealFlywheel extends FlywheelIO {
 
     @Override
     public void setTargetVelocity(double velocityRotationsPerSecond) {
+        Logger.recordOutput("Flywheel/" + motor.getDeviceID() + "/targetVelocity", velocityRotationsPerSecond);
         motor.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRotationsPerSecond);
     }
 

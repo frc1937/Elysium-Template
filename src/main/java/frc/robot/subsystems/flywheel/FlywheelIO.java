@@ -1,24 +1,11 @@
 package frc.robot.subsystems.flywheel;
 
-import frc.robot.GlobalConstants;
-import frc.robot.subsystems.flywheel.real.RealFlywheelConstants;
-import frc.robot.subsystems.flywheel.simulation.SimulatedFlywheelConstants;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 public class FlywheelIO {
     private final FlywheelInputsAutoLogged flywheelInputs = new FlywheelInputsAutoLogged();
     private final String name;
-
-    static FlywheelIO[] generateFlywheels() {
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
-            return RealFlywheelConstants.getFlywheels();
-
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return SimulatedFlywheelConstants.getFlywheels();
-
-        return FlywheelConstants.getFlywheels();
-    }
 
     public FlywheelIO(String name) {
         this.name = name;
