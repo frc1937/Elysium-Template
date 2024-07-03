@@ -5,10 +5,7 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -34,10 +31,10 @@ import static frc.robot.subsystems.swerve.real.RealSwerveConstants.SWERVE_KINEMA
 
 public class Swerve extends SubsystemBase {
     private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
-    private final SwerveConstants constants = SwerveConstants.generateConstants();
-
-    private final SwerveModuleIO[] swerveModules = getSwerveModules();
     private final SwerveIO swerve = SwerveIO.generateSwerve();
+
+    private final SwerveConstants constants = SwerveConstants.generateConstants();
+    private final SwerveModuleIO[] swerveModules = getSwerveModules();
 
     private double lastTimestamp = 0;
 
@@ -48,11 +45,12 @@ public class Swerve extends SubsystemBase {
     @Override
     public void periodic() {
         ODOMETRY_LOCK.lock();
+        System.out.println("UPDATING INPUTS");
         refreshAllInputs();
         ODOMETRY_LOCK.unlock();
 
-        updateOdometryFromInputs();
         refreshRotationController();
+        updateOdometryFromInputs();
     }
 
     public Command driveWhilstRotatingToTarget(DoubleSupplier x, DoubleSupplier y, Pose2d target, BooleanSupplier robotCentric) {
@@ -153,6 +151,7 @@ public class Swerve extends SubsystemBase {
 
         SwerveModuleState[] targetStates = SWERVE_KINEMATICS.toSwerveModuleStates(speeds);
 
+        SwerveDriveKinematics.desaturateWheelSpeeds(targetStates, MAX_SPEED_MPS);
         for (int i = 0; i < swerveModules.length; i++) {
             swerveModules[i].setTargetState(targetStates[i]);
         }
@@ -170,7 +169,7 @@ public class Swerve extends SubsystemBase {
             };
         }
 
-        return constants.getSwerveModules();
+        return constants.getSwerveModules().get();
     }
 
     @AutoLogOutput(key = "Swerve/CurrentStates")
@@ -202,25 +201,23 @@ public class Swerve extends SubsystemBase {
     }
 
     private void refreshAllInputs() {
-        swerve.refreshInputs(swerveInputs);
-        Logger.processInputs("Swerve", swerveInputs);
-
         for (SwerveModuleIO swerveModule : swerveModules) {
             swerveModule.periodic();
         }
+
+        swerve.refreshInputs(swerveInputs);
+        Logger.processInputs("Swerve", swerveInputs);
     }
 
     private void updateOdometryFromInputs() {
         final int odometryUpdates = swerveInputs.odometryUpdatesYawDegrees.length;
 
-        final Rotation2d[] gyroUpdates = new Rotation2d[odometryUpdates];
         final SwerveDriveWheelPositions[] swerveDriveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
-
-        if (odometryUpdates == 0) return;
+        final Rotation2d[] gyroUpdates = new Rotation2d[odometryUpdates];
 
         for (int i = 0; i < odometryUpdates; i++) {
-            gyroUpdates[i] = Rotation2d.fromDegrees(swerveInputs.odometryUpdatesYawDegrees[i]);
             swerveDriveWheelPositions[i] = getWheelPositions(i);
+            gyroUpdates[i] = Rotation2d.fromDegrees(swerveInputs.odometryUpdatesYawDegrees[i]);
         }
 
         RobotContainer.POSE_ESTIMATOR.updatePoseEstimatorStates(
@@ -235,7 +232,7 @@ public class Swerve extends SubsystemBase {
 
         for (int i = 0; i < swerveModules.length; i++) {
             swerveModulePositions[i] = swerveModules[i].getOdometryPosition(odometryUpdateIndex);
-        }
+        }//todo: problematic line aB BO VE.
 
         return new SwerveDriveWheelPositions(swerveModulePositions);
     }

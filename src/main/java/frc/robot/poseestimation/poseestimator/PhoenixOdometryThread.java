@@ -11,10 +11,11 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 
-package frc.lib.util.threads;
+package frc.robot.poseestimation.poseestimator;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -36,35 +37,32 @@ import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
  * time synchronization.
  */
 public class PhoenixOdometryThread extends Thread {
-    private final Lock signalsLock =
-            new ReentrantLock(); // Prevents conflicts when registering signals
-    private BaseStatusSignal[] signals = new BaseStatusSignal[0];
+    private final Lock signalsLock = new ReentrantLock();
     private final List<Queue<Double>> queues = new ArrayList<>();
-    private final List<Queue<Double>> timestampQueues = new ArrayList<>();
+    private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
+    private BaseStatusSignal[] signals = new BaseStatusSignal[0];
 
-    private static PhoenixOdometryThread instance = null;
+    private static PhoenixOdometryThread INSTANCE = null;
 
     public static PhoenixOdometryThread getInstance() {
-        if (instance == null) {
-            instance = new PhoenixOdometryThread();
+        if (INSTANCE == null) {
+            INSTANCE = new PhoenixOdometryThread();
         }
-        return instance;
+        return INSTANCE;
     }
 
     private PhoenixOdometryThread() {
         setName("PhoenixOdometryThread");
         setDaemon(true);
+        start();
     }
 
-    @Override
-    public void start() {
-        if (timestampQueues.size() > 0) {
-            super.start();
-        }
+    public Queue<Double> getTimestampQueue() {
+        return timestamps;
     }
 
     public Queue<Double> registerSignal(StatusSignal<Double> signal) {
-        Queue<Double> queue = new ArrayBlockingQueue<>(20);
+        Queue<Double> queue = new ArrayBlockingQueue<>(100);
         signalsLock.lock();
         ODOMETRY_LOCK.lock();
         try {
@@ -80,52 +78,29 @@ public class PhoenixOdometryThread extends Thread {
         return queue;
     }
 
-    public Queue<Double> makeTimestampQueue() {
-        Queue<Double> queue = new ArrayBlockingQueue<>(20);
-        ODOMETRY_LOCK.lock();
-        try {
-            timestampQueues.add(queue);
-        } finally {
-            ODOMETRY_LOCK.unlock();
-        }
-        return queue;
-    }
-
     @Override
     public void run() {
+        Timer.delay(5);
         while (true) {
             // Wait for updates from all signals
             signalsLock.lock();
             try {
-                // "waitForAll" does not support blocking on multiple
-                // signals with a bus that is not CAN FD, regardless
-                // of Pro licensing. No reasoning for this behavior
-                // is provided by the documentation.
-                Thread.sleep((long) (1000.0 / ODOMETRY_FREQUENCY_HERTZ ));
+                Thread.sleep((long) (1000.0 / ODOMETRY_FREQUENCY_HERTZ));
                 if (signals.length > 0) BaseStatusSignal.refreshAll(signals);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             } finally {
                 signalsLock.unlock();
             }
+            double fpgaTimestamp = Logger.getRealTimestamp() / 1.0e6;
 
             // Save new data to queues
             ODOMETRY_LOCK.lock();
             try {
-                double timestamp = Logger.getRealTimestamp() / 1e6;
-                double totalLatency = 0.0;
-                for (BaseStatusSignal signal : signals) {
-                    totalLatency += signal.getTimestamp().getLatency();
-                }
-                if (signals.length > 0) {
-                    timestamp -= totalLatency / signals.length;
-                }
                 for (int i = 0; i < signals.length; i++) {
                     queues.get(i).offer(signals[i].getValueAsDouble());
                 }
-                for (int i = 0; i < timestampQueues.size(); i++) {
-                    timestampQueues.get(i).offer(timestamp);
-                }
+                timestamps.offer(fpgaTimestamp);
             } finally {
                 ODOMETRY_LOCK.unlock();
             }

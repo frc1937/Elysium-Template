@@ -8,6 +8,8 @@ import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 
+import java.util.Optional;
+
 public class SimulatedSwerveConstants extends SwerveConstants {
     static final GyroSimulation GYRO = new GyroSimulation();
 
@@ -44,13 +46,13 @@ public class SimulatedSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    protected SwerveModuleIO[] getSwerveModules() {
-        return new SwerveModuleIO[]{
+    protected Optional<SwerveModuleIO[]> getSwerveModules() {
+        return ofReplayable(() -> new SwerveModuleIO[]{
                 new SimulatedSwerveModule("FL", FL_DRIVE_MOTOR, FL_STEER_MOTOR),
                 new SimulatedSwerveModule("FR", FR_DRIVE_MOTOR, FR_STEER_MOTOR),
                 new SimulatedSwerveModule("RL", RL_DRIVE_MOTOR, RL_STEER_MOTOR),
                 new SimulatedSwerveModule("RR", RR_DRIVE_MOTOR, RR_STEER_MOTOR)
-        };
+        });
     }
 
     private static void configureDriveMotor(SimpleMotorSimulation driveMotor) {

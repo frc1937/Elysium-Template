@@ -22,7 +22,7 @@ public class SimulationSwerveIO extends SwerveIO {
 
         swerveInputs.gyroYawDegrees = GYRO.getGyroYawDegrees();
 
-        swerveInputs.odometryUpdatesTimestamp = new double[]{Timer.getFPGATimestamp()};
         swerveInputs.odometryUpdatesYawDegrees =  new double[]{swerveInputs.gyroYawDegrees};
+        swerveInputs.odometryUpdatesTimestamp = new double[]{Timer.getFPGATimestamp()};
     }
 }

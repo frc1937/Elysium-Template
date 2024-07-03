@@ -8,13 +8,14 @@ import org.littletonrobotics.junction.AutoLog;
 
 public class SwerveIO {
     static SwerveIO generateSwerve() {
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
-            return new RealSwerveIO();
-        }
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
+            return new SwerveIO();
 
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
+            return new RealSwerveIO();
+
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
             return new SimulationSwerveIO();
-        }
 
         return new SwerveIO();
     }

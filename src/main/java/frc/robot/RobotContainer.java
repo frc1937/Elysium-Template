@@ -7,10 +7,9 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
-import frc.robot.poseestimation.PoseEstimator;
+import frc.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.intake.Intake;
@@ -22,10 +21,9 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
-import static frc.robot.poseestimation.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
     public static final Flywheel FLYWHEEL = new Flywheel();
@@ -50,16 +48,18 @@ public class RobotContainer {
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
 
-        SWERVE.setDefaultCommand(SWERVE.driveTeleop(
-                translationSupplier,
-                strafeSupplier,
-                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK),
-                driveController.getButton(Controller.Inputs.LEFT_BUMPER)
-        ));
+        INTAKE.setDefaultCommand(INTAKE.setIntakeSpeed(0.5));
 
-        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
-
-        FLYWHEEL.sysIdDynamicTest(SysIdRoutine.Direction.kForward);
+//        SWERVE.setDefaultCommand(SWERVE.driveTeleop(
+//                translationSupplier,
+//                strafeSupplier,
+//                () -> -driveController.getRawAxis(Controller.Axis.LEFT_STICK),
+//                driveController.getButton(Controller.Inputs.LEFT_BUMPER)
+//        ));
+//
+//        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
+//
+//        FLYWHEEL.sysIdDynamicTest(SysIdRoutine.Direction.kForward);
 
 //        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
 //                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)

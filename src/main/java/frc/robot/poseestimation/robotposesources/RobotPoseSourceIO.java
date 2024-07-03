@@ -3,7 +3,7 @@ package frc.robot.poseestimation.robotposesources;
 import org.littletonrobotics.junction.AutoLog;
 
 public class RobotPoseSourceIO {
-    protected void refreshInputs(RobotPoseSourceInputsAutoLogged inputs) {
+    protected void updateInputs(RobotPoseSourceInputsAutoLogged inputs) {
     }
 
     @AutoLog

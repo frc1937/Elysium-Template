@@ -10,6 +10,9 @@ import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.real.RealSwerveConstants;
 import frc.robot.subsystems.swerve.simulation.SimulatedSwerveConstants;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
 
@@ -42,21 +45,26 @@ public abstract class SwerveConstants {
 
     public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
 
-    static final double MAX_SPEED_MPS = 5.1;
-    static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
+    public static final double MAX_SPEED_MPS = 5.1;
+    public static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
 
+    protected static <T> Optional<T> ofReplayable(Supplier<T> value) {
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
+            return Optional.empty();
+        return Optional.of(value.get());
+    }
 
     static SwerveConstants generateConstants() {
         ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
         ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
 
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            return new SimulatedSwerveConstants();
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
+            return new RealSwerveConstants();
         }
 
-        return new RealSwerveConstants();
+        return new SimulatedSwerveConstants();
     }
 
 
-    protected abstract SwerveModuleIO[] getSwerveModules();
+    protected abstract Optional<SwerveModuleIO[]> getSwerveModules();
 }

@@ -1,5 +1,4 @@
-package frc.robot.poseestimation;
-
+package frc.robot.poseestimation.poseestimator;
 
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.Matrix;
@@ -21,7 +20,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static frc.robot.poseestimation.PoseEstimatorConstants.*;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
 
 /**
  * A class that estimates the robot's pose using team 6328's custom pose estimator.
@@ -73,18 +72,15 @@ public class PoseEstimator implements AutoCloseable {
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
     public Pose2d getCurrentPose() {
-        if(poseEstimator6328.getEstimatedPose() == null)
-            return DEFAULT_POSE;
-
         return poseEstimator6328.getEstimatedPose();
     }
 
     /**
-     * Updates the pose estimator with the given SWERVE wheel positions and gyro rotations.
-     * This function accepts an array of SWERVE wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
+     * Updates the pose estimator with the given swerve wheel positions and gyro rotations.
+     * This function accepts an array of swerve wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
      * This means you could have a couple of odometry updates per main loop, and you would want to update the pose estimator with all of them.
      *
-     * @param swerveWheelPositions the SWERVE wheel positions accumulated since the last update
+     * @param swerveWheelPositions the swerve wheel positions accumulated since the last update
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
     public void updatePoseEstimatorStates(SwerveDriveWheelPositions[] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
@@ -100,25 +96,19 @@ public class PoseEstimator implements AutoCloseable {
 
     private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
         List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
-
         for (RobotPoseSource robotPoseSource : robotPoseSources) {
             final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(robotPoseSource);
-
             if (visionObservation != null)
                 viableVisionObservations.add(visionObservation);
         }
-
         return viableVisionObservations;
     }
 
     private PoseEstimator6328.VisionObservation getVisionObservation(RobotPoseSource robotPoseSource) {
         robotPoseSource.update();
-
         if (!robotPoseSource.hasNewResult())
             return null;
-
         final Pose2d robotPose = robotPoseSource.getRobotPose();
-
         if (robotPose == null)
             return null;
 

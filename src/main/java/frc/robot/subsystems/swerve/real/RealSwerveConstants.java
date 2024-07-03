@@ -1,5 +1,6 @@
 package frc.robot.subsystems.swerve.real;
 
+import com.ctre.phoenix.sensors.PigeonIMU;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.Properties;
@@ -11,10 +12,12 @@ import frc.lib.generic.motor.*;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 
+import java.util.Optional;
+
 import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 public class RealSwerveConstants extends SwerveConstants {
-    static final WPI_PigeonIMU GYRO = new WPI_PigeonIMU(30);
+    static final Optional<WPI_PigeonIMU> GYRO = ofReplayable(() -> new WPI_PigeonIMU(30));
 
     static final MotorProperties.IdleMode ANGLE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
     static final MotorProperties.IdleMode DRIVE_NEUTRAL_MODE = MotorProperties.IdleMode.BRAKE;
@@ -74,17 +77,17 @@ public class RealSwerveConstants extends SwerveConstants {
             configureSteerMotor(STEER_MOTOR[i]);
         }
 
-        GYRO.configFactoryDefault();
+        GYRO.ifPresent(PigeonIMU::configFactoryDefault);
     }
 
     @Override
-    protected SwerveModuleIO[] getSwerveModules() {
-        return new SwerveModuleIO[]{
+    protected Optional<SwerveModuleIO[]> getSwerveModules() {
+        return ofReplayable(() -> new SwerveModuleIO[]{
                 new RealSwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER, "ModuleFL"),
                 new RealSwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER, "ModuleFR"),
                 new RealSwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER, "ModuleRL"),
                 new RealSwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER, "ModuleRR")
-        };
+        });
     }
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {

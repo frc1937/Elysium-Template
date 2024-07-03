@@ -1,5 +1,10 @@
-package frc.robot.poseestimation;
-
+// Copyright (c) 2024 FRC 6328
+// http://github.com/Mechanical-Advantage
+//
+// Use of this source code is governed by an MIT-style
+// license that can be found in the LICENSE file at
+// the root directory of this project.
+package frc.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.Nat;
@@ -17,7 +22,6 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.NoSuchElementException;
 
-import static frc.robot.poseestimation.PoseEstimatorConstants.ODOMETRY_AMBIGUITY;
 import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 
 public class PoseEstimator6328 {
@@ -33,9 +37,7 @@ public class PoseEstimator6328 {
     private static PoseEstimator6328 instance;
 
     public static PoseEstimator6328 getInstance() {
-        if (instance == null)
-            instance = new PoseEstimator6328();
-
+        if (instance == null) instance = new PoseEstimator6328();
         return instance;
     }
 
@@ -58,7 +60,7 @@ public class PoseEstimator6328 {
 
     private PoseEstimator6328() {
         for (int i = 0; i < 3; ++i) {
-            qStdDevs.set(i, 0, Math.pow(ODOMETRY_AMBIGUITY.get(i, 0), 2));
+            qStdDevs.set(i, 0, Math.pow(PoseEstimatorConstants.ODOMETRY_AMBIGUITY.get(i, 0), 2));
         }
     }
 
@@ -66,12 +68,8 @@ public class PoseEstimator6328 {
      * Add odometry observation
      */
     public void addOdometryObservation(OdometryObservation observation) {
-        if (observation.wheelPositions == null) return;
-
         Twist2d twist = SWERVE_KINEMATICS.toTwist2d(lastWheelPositions, observation.wheelPositions());
-
         lastWheelPositions = observation.wheelPositions();
-
         // Check gyro connected
         if (observation.gyroAngle != null) {
             // Update dtheta for twist if gyro connected

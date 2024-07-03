@@ -188,6 +188,8 @@ public class GenericTalonFX extends TalonFX implements Motor {
         BaseStatusSignal.refreshAll(signals.toArray(new BaseStatusSignal[0]));
     }
 
+
+
     @Override
     public TalonFXSimState getSimulationState() {
         return this.getSimState();

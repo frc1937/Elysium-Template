@@ -4,24 +4,22 @@ import edu.wpi.first.math.geometry.*;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.poseestimation.PoseEstimatorConstants.EMPTY_POSE_LIST;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.EMPTY_POSE_LIST;
 
 /**
  * A pose source is a class that provides the robot's pose, from a camera.
  */
 public class RobotPoseSource {
     protected final String name;
-
     private final RobotPoseSourceInputsAutoLogged inputs = new RobotPoseSourceInputsAutoLogged();
     private final Transform3d robotCenterToCamera;
     private final RobotPoseSourceIO robotPoseSourceIO;
-
     private double lastUpdatedTimestamp;
     private Pose2d cachedPose = null;
 
     public RobotPoseSource(String name, Transform3d robotCenterToCamera) {
         this.name = name;
-        this.robotCenterToCamera = robotCenterToCamera;
+        this.robotCenterToCamera = new Transform3d();
 
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL)
             robotPoseSourceIO = new PhotonCameraIO(name, robotCenterToCamera);
@@ -44,11 +42,9 @@ public class RobotPoseSource {
     }
 
     public void update() {
-        robotPoseSourceIO.refreshInputs(inputs);
+        robotPoseSourceIO.updateInputs(inputs);
         Logger.processInputs("Cameras/" + name, inputs);
-
         cachedPose = getUnCachedRobotPose();
-
         if (!inputs.hasResult || inputs.averageDistanceFromTags == 0 || cachedPose == null)
             Logger.recordOutput("Poses/Robot/" + name + "Pose", EMPTY_POSE_LIST);
         else
@@ -81,7 +77,6 @@ public class RobotPoseSource {
 
     private Pose2d getUnCachedRobotPose() {
         final Pose3d cameraPose = doubleArrayToPose3d(inputs.cameraPose);
-
         if (cameraPose == null)
             return null;
 
@@ -89,7 +84,8 @@ public class RobotPoseSource {
     }
 
     private boolean isNewTimestamp() {
-        if (lastUpdatedTimestamp == getLastResultTimestamp()) return false;
+        if (lastUpdatedTimestamp == getLastResultTimestamp())
+            return false;
 
         lastUpdatedTimestamp = getLastResultTimestamp();
         return true;

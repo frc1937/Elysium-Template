@@ -35,7 +35,6 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.RobotContainer;
 import org.photonvision.PhotonCamera;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.estimation.VisionEstimation;
@@ -45,6 +44,8 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 /**
  * The PhotonPoseEstimator class filters or combines readings from all the AprilTags visible at a
@@ -121,7 +122,7 @@ public class PhotonPoseEstimator {
      * @param strategy      The strategy it should use to determine the best pose.
      * @param camera        PhotonCamera
      * @param robotToCamera Transform3d from the center of the robot to the camera mount position (ie,
-     *                      robot ➔ camera) in the <a href=
+     *                      robot to camera) in the <a href=
      *                      "https://docs.wpilib.org/en/stable/docs/software/advanced-controls/geometry/coordinate-systems.html#robot-coordinate-system">Robot
      *                      Coordinate System</a>.
      */
@@ -137,6 +138,11 @@ public class PhotonPoseEstimator {
 
         HAL.report(tResourceType.kResourceType_PhotonPoseEstimator, InstanceCount);
         InstanceCount++;
+    }
+
+    public PhotonPoseEstimator(
+            AprilTagFieldLayout fieldTags, PoseStrategy strategy, Transform3d robotToCamera) {
+        this(fieldTags, strategy, null, robotToCamera);
     }
 
     /**
@@ -417,7 +423,9 @@ public class PhotonPoseEstimator {
                 return Optional.empty();
         }
 
-        estimatedPose.ifPresent(estimatedRobotPose -> lastPose = estimatedRobotPose.estimatedPose());
+        if (estimatedPose.isPresent()) {
+            lastPose = estimatedPose.get().estimatedPose;
+        }
 
         return estimatedPose;
     }
@@ -425,7 +433,7 @@ public class PhotonPoseEstimator {
     private Optional<EstimatedRobotPose> closestToHeadingStrategy(PhotonPipelineResult result) {
         double smallestAngleDifferenceRadians;
         EstimatedRobotPose closestAngleTarget;
-        double currentHeadingRadians = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians();
+        double currentHeadingRadians = POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians();
 
         PhotonTrackedTarget target = result.getBestTarget();
         int targetFiducialId = target.getFiducialId();
@@ -543,7 +551,18 @@ public class PhotonPoseEstimator {
      * estimation.
      */
     private Optional<EstimatedRobotPose> lowestAmbiguityStrategy(PhotonPipelineResult result) {
-        PhotonTrackedTarget lowestAmbiguityTarget = getPhotonTrackedTarget(result);
+        PhotonTrackedTarget lowestAmbiguityTarget = null;
+
+        double lowestAmbiguityScore = 10;
+
+        for (PhotonTrackedTarget target : result.targets) {
+            double targetPoseAmbiguity = target.getPoseAmbiguity();
+            // Make sure the target is a Fiducial target.
+            if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
+                lowestAmbiguityScore = targetPoseAmbiguity;
+                lowestAmbiguityTarget = target;
+            }
+        }
 
         // Although there are confirmed to be targets, none of them may be fiducial
         // targets.
@@ -567,22 +586,6 @@ public class PhotonPoseEstimator {
                         result.getTimestampSeconds(),
                         result.getTargets(),
                         PoseStrategy.LOWEST_AMBIGUITY));
-    }
-
-    private static PhotonTrackedTarget getPhotonTrackedTarget(PhotonPipelineResult result) {
-        PhotonTrackedTarget lowestAmbiguityTarget = null;
-
-        double lowestAmbiguityScore = 10;
-
-        for (PhotonTrackedTarget target : result.targets) {
-            double targetPoseAmbiguity = target.getPoseAmbiguity();
-            // Make sure the target is a Fiducial target.
-            if (targetPoseAmbiguity != -1 && targetPoseAmbiguity < lowestAmbiguityScore) {
-                lowestAmbiguityScore = targetPoseAmbiguity;
-                lowestAmbiguityTarget = target;
-            }
-        }
-        return lowestAmbiguityTarget;
     }
 
     /**

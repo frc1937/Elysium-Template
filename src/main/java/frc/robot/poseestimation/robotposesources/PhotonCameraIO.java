@@ -13,7 +13,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.poseestimation.PoseEstimatorConstants.*;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
 
 public class PhotonCameraIO extends RobotPoseSourceIO {
     private final PhotonCamera photonCamera;
@@ -30,34 +30,53 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
         );
 
         photonPoseEstimator.setMultiTagFallbackStrategy(SECONDARY_POSE_STRATEGY);
-        photonPoseEstimator.setTagModel(TAG_MODEL);
     }
 
-    private void logVisibleTags(boolean hasResult, EstimatedRobotPose estimatedRobotPose) {
-        if (!hasResult || estimatedRobotPose == null) {
+    @Override
+    protected void updateInputs(RobotPoseSourceInputsAutoLogged inputs) {
+        final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
+        Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(latestResult);
+
+        inputs.hasResult = hasResult(optionalEstimatedRobotPose);
+
+        if (inputs.hasResult) {
+            final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
+            inputs.cameraPose = RobotPoseSource.pose3dToDoubleArray(estimatedRobotPose.estimatedPose);
+            inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds;
+            inputs.visibleTags = estimatedRobotPose.targetsUsed.size();
+            inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
+        } else {
+            inputs.visibleTags = 0;
+            inputs.cameraPose = new double[0];
+        }
+
+        logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose);
+    }
+
+    private void logVisibleTags(boolean hasResult, Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
+        if (!hasResult) {
             Logger.recordOutput("VisibleTags/" + photonCamera.getName());
             return;
         }
 
-        final Pose2d[] visibleTagPoses = new Pose2d[estimatedRobotPose.targetsUsed().size()];
-
+        final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
+        final Pose2d[] visibleTagPoses = new Pose2d[estimatedRobotPose.targetsUsed.size()];
         for (int i = 0; i < visibleTagPoses.length; i++) {
-            final int currentId = estimatedRobotPose.targetsUsed().get(i).getFiducialId();
+            final int currentId = estimatedRobotPose.targetsUsed.get(i).getFiducialId();
             final Pose2d currentPose = TAG_ID_TO_POSE.get(currentId).toPose2d();
-
             visibleTagPoses[i] = currentPose;
         }
-
         Logger.recordOutput("VisibleTags/" + photonCamera.getName(), visibleTagPoses);
     }
 
-    private boolean hasResult(EstimatedRobotPose estimatedRobotPose) {
-        if (estimatedRobotPose == null) return false;
-
-        if (estimatedRobotPose.strategy() == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
+    private boolean hasResult(Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
+        final boolean isEmpty = optionalEstimatedRobotPose.isEmpty();
+        if (isEmpty)
+            return false;
+        final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
+        if (estimatedRobotPose.strategy == PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR)
             return true;
-
-        return estimatedRobotPose.targetsUsed().get(0).getPoseAmbiguity() < MAXIMUM_AMBIGUITY;
+        return estimatedRobotPose.targetsUsed.get(0).getPoseAmbiguity() < MAXIMUM_AMBIGUITY;
     }
 
     private double getAverageDistanceFromTags(PhotonPipelineResult result) {
@@ -70,27 +89,5 @@ public class PhotonCameraIO extends RobotPoseSourceIO {
         }
 
         return distanceSum / targets.size();
-    }
-
-    @Override
-    protected void refreshInputs(RobotPoseSourceInputsAutoLogged inputs) {
-        final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
-        Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(latestResult);
-
-        inputs.hasResult = hasResult(optionalEstimatedRobotPose.orElse(null));
-
-        if (inputs.hasResult) {
-            final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
-
-            inputs.cameraPose = RobotPoseSource.pose3dToDoubleArray(estimatedRobotPose.estimatedPose());
-            inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds();
-            inputs.visibleTags = estimatedRobotPose.targetsUsed().size();
-            inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
-        } else {
-            inputs.visibleTags = 0;
-            inputs.cameraPose = new double[0];
-        }
-
-        logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose.orElse(null));
     }
 }

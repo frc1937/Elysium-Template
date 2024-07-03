@@ -9,7 +9,7 @@ import org.photonvision.simulation.PhotonCameraSim;
 import org.photonvision.simulation.SimCameraProperties;
 import org.photonvision.simulation.VisionSystemSim;
 
-import static frc.robot.poseestimation.PoseEstimatorConstants.APRIL_TAG_FIELD_LAYOUT;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.APRIL_TAG_FIELD_LAYOUT;
 
 public class AdvancedVisionSimulation extends GenericSimulation {
     private final VisionSystemSim visionSystem = new VisionSystemSim("main");

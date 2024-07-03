@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.simulation.GenericSimulation;
@@ -25,22 +26,22 @@ public class Robot extends LoggedRobot {
     public void robotInit() {
         robotContainer = new RobotContainer();
 
-        switch (CURRENT_MODE) {
-            case REAL:
-                Logger.addDataReceiver(new WPILOGWriter());
-                Logger.addDataReceiver(new NT4Publisher());
-                break;
+        String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
 
-            case SIMULATION:
+        switch (CURRENT_MODE) {
+            case REAL, SIMULATION:
                 Logger.addDataReceiver(new NT4Publisher());
+                Logger.addDataReceiver(new WPILOGWriter(logPath));
                 break;
 
             case REPLAY:
-                setUseTiming(false);
-                String logPath = LogFileUtil.findReplayLog();
+                setUseTiming(true);
+                logPath = LogFileUtil.findReplayLog();
+
+                final String logWriterPath = LogFileUtil.addPathSuffix(logPath, "_replay");
 
                 Logger.setReplaySource(new WPILOGReader(logPath));
-                Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+                Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
                 break;
         }
 

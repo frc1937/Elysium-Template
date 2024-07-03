@@ -1,5 +1,6 @@
 package frc.lib.generic.encoder;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -7,6 +8,8 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import frc.lib.generic.Properties;
+
+import java.util.ArrayList;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -52,6 +55,17 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     @Override
     public double getEncoderVelocity() {
         return velocitySignal.refresh().getValue();
+    }
+
+    @Override
+    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
+        ArrayList<BaseStatusSignal> signals = new ArrayList<>();
+
+        for (Properties.SignalType signalType : signalTypes) {
+            signals.add(getRawStatusSignal(signalType));
+        }
+
+        BaseStatusSignal.refreshAll(signals.toArray(new BaseStatusSignal[0]));
     }
 
     @Override

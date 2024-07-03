@@ -1,4 +1,4 @@
-package frc.robot.poseestimation;
+package frc.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.apriltag.AprilTag;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -54,3 +54,4 @@ public class PoseEstimatorConstants {
             TAG_ID_TO_POSE.put(aprilTag.ID, aprilTag.pose);
     }
 }
+

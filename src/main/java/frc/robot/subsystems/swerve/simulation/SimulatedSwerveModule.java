@@ -7,6 +7,7 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 
 import static frc.lib.math.Conversions.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.simulation.SimulatedSwerveConstants.WHEEL_DIAMETER;
 
 public class SimulatedSwerveModule extends SwerveModuleIO {
@@ -26,7 +27,7 @@ public class SimulatedSwerveModule extends SwerveModuleIO {
 
     @Override
     protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
-        driveMotor.setOutput(MotorProperties.ControlMode.VELOCITY, mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER));
+        driveMotor.setOutput(MotorProperties.ControlMode.VELOCITY, 12 * mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER) / MAX_SPEED_MPS);
     }
 
     @Override

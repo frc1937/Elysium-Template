@@ -8,12 +8,14 @@ import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 public class SwerveModuleIO {
-    private boolean openLoop = true;
-
     private final SwerveModuleInputsAutoLogged swerveModuleInputs = new SwerveModuleInputsAutoLogged();
     private final String name;
 
-    private SwerveModuleState targetState = new SwerveModuleState(0, Rotation2d.fromDegrees(0));
+    private int counter = 0;
+    private int counter2 = 0;
+
+    private SwerveModuleState targetState = new SwerveModuleState();
+    private boolean openLoop = true;
 
     public SwerveModuleIO(String name) {
         this.name = name;
@@ -22,6 +24,8 @@ public class SwerveModuleIO {
     public void periodic() {
         refreshInputs(swerveModuleInputs);
         Logger.processInputs("Swerve/" + name + "/", swerveModuleInputs);
+        System.out.println("Inputs: " + swerveModuleInputs.driveDistanceMeters);
+        System.out.println("UPDATING INPUTS #2");
 
         modulePeriodic();
     }
@@ -43,6 +47,15 @@ public class SwerveModuleIO {
      * @return the position of the module at the given odometry update index
      */
     SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+        counter++;
+        System.out.println("Odometry update index: " + odometryUpdateIndex  + " counter: " + counter);
+
+        if (swerveModuleInputs.odometryUpdatesDriveDistanceMeters.length <= odometryUpdateIndex) {
+            counter2++;
+            System.out.println("Counter of how many updates were missed: " + counter2);
+            return new SwerveModulePosition(0, Rotation2d.fromDegrees(0));
+        }
+
         return new SwerveModulePosition(
                 swerveModuleInputs.odometryUpdatesDriveDistanceMeters[odometryUpdateIndex],
                 Rotation2d.fromDegrees(swerveModuleInputs.odometryUpdatesSteerAngleDegrees[odometryUpdateIndex])
