@@ -64,7 +64,7 @@ public class RealSwerveConstants extends SwerveConstants {
     static final Optional<WPI_PigeonIMU> GYRO = ofReplayable(() -> new WPI_PigeonIMU(30));
 
     static {
-        if (GlobalConstants.CURRENT_MODE != GlobalConstants.Mode.REPLAY) {
+        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
             configureSteerConfiguration();
             configureDriveConfiguration();
 
@@ -126,7 +126,7 @@ public class RealSwerveConstants extends SwerveConstants {
         driveMotorConfiguration.idleMode = DRIVE_NEUTRAL_MODE;
         driveMotorConfiguration.inverted = DRIVE_MOTOR_INVERT;
 
-        driveMotorConfiguration.conversionFactor = DRIVE_GEAR_RATIO;
+        driveMotorConfiguration.gearRatio = DRIVE_GEAR_RATIO;
 
         driveMotorConfiguration.statorCurrentLimit = DRIVE_STATOR_CURRENT_LIMIT;
         driveMotorConfiguration.supplyCurrentLimit = DRIVE_SUPPLY_CURRENT_LIMIT;
@@ -138,14 +138,14 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfiguration.slot0 = new MotorProperties.Slot(5, 0, 0, 0, 0, 0);
+        steerMotorConfiguration.slot0 = new MotorProperties.Slot(7, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
         steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;
         steerMotorConfiguration.idleMode = ANGLE_NEUTRAL_MODE;
 
-        steerMotorConfiguration.conversionFactor = ANGLE_GEAR_RATIO;
+        steerMotorConfiguration.gearRatio = ANGLE_GEAR_RATIO;
 
-        steerMotorConfiguration.ClosedLoopContinousWrap = true;
+        steerMotorConfiguration.closedLoopContinousWrap = true;
     }
 }

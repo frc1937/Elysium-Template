@@ -210,7 +210,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
         talonConfig.Voltage.PeakForwardVoltage = 12;
         talonConfig.Voltage.PeakReverseVoltage = -12;
 
-        talonConfig.Feedback.SensorToMechanismRatio = configuration.conversionFactor;
+        talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
 
         setConfig0();
         setConfig1();
@@ -218,7 +218,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
         applyCurrentLimits();
 
-        talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.ClosedLoopContinousWrap;
+        talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinousWrap;
 
         slotToUse = configuration.slotToUse;
 

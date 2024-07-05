@@ -20,7 +20,7 @@ public class RealFlywheelConstants extends FlywheelConstants {
     private static final MotorConfiguration configuration = new MotorConfiguration();
 
     static {
-        configureMotor(LEFT_FLYWHEEL_MOTOR, LEFT_MOTOR_INVERT, LEFT_SLOT);
+        configureMotor(LEFT_FLYWHEEL_MOTOR, true, LEFT_SLOT);
         configureMotor(RIGHT_FLYWHEEL_MOTOR, RIGHT_MOTOR_INVERT, RIGHT_SLOT);
     }
 

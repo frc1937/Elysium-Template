@@ -5,7 +5,7 @@ import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
-import frc.robot.poseestimation.poseestimator.PhoenixOdometryThread;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 
@@ -13,7 +13,9 @@ import java.util.Queue;
 
 import static frc.lib.generic.Properties.SignalType.POSITION;
 import static frc.lib.generic.Properties.SignalType.VELOCITY;
-import static frc.lib.math.Conversions.*;
+import static frc.lib.math.Conversions.degreesToRotations;
+import static frc.lib.math.Conversions.rotationsToDegrees;
+import static frc.lib.math.Conversions.rotationsToMetres;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
@@ -31,8 +33,8 @@ public class RealSwerveModule extends SwerveModuleIO {
         this.steerMotor = steerMotor;
         this.steerEncoder = steerEncoder;
 
-        steerPositionQueue = PhoenixOdometryThread.getInstance().registerSignal(steerEncoder.getRawStatusSignal(POSITION));
-        drivePositionQueue = PhoenixOdometryThread.getInstance().registerSignal(driveMotor.getRawStatusSignal(POSITION));
+        steerPositionQueue = SparkOdometryThread.getInstance().registerSignal(steerEncoder::getEncoderPosition);
+        drivePositionQueue = SparkOdometryThread.getInstance().registerSignal(driveMotor::getSystemPosition);
     }
 
     @Override
@@ -48,11 +50,11 @@ public class RealSwerveModule extends SwerveModuleIO {
     @Override
     public void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
         if (openLoop) {
-            final double targetPowerOpenLoop = VOLTAGE_COMPENSATION_SATURATION * velocityMetresPerSecond / MAX_SPEED_MPS;
+            final double targetPowerOpenLoop = VOLTAGE_COMPENSATION_SATURATION * (velocityMetresPerSecond / MAX_SPEED_MPS);
             driveMotor.setOutput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
         } else {
             final double targetVelocityRPSClosedLoop = Conversions.mpsToRps(velocityMetresPerSecond, WHEEL_DIAMETER);
-            driveMotor.setOutput(MotorProperties.ControlMode.PROFILED_VELOCITY, targetVelocityRPSClosedLoop);
+            driveMotor.setOutput(MotorProperties.ControlMode.VELOCITY, targetVelocityRPSClosedLoop);
         }
     }
 

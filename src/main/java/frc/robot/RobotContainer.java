@@ -21,7 +21,6 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
-import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
@@ -53,20 +52,15 @@ public class RobotContainer {
                 SWERVE.driveOpenLoop(
                         translationSupplier,
                         strafeSupplier,
-                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_Y),
+                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X),
                         () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
                 ));
 
+        driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(
-                SWERVE.driveWhilstRotatingToTarget(
-                        translationSupplier,
-                        strafeSupplier,
-                        BLUE_SPEAKER.toPose2d(),
-                        driveController.getButton(Controller.Inputs.LEFT_BUMPER)
-                )
-        );
+        driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(shooterCommands.receiveFloorNote());
+
 //
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
 //

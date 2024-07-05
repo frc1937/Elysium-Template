@@ -35,10 +35,10 @@ public class MotorConfiguration {
      * This uses the mechanism rotation value. If there is a gear ratio between the sensor and the mechanism, make sure to apply a SensorToMechanismRatio so the closed loop operates on the full rotation.
      * Default Value: False
      */
-    public boolean ClosedLoopContinousWrap = false;
+    public boolean closedLoopContinousWrap = false;
 
     public double supplyCurrentLimit = -1, statorCurrentLimit = -1;
 
     /** Convert between 1 system rotation to motor rotation. 1 / num*/
-    public double conversionFactor = 1;
+    public double gearRatio = 1;
 }

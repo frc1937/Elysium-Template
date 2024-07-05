@@ -51,7 +51,7 @@ public class RealArmConstants {
     private static void configureMotor() {
         MotorConfiguration motorConfiguration = new MotorConfiguration();
 
-        motorConfiguration.conversionFactor = PITCH_GEAR_RATIO;
+        motorConfiguration.gearRatio = PITCH_GEAR_RATIO;
 
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;

@@ -6,11 +6,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.math.Conversions;
+import frc.lib.util.commands.ExecuteEndCommand;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.flywheel.real.RealFlywheelConstants;
 import frc.robot.subsystems.flywheel.simulation.SimulatedFlywheelConstants;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.flywheel.FlywheelConstants.SYSID_CONFIG;
 
 public class Flywheel extends SubsystemBase {
@@ -29,8 +31,8 @@ public class Flywheel extends SubsystemBase {
     }
 
     public Command setFlywheelTarget(double velocityRotationsPerSecond) {
-        return Commands.startEnd(
-                () -> setFlywheelTargetVelocity(velocityRotationsPerSecond),
+        return new ExecuteEndCommand(
+                () -> setFlywheelsTargetVelocity(velocityRotationsPerSecond),
                 this::stop,
                 this
         );
@@ -46,7 +48,7 @@ public class Flywheel extends SubsystemBase {
 
     public Command setFlywheelTargetTangentialVelocity(double velocityMetersPerSecond) {
         return Commands.startEnd(
-                () -> setFlywheelTangentialVelocity(velocityMetersPerSecond),
+                () -> setFlywheelsTargetVelocity(velocityMetersPerSecond),
                 this::stop,
                 this
         );
@@ -79,7 +81,7 @@ public class Flywheel extends SubsystemBase {
         log.motor(currentFlywheel.getName())
                 .voltage(Volts.of(currentFlywheel.getVoltage()))
                 .angularVelocity(RotationsPerSecond.of(currentFlywheel.getVelocityRotationsPerSecond())
-        );
+                );
     }
 
     private void setFlywheelTangentialVelocity(double velocityMetersPerSecond) {
@@ -88,10 +90,16 @@ public class Flywheel extends SubsystemBase {
         }
     }
 
-    private void setFlywheelTargetVelocity(double velocityRotationsPerSecond) {
+    private void setFlywheelsTargetVelocity(double velocityRotationsPerSecond) {
         for (FlywheelIO flywheel : flywheels) {
-            flywheel.setTargetVelocity(velocityRotationsPerSecond);
+            System.out.println("Flywheel #" + flywheel.getName());
+            setFlywheelTargetVelocity(flywheel, velocityRotationsPerSecond);
         }
+    }
+
+    private void setFlywheelTargetVelocity(FlywheelIO flywheel, double velocityRotationsPerSecond) {
+        System.out.println("NIGFlywheel #" + flywheel.getName());
+        flywheel.setTargetVelocity(velocityRotationsPerSecond);
     }
 
     private void stop() {

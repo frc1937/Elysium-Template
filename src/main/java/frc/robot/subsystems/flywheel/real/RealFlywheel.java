@@ -26,7 +26,7 @@ public class RealFlywheel extends FlywheelIO {
 
     @Override
     public void setTargetVelocity(double velocityRotationsPerSecond) {
-        Logger.recordOutput("Flywheel/" + motor.getDeviceID() + "/targetVelocity", velocityRotationsPerSecond);
+        Logger.recordOutput("FLywheel" + getName(), velocityRotationsPerSecond);
         motor.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRotationsPerSecond);
     }
 

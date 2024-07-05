@@ -19,6 +19,7 @@ import java.util.function.Supplier;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public abstract class SwerveConstants {
     public static final double DRIVE_GEAR_RATIO = (6.75);
@@ -67,7 +68,7 @@ public abstract class SwerveConstants {
     );
 
     protected static <T> Optional<T> ofReplayable(Supplier<T> value) {
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
+        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return Optional.empty();
 
         return Optional.of(value.get());
@@ -77,10 +78,10 @@ public abstract class SwerveConstants {
         ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
         ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
 
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY)
-            return new RealSwerveConstants();
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+            return new SimulationSwerveConstants();
 
-        return new SimulationSwerveConstants();
+        return new RealSwerveConstants();
     }
 
     protected abstract Optional<WPI_PigeonIMU> getPigeon();

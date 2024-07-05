@@ -28,21 +28,17 @@ public class Robot extends LoggedRobot {
 
         String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
 
-        switch (CURRENT_MODE) {
-            case REAL, SIMULATION:
-                Logger.addDataReceiver(new NT4Publisher());
-                Logger.addDataReceiver(new WPILOGWriter(logPath));
-                break;
+        if (CURRENT_MODE == GlobalConstants.Mode.REAL || CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            Logger.addDataReceiver(new NT4Publisher());
+            Logger.addDataReceiver(new WPILOGWriter(logPath));
+        } else {
+            setUseTiming(true);
+            logPath = LogFileUtil.findReplayLog();
 
-            case REPLAY:
-                setUseTiming(true);
-                logPath = LogFileUtil.findReplayLog();
+            final String logWriterPath = LogFileUtil.addPathSuffix(logPath, "_replay");
 
-                final String logWriterPath = LogFileUtil.addPathSuffix(logPath, "_replay");
-
-                Logger.setReplaySource(new WPILOGReader(logPath));
-                Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
-                break;
+            Logger.setReplaySource(new WPILOGReader(logPath));
+            Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
         }
 
         Logger.start();

@@ -56,7 +56,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
         final MotorConfiguration config = new MotorConfiguration();
 
         config.slot0 = new MotorProperties.Slot(5, 0, 0, 0, 0, 0);
-        config.ClosedLoopContinousWrap = true;
+        config.closedLoopContinousWrap = true;
 
         steerMotor.configure(config);
     }

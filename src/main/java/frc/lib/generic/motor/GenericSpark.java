@@ -10,6 +10,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkRelativeEncoder;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import org.littletonrobotics.junction.Logger;
 
 public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
@@ -64,6 +65,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     @Override
     public void setMotorEncoderPosition(double position) {
         encoder.setPosition(position);
+        Logger.recordOutput("EncoderValue" + getDeviceID(), encoder.getPosition());
         //Position to set the motor to, after gear ratio is applied
     }
 
@@ -167,8 +169,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
         super.setIdleMode(configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? IdleMode.kBrake : IdleMode.kCoast);
         super.setInverted(configuration.inverted);
 
-        encoder.setPositionConversionFactor(configuration.conversionFactor);
-        encoder.setVelocityConversionFactor(configuration.conversionFactor);
+        encoder.setPositionConversionFactor(1 / configuration.gearRatio);
+        encoder.setVelocityConversionFactor(1 / configuration.gearRatio);
 
         super.enableVoltageCompensation(12);
 
@@ -217,7 +219,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.ClosedLoopContinousWrap);
+        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinousWrap);
 
         controller.setP(configuration.slot0.kP(), 0);
         controller.setI(configuration.slot0.kI(), 0);
