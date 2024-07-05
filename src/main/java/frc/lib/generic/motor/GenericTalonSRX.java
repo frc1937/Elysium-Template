@@ -109,6 +109,8 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
 
     @Override
     public boolean configure(MotorConfiguration configuration) {
+        super.configFactoryDefault();
+
         configureSlots(configuration);
 
         TalonSRXConfiguration talonSRXConfiguration = new TalonSRXConfiguration();
@@ -117,8 +119,6 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
         talonSRXConfiguration.closedloopRamp = configuration.dutyCycleClosedLoopRampPeriod;
 
         talonSRXConfiguration.feedbackNotContinuous = !configuration.closedLoopContinousWrap;
-
-        slotToUse = configuration.slotToUse;
 
         talonSRXConfiguration.peakCurrentLimit = (int) configuration.statorCurrentLimit;
 

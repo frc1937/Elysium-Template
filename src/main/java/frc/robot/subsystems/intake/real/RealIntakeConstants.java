@@ -1,19 +1,23 @@
 package frc.robot.subsystems.intake.real;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+import frc.lib.generic.motor.GenericTalonSRX;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
 
 public class RealIntakeConstants {
-    protected static final WPI_TalonSRX MOTOR = new WPI_TalonSRX(5);
+    protected static final Motor MOTOR = new GenericTalonSRX(5);
 
     static {
         configureMotor();
     }
 
     private static void configureMotor() {
-        MOTOR.configFactoryDefault();
+        MotorConfiguration configuration = new MotorConfiguration();
 
-        MOTOR.setNeutralMode(NeutralMode.Coast);
-        MOTOR.setInverted(true);
+        configuration.idleMode = MotorProperties.IdleMode.COAST;
+        configuration.inverted = true;
+
+        MOTOR.configure(configuration);
     }
 }

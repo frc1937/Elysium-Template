@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake.real;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
+import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.intake.IntakeIO;
 import frc.robot.subsystems.intake.IntakeInputsAutoLogged;
 
@@ -10,7 +10,7 @@ public class RealIntake extends IntakeIO {
 
     @Override
     public void setPercentageOutput(double percentageOutput) {
-        MOTOR.set(ControlMode.PercentOutput, percentageOutput);
+        MOTOR.setOutput(MotorProperties.ControlMode.PERCENTAGE_OUTPUT, percentageOutput);
     }
 
     @Override
@@ -20,6 +20,6 @@ public class RealIntake extends IntakeIO {
 
     @Override
     protected void refreshInputs(IntakeInputsAutoLogged intakeInputs) {
-        intakeInputs.voltage = MOTOR.getMotorOutputVoltage() * 12;
+        intakeInputs.voltage = MOTOR.getVoltage();
     }
 }

@@ -64,6 +64,9 @@
     }
   },
   "NetworkTables": {
+    "Persistent Values": {
+      "open": false
+    },
     "transitory": {
       "AdvantageKit": {
         "RealOutputs": {
