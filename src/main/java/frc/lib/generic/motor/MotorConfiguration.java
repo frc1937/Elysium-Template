@@ -28,7 +28,7 @@ public class MotorConfiguration {
      * @| Default Value: 0
      * @| Units: sec
      */
-    public double dutyCycleCloseLoopRampPeriod = 0;
+    public double dutyCycleClosedLoopRampPeriod = 0;
 
     /**
      * Wrap position error within [-0.5,+0.5) mechanism rotations. Typically used for continuous position closed-loops like swerve azimuth.

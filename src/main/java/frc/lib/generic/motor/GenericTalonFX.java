@@ -269,7 +269,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     private void applyCurrentLimits() {
         talonConfig.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = currentConfiguration.dutyCycleOpenLoopRampPeriod;
-        talonConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = currentConfiguration.dutyCycleCloseLoopRampPeriod;
+        talonConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = currentConfiguration.dutyCycleClosedLoopRampPeriod;
 
         if (currentConfiguration.statorCurrentLimit != -1) {
             talonConfig.CurrentLimits.StatorCurrentLimitEnable = true;

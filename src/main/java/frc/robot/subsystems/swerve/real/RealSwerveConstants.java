@@ -134,7 +134,7 @@ public class RealSwerveConstants extends SwerveConstants {
         driveMotorConfiguration.slot0 = DRIVE_SLOT;
 
         driveMotorConfiguration.dutyCycleOpenLoopRampPeriod = OPEN_LOOP_RAMP;
-        driveMotorConfiguration.dutyCycleCloseLoopRampPeriod = CLOSED_LOOP_RAMP;
+        driveMotorConfiguration.dutyCycleClosedLoopRampPeriod = CLOSED_LOOP_RAMP;
     }
 
     private static void configureSteerConfiguration() {
