@@ -6,7 +6,9 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
@@ -14,6 +16,7 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheel.Flywheel;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.kicker.Kicker;
+import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -29,6 +32,7 @@ public class RobotContainer {
     public static final Flywheel FLYWHEEL = new Flywheel();
     public static final Intake INTAKE = new Intake();
     public static final Kicker KICKER = new Kicker();
+    public static final Leds LEDS = new Leds();
 
     private final ShooterCommands shooterCommands = new ShooterCommands();
 
@@ -44,6 +48,9 @@ public class RobotContainer {
 
     private void configureBindings() {
         DriverStation.silenceJoystickConnectionWarning(true);
+
+        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
+        new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);

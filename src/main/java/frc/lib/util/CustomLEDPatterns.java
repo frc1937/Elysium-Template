@@ -1,5 +1,6 @@
 package frc.lib.util;
 
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
@@ -7,7 +8,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import java.util.Arrays;
 
 public class CustomLEDPatterns {
-    private static final int LEDS_COUNT = 40;
+    public static final int LEDS_COUNT = 46;
 
     private static int counter;
     private static int previousColour = 0;
@@ -31,6 +32,18 @@ public class CustomLEDPatterns {
     public static Color8Bit[] generateSingleColourBuffer(Color8Bit colour) {
         Arrays.fill(buffer, colour);
         return buffer;
+    }
+
+    /**
+     * Set the buffer from the colour
+     * @param ledBuffer - the ledbuffer to set
+     */
+    public static AddressableLEDBuffer getBufferFromColours(AddressableLEDBuffer ledBuffer, Color8Bit[] buffer) {
+        for (int i = 0; i < buffer.length; i++) {
+            ledBuffer.setLED(i, buffer[i]);
+        }
+
+        return ledBuffer;
     }
 
     /**
@@ -91,7 +104,7 @@ public class CustomLEDPatterns {
      * @param colours - The colours
      * @return - The filled buffer
      */
-    public static Color8Bit[] generateNewCirclingBuffer(Color8Bit... colours) {
+    public static Color8Bit[] generateCirclingBuffer(Color8Bit... colours) {
         int colorsLength = colours.length;
         float timerValue = (float) timer.get(); // Get current timer value
         float timerPosition = timerValue * 13f % LEDS_COUNT; // Adjust the multiplier to control the speed
