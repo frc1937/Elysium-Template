@@ -183,8 +183,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configureProfile(MotorConfiguration configuration) {
-        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity, slotToUse);
-        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration, slotToUse);
+        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
+        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60 , slotToUse);
 
 //        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
         controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
