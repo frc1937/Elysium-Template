@@ -20,11 +20,7 @@ public class MotorProperties {
         /** In rotations */
         POSITION,
         /** In rotations per second */
-        VELOCITY,
-
-        PROFILED_POSITION,
-
-        PROFILED_VELOCITY
+        VELOCITY
     }
 
     public enum SparkType {

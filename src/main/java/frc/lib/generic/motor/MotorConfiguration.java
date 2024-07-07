@@ -41,4 +41,29 @@ public class MotorConfiguration {
 
     /** Convert between 1 system rotation to motor rotation. 1 / num*/
     public double gearRatio = 1;
+
+    /**
+     * This is the maximum velocity of the motion profile. Only set this if a profile is desired.
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Maximum Value:</b> 9999
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> rps
+     * </ul>
+     */
+    public double profiledMaxVelocity = 0;
+
+    /**
+     * This is the target acceleration the motion profile will try to honour.
+     * Only set this if a profile is desired.
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Maximum Value:</b> 9999
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> rot per sec²
+     * </ul>
+     */
+    public double profiledTargetAcceleration = 0;
 }
