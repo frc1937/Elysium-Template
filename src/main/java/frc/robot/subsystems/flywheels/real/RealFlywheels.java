@@ -1,7 +1,8 @@
 package frc.robot.subsystems.flywheels.real;
 
 import frc.robot.subsystems.flywheels.FlywheelsIO;
-import frc.robot.subsystems.shooter.FlywheelsInputsAutoLogged;
+import frc.robot.subsystems.flywheels.FlywheelsInputsAutoLogged;
+
 
 public class RealFlywheels extends FlywheelsIO {
     @Override

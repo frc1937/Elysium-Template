@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -66,7 +67,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(shooterCommands.receiveFloorNote());
+        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(15, Rotation2d.fromDegrees(35)));
 
 //
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());

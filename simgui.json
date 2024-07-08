@@ -45,11 +45,6 @@
           "visible": true
         }
       },
-      "/SmartDashboard/Mechanism/FlywheelLeftSim": {
-        "window": {
-          "visible": true
-        }
-      },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -69,6 +64,12 @@
     },
     "transitory": {
       "AdvantageKit": {
+        "Flywheel": {
+          "RightSim": {
+            "open": true
+          },
+          "open": true
+        },
         "RealOutputs": {
           "Logger": {
             "open": true

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.flywheels;
 
 import frc.lib.math.Conversions;
-import frc.robot.subsystems.shooter.SingleFlywheelInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
@@ -27,8 +26,16 @@ public class SingleFlywheelIO {
     }
 
     protected boolean hasReachedTarget() {
-        return Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond -
-                singleFlywheelInputs.velocityRotationsPerSecond) < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
+        double positiveDifference = Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond -
+                singleFlywheelInputs.velocityRotationsPerSecond);
+
+        double negativeDifference = Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond +
+                singleFlywheelInputs.velocityRotationsPerSecond); //to account for inverted motors
+
+        Logger.recordOutput("HAS REACHED? NO! + postivei" + name, positiveDifference);
+        Logger.recordOutput("HAS REACHED? NO! + negative " + name, negativeDifference);
+
+        return positiveDifference < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS || negativeDifference < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
     }
 
     protected double getFlywheelDiameter() {

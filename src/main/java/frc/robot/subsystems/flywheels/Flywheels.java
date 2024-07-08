@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.util.commands.ExecuteEndCommand;
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.shooter.FlywheelsInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 public class Flywheels extends SubsystemBase {

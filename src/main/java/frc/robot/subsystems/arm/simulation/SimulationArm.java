@@ -32,6 +32,8 @@ public class SimulationArm extends ArmIO {
 
     @Override
     public boolean hasReachedTarget() {
+        if(targetPosition == null) return false;
+
         return Math.abs(ARM_MOTOR.getPositionRotations() - targetPosition.getRotations()) < TOLERANCE_ROTATIONS;
     }
 

@@ -5,7 +5,7 @@ import frc.lib.generic.simulation.FlywheelSimulation;
 import frc.lib.generic.simulation.mechanisms.SpeedMechanism2d;
 import frc.robot.subsystems.flywheels.FlywheelsConstants;
 import frc.robot.subsystems.flywheels.SingleFlywheelIO;
-import frc.robot.subsystems.shooter.SingleFlywheelInputsAutoLogged;
+import frc.robot.subsystems.flywheels.SingleFlywheelInputsAutoLogged;
 
 public class SimulatedSingleFlywheel extends SingleFlywheelIO {
     private final FlywheelSimulation motor;

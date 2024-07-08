@@ -27,6 +27,8 @@ public class RealArm extends ArmIO {
 
     @Override
     public boolean hasReachedTarget() {
+        if (targetPosition == null) return false;
+
         return Math.abs(ABSOLUTE_ARM_ENCODER.getEncoderPosition() - targetPosition.getRotations()) < TOLERANCE_ROTATIONS;
     }
 

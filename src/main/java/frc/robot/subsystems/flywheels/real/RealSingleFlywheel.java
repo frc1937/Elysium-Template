@@ -3,7 +3,7 @@ package frc.robot.subsystems.flywheels.real;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.flywheels.SingleFlywheelIO;
-import frc.robot.subsystems.shooter.SingleFlywheelInputsAutoLogged;
+import frc.robot.subsystems.flywheels.SingleFlywheelInputsAutoLogged;
 
 public class RealSingleFlywheel extends SingleFlywheelIO {
     private final Motor motor;

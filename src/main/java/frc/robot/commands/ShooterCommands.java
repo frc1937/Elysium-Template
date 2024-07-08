@@ -11,7 +11,7 @@ public class ShooterCommands {
     public Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEEL.setFlywheelsTargetVelocity(-15),
+                        FLYWHEEL.setFlywheelsTangentialVelocity(-15),
                         INTAKE.setIntakeSpeed(0.5),
                         KICKER.setKickerPercentageOutput(0.5)
                 );
@@ -24,14 +24,15 @@ public class ShooterCommands {
         );
     }
 
-    public Command shootWithoutPhysics(double tangentialVelocity, Rotation2d armAngle) {
-
+    public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
         return ARM.setTargetPosition(armAngle)
-                .alongWith(FLYWHEEL.setFlywheelsTangentialVelocity(15))
-
-                .until(FLYWHEEL::hasReachedTarget)
-                .until(ARM::hasReachedTarget)
-
-                .andThen(KICKER.setKickerPercentageOutput(0.5));
+                .alongWith(FLYWHEEL.setFlywheelsTargetVelocity(targetRPS))
+                .until(() -> FLYWHEEL.hasReachedTarget() && ARM.hasReachedTarget()
+                )
+                //todo: fix it going back when reaching speed
+                .andThen(
+                        KICKER.setKickerPercentageOutput(0.5),
+                        FLYWHEEL.setFlywheelsTargetVelocity(targetRPS)
+                );
     }
 }
