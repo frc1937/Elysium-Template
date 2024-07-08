@@ -13,7 +13,7 @@ import java.util.Optional;
 import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
 
 public class RealFlywheelsConstants extends FlywheelsConstants {
-    private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark(16, MotorProperties.SparkType.FLEX);
+    private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark(28, MotorProperties.SparkType.FLEX);
     private static final Motor RIGHT_FLYWHEEL_MOTOR = new GenericSpark(15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot LEFT_SLOT =
@@ -32,12 +32,16 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.inverted = invert;
 
-        configuration.supplyCurrentLimit = 80;
-        configuration.statorCurrentLimit = 100;
+        configuration.supplyCurrentLimit = 40;
+        configuration.statorCurrentLimit = 40;
 
         configuration.slot0 = new MotorProperties.Slot(0.001, 0, 0, 0, 0, 0);// slot;
 
-        motor.configure(configuration);
+        int i = 0;
+
+        while (!motor.configure(configuration) && i < 10) {
+            i++;
+        }
 
         motor.setSignalUpdateFrequency(Properties.SignalType.CLOSED_LOOP_TARGET, 50);
         motor.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
@@ -47,9 +51,9 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
 
     @Override
     protected Optional<SingleFlywheelIO[]> getFlywheels() {
-        return ofReplayable(() -> new SingleFlywheelIO[] {
-            new RealSingleFlywheel("Left", LEFT_FLYWHEEL_MOTOR, LEFT_FLYWHEEL_DIAMETER),
-            new RealSingleFlywheel("Right", RIGHT_FLYWHEEL_MOTOR, RIGHT_FLYWHEEL_DIAMETER)
+        return ofReplayable(() -> new SingleFlywheelIO[]{
+                new RealSingleFlywheel("Right", RIGHT_FLYWHEEL_MOTOR, RIGHT_FLYWHEEL_DIAMETER),
+                new RealSingleFlywheel("Left", LEFT_FLYWHEEL_MOTOR, LEFT_FLYWHEEL_DIAMETER)
         });
     }
 }

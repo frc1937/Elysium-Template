@@ -19,7 +19,7 @@ public abstract class FlywheelsConstants {
 
     public static final double MAXIMUM_VELOCITY_RPM = 5400;
 
-    protected static final boolean LEFT_MOTOR_INVERT = false;
+    protected static final boolean LEFT_MOTOR_INVERT = true;
     protected static final boolean RIGHT_MOTOR_INVERT = true;
 
     protected static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(

@@ -13,7 +13,6 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
@@ -30,7 +29,7 @@ public class Robot extends LoggedRobot {
 
         if (CURRENT_MODE == GlobalConstants.Mode.REAL || CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             Logger.addDataReceiver(new NT4Publisher());
-            Logger.addDataReceiver(new WPILOGWriter(logPath));
+//            Logger.addDataReceiver(new WPILOGWriter(logPath));
         } else {
             setUseTiming(true);
             logPath = LogFileUtil.findReplayLog();
@@ -38,7 +37,7 @@ public class Robot extends LoggedRobot {
             final String logWriterPath = LogFileUtil.addPathSuffix(logPath, "_replay");
 
             Logger.setReplaySource(new WPILOGReader(logPath));
-            Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
+//            Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
         }
 
         Logger.start();
