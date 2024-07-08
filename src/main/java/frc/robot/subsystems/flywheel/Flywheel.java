@@ -17,7 +17,6 @@ import static frc.robot.subsystems.flywheel.FlywheelConstants.SYSID_CONFIG;
 
 public class Flywheel extends SubsystemBase {
     private final FlywheelIO[] flywheels = generateFlywheels();
-
     private final SysIdRoutine routine;
 
     public Flywheel() {
@@ -92,13 +91,11 @@ public class Flywheel extends SubsystemBase {
 
     private void setFlywheelsTargetVelocity(double velocityRotationsPerSecond) {
         for (FlywheelIO flywheel : flywheels) {
-            System.out.println("Flywheel #" + flywheel.getName());
             setFlywheelTargetVelocity(flywheel, velocityRotationsPerSecond);
         }
     }
 
     private void setFlywheelTargetVelocity(FlywheelIO flywheel, double velocityRotationsPerSecond) {
-        System.out.println("NIGFlywheel #" + flywheel.getName());
         flywheel.setTargetVelocity(velocityRotationsPerSecond);
     }
 

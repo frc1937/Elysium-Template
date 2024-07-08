@@ -17,7 +17,6 @@ public class SimulatedFlywheel extends FlywheelIO {
 
     private double targetRPS = 0;
 
-
     public SimulatedFlywheel(FlywheelSimulation motor, String name, boolean inverted, double diameter) {
         super(name);
 

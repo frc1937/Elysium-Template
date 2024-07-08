@@ -12,7 +12,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.util.LoggedTunableNumber;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.real.RealSwerveConstants;
-import frc.robot.subsystems.swerve.simulationswerve.SimulationSwerveConstants;
+import frc.robot.subsystems.swerve.simulation.SimulationSwerveConstants;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -67,7 +67,7 @@ public abstract class SwerveConstants {
             new ReplanningConfig(true, false)
     );
 
-    protected static <T> Optional<T> ofReplayable(Supplier<T> value) {
+    public static <T> Optional<T> ofReplayable(Supplier<T> value) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return Optional.empty();
 

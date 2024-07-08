@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.simulationswerve;
+package frc.robot.subsystems.swerve.simulation;
 
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.system.plant.DCMotor;
