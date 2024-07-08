@@ -16,10 +16,14 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
     private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark(28, MotorProperties.SparkType.FLEX);
     private static final Motor RIGHT_FLYWHEEL_MOTOR = new GenericSpark(15, MotorProperties.SparkType.FLEX);
 
-    private static final MotorProperties.Slot LEFT_SLOT =
-            new MotorProperties.Slot(0.003, 0.0, 0.0, 0.0969743, 0.0, 0.02426);
-    private static final MotorProperties.Slot RIGHT_SLOT =
-            new MotorProperties.Slot(0.003, 0.0, 0.0, 0.097728, 0.0, 0.022648);
+//    private static final MotorProperties.Slot LEFT_SLOT =
+//            new MotorProperties.Slot(0.003, 0.0, 0.0, 0.0969743, 0.0, 0.02426);
+//    private static final MotorProperties.Slot RIGHT_SLOT =
+//            new MotorProperties.Slot(0.003, 0.0, 0.0, 0.097728, 0.0, 0.022648);
+
+    private static final MotorProperties.Slot
+            LEFT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0),
+            RIGHT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0);
 
     static {
         configureMotor(LEFT_FLYWHEEL_MOTOR, true, LEFT_SLOT);
@@ -35,7 +39,7 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
         configuration.supplyCurrentLimit = 40;
         configuration.statorCurrentLimit = 40;
 
-        configuration.slot0 = new MotorProperties.Slot(0.001, 0, 0, 0, 0, 0);// slot;
+        configuration.slot0 = slot;
 
         int i = 0;
 

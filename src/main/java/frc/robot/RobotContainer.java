@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
@@ -67,7 +68,10 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(15, Rotation2d.fromDegrees(35)));
+        driveController.getButton(Controller.Inputs.A)
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(35)));
+
+        configureButtons(ButtonLayout.CHARACTERIZE_ARM);
 
 //
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
@@ -87,7 +91,24 @@ public class RobotContainer {
 //                ));
     }
 
+    private void configureButtons(ButtonLayout layout) {
+        switch (layout) {
+            case CHARACTERIZE_ARM -> {
+                driveController.getButton(Controller.Inputs.A).whileTrue(ARM.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
+                driveController.getButton(Controller.Inputs.B).whileTrue(ARM.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
+                driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
+                driveController.getButton(Controller.Inputs.X).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
+            }
+        }
+    }
+
     public Command getAutonomousCommand() {
         return autoChooser.get();
+    }
+
+    private enum ButtonLayout {
+        TELEOP,
+        CHARACTERIZE_FLYWHEEL,
+        CHARACTERIZE_ARM
     }
 }
