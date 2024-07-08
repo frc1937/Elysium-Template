@@ -11,7 +11,7 @@ public class ShooterCommands {
     public Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEEL.setFlywheelTarget(-15),
+                        FLYWHEEL.setFlywheelsTargetVelocity(-15),
                         INTAKE.setIntakeSpeed(0.5),
                         KICKER.setKickerPercentageOutput(0.5)
                 );
@@ -19,7 +19,7 @@ public class ShooterCommands {
 
     public Command shootToTargetWithPhysics(Pose2d target, double tangentialVelocity) {
         return SWERVE.rotateToTarget(target).alongWith(
-                FLYWHEEL.setFlywheelTargetTangentialVelocity(tangentialVelocity),
+                FLYWHEEL.setFlywheelsTangentialVelocity(tangentialVelocity),
                 ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
         );
     }
@@ -27,7 +27,7 @@ public class ShooterCommands {
     public Command shootWithoutPhysics(double tangentialVelocity, Rotation2d armAngle) {
 
         return ARM.setTargetPosition(armAngle)
-                .alongWith(FLYWHEEL.setFlywheelTarget(15))
+                .alongWith(FLYWHEEL.setFlywheelsTangentialVelocity(15))
 
                 .until(FLYWHEEL::hasReachedTarget)
                 .until(ARM::hasReachedTarget)

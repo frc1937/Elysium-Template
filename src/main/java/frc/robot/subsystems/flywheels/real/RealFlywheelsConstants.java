@@ -1,14 +1,18 @@
-package frc.robot.subsystems.flywheel.real;
+package frc.robot.subsystems.flywheels.real;
 
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.GenericSpark;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
-import frc.robot.subsystems.flywheel.FlywheelConstants;
-import frc.robot.subsystems.flywheel.FlywheelIO;
+import frc.robot.subsystems.flywheels.FlywheelsConstants;
+import frc.robot.subsystems.flywheels.SingleFlywheelIO;
 
-public class RealFlywheelConstants extends FlywheelConstants {
+import java.util.Optional;
+
+import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
+
+public class RealFlywheelsConstants extends FlywheelsConstants {
     private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark(16, MotorProperties.SparkType.FLEX);
     private static final Motor RIGHT_FLYWHEEL_MOTOR = new GenericSpark(15, MotorProperties.SparkType.FLEX);
 
@@ -17,14 +21,14 @@ public class RealFlywheelConstants extends FlywheelConstants {
     private static final MotorProperties.Slot RIGHT_SLOT =
             new MotorProperties.Slot(0.003, 0.0, 0.0, 0.097728, 0.0, 0.022648);
 
-    private static final MotorConfiguration configuration = new MotorConfiguration();
-
     static {
         configureMotor(LEFT_FLYWHEEL_MOTOR, true, LEFT_SLOT);
-        configureMotor(RIGHT_FLYWHEEL_MOTOR, RIGHT_MOTOR_INVERT, RIGHT_SLOT);
+        configureMotor(RIGHT_FLYWHEEL_MOTOR, false, RIGHT_SLOT);
     }
 
     private static void configureMotor(Motor motor, boolean invert, MotorProperties.Slot slot) {
+        MotorConfiguration configuration = new MotorConfiguration();
+
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.inverted = invert;
 
@@ -41,10 +45,11 @@ public class RealFlywheelConstants extends FlywheelConstants {
         motor.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
     }
 
-    public static FlywheelIO[] getFlywheels() {
-        return new RealFlywheel[]{
-                new RealFlywheel(LEFT_FLYWHEEL_MOTOR, "LeftReal", LEFT_FLYWHEEL_DIAMETER),
-                new RealFlywheel(RIGHT_FLYWHEEL_MOTOR, "RightReal", RIGHT_FLYWHEEL_DIAMETER)
-        };
+    @Override
+    protected Optional<SingleFlywheelIO[]> getFlywheels() {
+        return ofReplayable(() -> new SingleFlywheelIO[] {
+            new RealSingleFlywheel("Left", LEFT_FLYWHEEL_MOTOR, LEFT_FLYWHEEL_DIAMETER),
+            new RealSingleFlywheel("Right", RIGHT_FLYWHEEL_MOTOR, RIGHT_FLYWHEEL_DIAMETER)
+        });
     }
 }

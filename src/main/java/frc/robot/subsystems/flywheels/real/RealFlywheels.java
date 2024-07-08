@@ -1,13 +1,11 @@
-package frc.robot.subsystems.shooter.real;
+package frc.robot.subsystems.flywheels.real;
 
-import frc.robot.subsystems.shooter.FlywheelsIO;
+import frc.robot.subsystems.flywheels.FlywheelsIO;
 import frc.robot.subsystems.shooter.FlywheelsInputsAutoLogged;
 
 public class RealFlywheels extends FlywheelsIO {
-
-
     @Override
     protected void refreshInputs(FlywheelsInputsAutoLogged inputs) {
-
+        //todo: delete and remove (IF WORKS);
     }
 }

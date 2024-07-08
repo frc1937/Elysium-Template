@@ -1,5 +1,7 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.flywheels;
 
+import frc.lib.math.Conversions;
+import frc.robot.subsystems.shooter.SingleFlywheelInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,7 +23,16 @@ public class SingleFlywheelIO {
     protected void setTargetVelocityRPS(double velocityRPS) { }
 
     protected void setTargetTangentialVelocity(double tangentialVelocity) {
-        setTargetVelocityRPS(tangentialVelocity / getFlywheelDiameter() * 60);
+        setTargetVelocityRPS(Conversions.mpsToRps(tangentialVelocity, getFlywheelDiameter()));
+    }
+
+    protected boolean hasReachedTarget() {
+        return Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond -
+                singleFlywheelInputs.velocityRotationsPerSecond) < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
+    }
+
+    protected double getFlywheelDiameter() {
+        return 0;
     }
 
     protected void flywheelPeriodic() { }

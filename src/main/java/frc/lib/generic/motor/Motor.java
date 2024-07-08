@@ -113,7 +113,7 @@ public interface Motor {
 
     /**
      * Refreshes all status signals.
-     * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}}}.
+     * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}.
      * DO NOT USE if not necessary.
      */
     void refreshStatusSignals(Properties.SignalType... signalTypes);

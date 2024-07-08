@@ -1,8 +1,9 @@
-package frc.robot.subsystems.shooter;
+package frc.robot.subsystems.flywheels;
 
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.shooter.real.RealFlywheels;
-import frc.robot.subsystems.shooter.simulation.SimulatedFlywheels;
+import frc.robot.subsystems.shooter.FlywheelsInputsAutoLogged;
+import frc.robot.subsystems.flywheels.real.RealFlywheels;
+import frc.robot.subsystems.flywheels.simulation.SimulatedFlywheels;
 import org.littletonrobotics.junction.AutoLog;
 
 public class FlywheelsIO {
@@ -24,6 +25,5 @@ public class FlywheelsIO {
 
     @AutoLog
     protected static class FlywheelsInputs {
-        public double currentTangentialVelocity = 0;
     }
 }

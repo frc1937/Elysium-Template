@@ -1,16 +1,14 @@
-package frc.robot.subsystems.shooter.simulation;
+package frc.robot.subsystems.flywheels.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.FlywheelSimulation;
-import frc.robot.subsystems.flywheel.simulation.SimulatedFlywheel;
-import frc.robot.subsystems.shooter.FlywheelsConstants;
-import frc.robot.subsystems.shooter.SingleFlywheelIO;
+import frc.robot.subsystems.flywheels.FlywheelsConstants;
+import frc.robot.subsystems.flywheels.SingleFlywheelIO;
 
 import java.util.Optional;
 
-import static frc.robot.subsystems.flywheel.FlywheelConstants.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
 
 public class SimulatedFlywheelsConstants extends FlywheelsConstants {
@@ -24,14 +22,14 @@ public class SimulatedFlywheelsConstants extends FlywheelsConstants {
             LEFT_SLOT = new MotorProperties.Slot(12, 0, 0),
             RIGHT_SLOT = new MotorProperties.Slot(10, 0, 0);
 
-    private static final MotorConfiguration configuration = new MotorConfiguration();
-
     static {
         configureMotor(LEFT_MOTOR, true, LEFT_SLOT);
         configureMotor(RIGHT_MOTOR, false, RIGHT_SLOT);
     }
 
     private static void configureMotor(FlywheelSimulation motor, boolean invert, MotorProperties.Slot slot) {
+        MotorConfiguration configuration = new MotorConfiguration();
+
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.inverted = invert;
 
@@ -46,8 +44,8 @@ public class SimulatedFlywheelsConstants extends FlywheelsConstants {
     @Override
     protected Optional<SingleFlywheelIO[]> getFlywheels() {
         return ofReplayable(() -> new SingleFlywheelIO[] {
-                new SimulatedSingleFlywheel("LeftSim", LEFT_MOTOR, LEFT_MOTOR_INVERT, LEFT_FLYWHEEL_DIAMETER),
-                new SimulatedSingleFlywheel(RIGHT_MOTOR, "RightSim", RIGHT_MOTOR_INVERT, RIGHT_FLYWHEEL_DIAMETER)
+                new SimulatedSingleFlywheel("LeftSim", LEFT_MOTOR, LEFT_FLYWHEEL_DIAMETER, LEFT_MOTOR_INVERT),
+                new SimulatedSingleFlywheel("RightSim",RIGHT_MOTOR, RIGHT_FLYWHEEL_DIAMETER, RIGHT_MOTOR_INVERT)
         });
     }
 }

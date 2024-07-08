@@ -23,7 +23,6 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
             case PERCENTAGE_OUTPUT -> super.set(ControlMode.PercentOutput, output);
             case CURRENT -> super.set(ControlMode.Current, output);
             case VOLTAGE -> super.setVoltage(output);
-            case PROFILED_POSITION, PROFILED_VELOCITY -> throw new UnsupportedOperationException("Not implemented yet. go fuck yourself");
         }
     }
 

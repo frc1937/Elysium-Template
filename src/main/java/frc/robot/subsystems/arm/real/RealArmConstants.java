@@ -16,7 +16,7 @@ public class RealArmConstants {
     static final Motor ARM_MOTOR = new GenericSpark(1, MotorProperties.SparkType.FLEX);
     static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
 
-    static final double PITCH_GEAR_RATIO = 1.0 / 149;
+    static final double PITCH_GEAR_RATIO = 149;
 
     static final Rotation2d PIVOT_ENCODER_OFFSET = Rotation2d.fromDegrees(21.478516);
 

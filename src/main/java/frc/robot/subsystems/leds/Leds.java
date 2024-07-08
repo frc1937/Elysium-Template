@@ -45,9 +45,10 @@ public class Leds extends SubsystemBase {
     }
 
     private Command getCommandFromColours(Color8Bit[] colours, double timeout) {
-        if (timeout == 0) return Commands.run(() -> flashLEDStrip(colours)).ignoringDisable(true);
+        if (timeout == 0)
+            return Commands.run(() -> flashLEDStrip(colours), this).ignoringDisable(true);
 
-        return Commands.run(() -> flashLEDStrip(colours)).withTimeout(timeout).ignoringDisable(true);
+        return Commands.run(() -> flashLEDStrip(colours), this).withTimeout(timeout).ignoringDisable(true);
     }
 
     private void flashLEDStrip(Color8Bit[] colours) {
