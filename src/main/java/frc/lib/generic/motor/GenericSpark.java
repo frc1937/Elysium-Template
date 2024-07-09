@@ -31,14 +31,14 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
         optimizeBusUsage();
 
-        encoder = getEncoder();
+        encoder = this.getEncoder();
         controller = super.getPIDController();
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
         Logger.recordOutput("ArmFF",
-                this.feedforward.calculate(
+                feedforward.calculate(
                         Units.rotationsToRadians(getSystemPosition())
                         , getSystemVelocity(), 0));
 
@@ -46,7 +46,10 @@ public class GenericSpark extends CANSparkBase implements Motor {
         Logger.recordOutput("FFVelocity", getSystemVelocity());
 
         setOutput(controlMode, output,
-                this.feedforward.calculate(Units.rotationsToRadians(getSystemPosition()), getSystemVelocity(), 0));
+                feedforward.calculate(
+                        Units.rotationsToRadians(getSystemPosition()),
+                        Units.rotationsToRadians(getSystemVelocity()),
+                        0));
     } //todo: change ff to use rotation2d
 
     @Override
@@ -57,10 +60,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> {
-                Logger.recordOutput("FFArm", feedforward);
-                controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
-            }
+            case POSITION -> controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
@@ -125,12 +125,12 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return encoder.getPosition(); // / currentConfiguration.gearRatio;
+        return encoder.getPosition() / currentConfiguration.gearRatio;
     }
 
     @Override
     public double getSystemVelocity() {
-        return encoder.getVelocity() / 60; /// (60 * currentConfiguration.gearRatio);
+        return encoder.getVelocity() / (60 * currentConfiguration.gearRatio);
     }
 
     @Override
@@ -194,9 +194,6 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
         super.setIdleMode(configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? IdleMode.kBrake : IdleMode.kCoast);
         super.setInverted(configuration.inverted);
-
-        encoder.setPositionConversionFactor(1 / configuration.gearRatio);
-        encoder.setVelocityConversionFactor(1 / configuration.gearRatio);
 
         super.enableVoltageCompensation(12);
 
