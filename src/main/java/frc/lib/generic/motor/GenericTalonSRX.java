@@ -134,7 +134,7 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
         talonSRXConfiguration.openloopRamp = configuration.dutyCycleOpenLoopRampPeriod;
         talonSRXConfiguration.closedloopRamp = configuration.dutyCycleClosedLoopRampPeriod;
 
-        talonSRXConfiguration.feedbackNotContinuous = !configuration.closedLoopContinousWrap;
+        talonSRXConfiguration.feedbackNotContinuous = !configuration.closedLoopContinuousWrap;
 
         talonSRXConfiguration.peakCurrentLimit = (int) configuration.statorCurrentLimit;
 

@@ -238,7 +238,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinousWrap);
+        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
 
         controller.setP(configuration.slot0.kP(), 0);
         controller.setI(configuration.slot0.kI(), 0);

@@ -146,6 +146,6 @@ public class RealSwerveConstants extends SwerveConstants {
 
         steerMotorConfiguration.gearRatio = ANGLE_GEAR_RATIO;
 
-        steerMotorConfiguration.closedLoopContinousWrap = true;
+        steerMotorConfiguration.closedLoopContinuousWrap = true;
     }
 }
