@@ -3,9 +3,15 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.SparkRelativeEncoder;
+import edu.wpi.first.math.util.Units;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import org.littletonrobotics.junction.Logger;
 
 public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
@@ -31,9 +37,17 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        Logger.recordOutput("ArmFF",
+                this.feedforward.calculate(
+                        Units.rotationsToRadians(getSystemPosition())
+                        , getSystemVelocity(), 0));
+
+        Logger.recordOutput("FFPosition", getSystemPosition());
+        Logger.recordOutput("FFVelocity", getSystemVelocity());
+
         setOutput(controlMode, output,
-                this.feedforward.calculate(getSystemPosition(), getSystemVelocity(), 0));
-    }
+                this.feedforward.calculate(Units.rotationsToRadians(getSystemPosition()), getSystemVelocity(), 0));
+    } //todo: change ff to use rotation2d
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
@@ -43,7 +57,10 @@ public class GenericSpark extends CANSparkBase implements Motor {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
+            case POSITION -> {
+                Logger.recordOutput("FFArm", feedforward);
+                controller.setReference(output, ControlType.kPosition, slotToUse, feedforward);
+            }
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
@@ -88,12 +105,12 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getMotorPosition() {
-        return getSystemPosition() / encoder.getPositionConversionFactor();
+        return encoder.getPosition();
     }
 
     @Override
     public double getMotorVelocity() {
-        return encoder.getVelocity() / 60 * encoder.getVelocityConversionFactor();
+        return encoder.getVelocity() / 60;
     }
 
     @Override
@@ -108,12 +125,12 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return encoder.getPosition();
+        return encoder.getPosition(); // / currentConfiguration.gearRatio;
     }
 
     @Override
     public double getSystemVelocity() {
-        return encoder.getVelocity() / 60;
+        return encoder.getVelocity() / 60; /// (60 * currentConfiguration.gearRatio);
     }
 
     @Override
@@ -123,7 +140,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getVoltage() {
-        return super.getBusVoltage();
+        return super.getBusVoltage() * getAppliedOutput();
     }
 
 
@@ -260,7 +277,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
      * Only call this ONCE at the beginning.
      */
     private void optimizeBusUsage() {
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 500);
+        super.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10000);
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10000);
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10000);
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 10000);

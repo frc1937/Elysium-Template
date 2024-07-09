@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import frc.lib.generic.motor.MotorProperties;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.arm.real.RealArm;
 import frc.robot.subsystems.arm.simulation.SimulationArm;
@@ -21,6 +22,9 @@ public class ArmIO {
 
     protected void setRawVoltage(double voltage) { }
     protected void setTargetPosition(Rotation2d targetPosition) { }
+    protected void stop() { }
+
+    protected void setIdleMode(MotorProperties.IdleMode idleMode) { }
 
     protected boolean hasReachedTarget() { return false; }
 
@@ -31,6 +35,7 @@ public class ArmIO {
         public double positionRotations = 0;
         public double velocityRotationsPerSecond = 0;
 
+        public double targetRotations = 0;
         public double voltage = 0;
     }
 }

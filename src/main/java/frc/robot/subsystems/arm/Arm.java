@@ -3,12 +3,15 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.util.commands.ExecuteEndCommand;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
 
 public class Arm extends SubsystemBase {
@@ -32,7 +35,10 @@ public class Arm extends SubsystemBase {
     }
 
     public Command setTargetPosition(Rotation2d targetPosition) {
-        return Commands.run(() -> armIO.setTargetPosition(targetPosition), this);
+        return new ExecuteEndCommand(
+                () -> armIO.setTargetPosition(targetPosition),
+                armIO::stop,
+                this);
     }
 
     public Command sysIdQuastaticTest(SysIdRoutine.Direction direction) {
@@ -49,6 +55,10 @@ public class Arm extends SubsystemBase {
         Logger.processInputs("Arm", armInputs);
 
         armIO.periodic();
+    }
+
+    public void setIdleMode(MotorProperties.IdleMode idleMode) {
+        armIO.setIdleMode(idleMode);
     }
 
     private void sysIdLogArm(SysIdRoutineLog log) {

@@ -14,7 +14,7 @@ import frc.lib.generic.motor.MotorProperties;
 
 public class RealArmConstants {
     static final Motor ARM_MOTOR = new GenericSpark(1, MotorProperties.SparkType.FLEX);
-    static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
+    public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
 
     static final double PITCH_GEAR_RATIO = 149;
 
@@ -46,6 +46,7 @@ public class RealArmConstants {
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
         ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
+        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
     }
 
     private static void configureMotor() {
@@ -56,10 +57,9 @@ public class RealArmConstants {
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;
 
-        motorConfiguration.slot0 = new MotorProperties.Slot(
-                1, 0, 0,
-                0, 0, 0, 0.1,
-                GravityTypeValue.Arm_Cosine
+        motorConfiguration.slot0 =
+//                new MotorProperties.Slot(0, 0, 0, 0 , 0, 0, 1, GravityTypeValue.Arm_Cosine
+                new MotorProperties.Slot(0, 0, 0, 15.825 / 12 , 0.85843, 0.097736, 0.22308, GravityTypeValue.Arm_Cosine
 //                PITCH_KP,
 //                PITCH_KI,
 //                PITCH_KD,
@@ -71,5 +71,9 @@ public class RealArmConstants {
         );
 
         ARM_MOTOR.configure(motorConfiguration);
+
+        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
+        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
+        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
     }
 }

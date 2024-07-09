@@ -58,8 +58,8 @@ public class MotorProperties {
 
         public Slot(double kP, double kI, double kD, double kV, double kA, double kS, double kG, GravityTypeValue gravityType) {
             this.kP = kP;
-            this.kD = kD;
             this.kI = kI;
+            this.kD = kD;
             this.kV = kV;
             this.kA = kA;
             this.kS = kS;

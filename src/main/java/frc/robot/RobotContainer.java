@@ -9,16 +9,18 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.generic.motor.MotorProperties;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
-import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -37,6 +39,8 @@ public class RobotContainer {
     public static final Leds LEDS = new Leds();
 
     private final ShooterCommands shooterCommands = new ShooterCommands();
+
+    private final Trigger userButton = new Trigger(RobotController::getUserButton);
 
     private final Controller driveController = new Controller(0);
 
@@ -69,8 +73,18 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(35)));
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(40)));
 
+        userButton.toggleOnTrue(Commands.startEnd(
+                () -> {
+                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
+                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
+                },
+
+                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+
+                ARM, LEDS).ignoringDisable(true)
+        ).debounce(0.5);
         configureButtons(ButtonLayout.TELEOP);
     }
 

@@ -30,7 +30,7 @@ public class Robot extends LoggedRobot {
 
         if (CURRENT_MODE == GlobalConstants.Mode.REAL || CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             Logger.addDataReceiver(new NT4Publisher());
-            Logger.addDataReceiver(new WPILOGWriter(logPath));
+//            Logger.addDataReceiver(new WPILOGWriter(logPath));
         } else {
             setUseTiming(true);
             logPath = LogFileUtil.findReplayLog();

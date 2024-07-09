@@ -37,9 +37,21 @@ public class RealArm extends ArmIO {
     }
 
     @Override
+    protected void stop() {
+        ARM_MOTOR.stopMotor();
+    }
+
+    @Override
+    protected void setIdleMode(MotorProperties.IdleMode idleMode) {
+        ARM_MOTOR.setIdleMode(idleMode);
+    }
+
+    @Override
     public void refreshInputs(ArmInputsAutoLogged armInputs) {
         armInputs.positionRotations = ABSOLUTE_ARM_ENCODER.getEncoderPosition();
         armInputs.velocityRotationsPerSecond = ARM_MOTOR.getSystemVelocity();
+
+        armInputs.targetRotations = targetPosition.getRotations();
 
         armInputs.voltage = ARM_MOTOR.getVoltage();
     }

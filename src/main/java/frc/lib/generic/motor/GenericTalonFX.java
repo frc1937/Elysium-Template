@@ -166,7 +166,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public double getVoltage() {
-        return getMotorVoltage().getValue();
+        return getMotorVoltage().refresh().getValue();
     }
 
     @Override
