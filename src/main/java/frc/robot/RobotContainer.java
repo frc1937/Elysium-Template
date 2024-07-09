@@ -31,7 +31,7 @@ public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
-    public static final Flywheels FLYWHEEL = new Flywheels();
+    public static final Flywheels FLYWHEELS = new Flywheels();
     public static final Intake INTAKE = new Intake();
     public static final Kicker KICKER = new Kicker();
     public static final Leds LEDS = new Leds();
@@ -71,24 +71,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(35)));
 
-        configureButtons(ButtonLayout.CHARACTERIZE_ARM);
-
-//
-//        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands.receiveFloorNote());
-//
-//        FLYWHEEL.sysIdDynamicTest(SysIdRoutine.Direction.kForward);
-
-//        new Trigger(driveController.getButton(Controller.Inputs.B)).whileTrue(
-//                shooterCommands.shootToTarget(BLUE_SPEAKER.toPose2d(), 15)
-//        );
-
-//        driveController.getButton(Controller.Inputs.BACK).onTrue(SWERVE.resetGyro());
-
-//        driveController.getButton(Controller.Inputs.A).whileTrue(
-//                SWERVE.driveWhilstRotatingToTarget(
-//                        translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(),
-//                        driveController.getButton(Controller.Inputs.LEFT_BUMPER)
-//                ));
+        configureButtons(ButtonLayout.CHARACTERIZE_FLYWHEEL);
     }
 
     private void configureButtons(ButtonLayout layout) {
@@ -98,6 +81,13 @@ public class RobotContainer {
                 driveController.getButton(Controller.Inputs.B).whileTrue(ARM.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
                 driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
                 driveController.getButton(Controller.Inputs.X).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
+            }
+
+            case CHARACTERIZE_FLYWHEEL -> {
+                driveController.getButton(Controller.Inputs.A).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
+                driveController.getButton(Controller.Inputs.B).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
+                driveController.getButton(Controller.Inputs.Y).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
+                driveController.getButton(Controller.Inputs.X).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
             }
         }
     }

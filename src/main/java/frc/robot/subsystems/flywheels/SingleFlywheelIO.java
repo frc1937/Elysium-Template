@@ -12,6 +12,10 @@ public class SingleFlywheelIO {
         this.name = name;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public void periodic() {
         refreshInputs(singleFlywheelInputs);
         Logger.processInputs("Flywheel/" + name + "/", singleFlywheelInputs);
@@ -24,6 +28,11 @@ public class SingleFlywheelIO {
     protected void setTargetTangentialVelocity(double tangentialVelocity) {
         setTargetVelocityRPS(Conversions.mpsToRps(tangentialVelocity, getFlywheelDiameter()));
     }
+
+    protected void setRawVoltage(double voltage) { }
+    protected double getVoltage() { return singleFlywheelInputs.voltage; }
+    protected double getVelocityRotationsPerSecond() { return singleFlywheelInputs.velocityRotationsPerSecond; }
+
 
     protected boolean hasReachedTarget() {
         double positiveDifference = Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond -

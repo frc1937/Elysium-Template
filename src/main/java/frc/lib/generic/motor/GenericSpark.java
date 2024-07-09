@@ -257,6 +257,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 10000);
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 10000);
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 10000);
+        super.setPeriodicFramePeriod(PeriodicFrame.kStatus7, 10000);
     }
 
     @Override

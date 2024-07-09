@@ -32,6 +32,11 @@ public class SimulatedSingleFlywheel extends SingleFlywheelIO {
     }
 
     @Override
+    protected void setRawVoltage(double voltage) {
+        motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
+    @Override
     protected double getFlywheelDiameter() {
         return flywheelDiameter;
     }
