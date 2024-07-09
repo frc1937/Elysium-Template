@@ -5,60 +5,131 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
-//TODO: Add talonSRX
 /**
  * Custom Motor class to allow switching and replacing motors quickly,
  * in addition of better uniformity across the code.
  */
 public interface Motor {
-    void setP(double kP, int slot);
+    /**
+     * In case you need to re-set the slot on runtime, use this.
+     *
+     * @param slot       The new slot values
+     * @param slotNumber The slot number to modify
+     */
+    void resetSlot(MotorProperties.Slot slot, int slotNumber);
 
     /**
-     * Put voltage to the motor according to the mode. Utilize the built-in feedforward and PID controller.
-     * If you need to you use something more advanced (E.G TrapezoidalProfile) use {@link Motor#setOutput(MotorProperties.ControlMode, double, double)}
-     * With a custom feedforward.
-     * <p>
-     * Feedforward only works for POSITION and VELOCITY control
+     * Sets the output of the motor based on the specified control mode and desired output value.
      *
-     * @param controlMode The type of output
-     * @param output      The output for the voltage
+     * <p>This method utilizes the built-in feedforward and PID controller to achieve precise control
+     * over the motor. The control mode determines how the output value is interpreted and applied
+     * to the motor. The supported control modes include:
+     * <ul>
+     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
+     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
+     *   <li>{@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT} - Achieve a specific duty cycle percentage.
+     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
+     * </ul>
+     * </p>
+     *
+     * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
+     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profiledMaxVelocity profiledMaxVelocity}
+     * and {@link MotorConfiguration#profiledTargetAcceleration profiledTargetAcceleration} are set.
+     * </p>
+     *
+     * @param controlMode the control mode for the motor
+     * @param output      the desired output value
      */
     void setOutput(MotorProperties.ControlMode controlMode, double output);
 
+
     /**
-     * Put voltage to the motor according to the mode. Use custom feedforward for the motor.
-     * Feedforward only works for POSITION and VELOCITY control.
+     * Sets the output of the motor based on the specified control mode, desired output value, and custom feedforward.
      *
-     * @param controlMode - The type of output
-     * @param output      - The output for the voltage
-     * @param feedforward - The custom feedforward to output the motor
+     * <p>This method utilizes the built-in feedforward and PID controller to achieve precise control
+     * over the motor. The control mode determines how the output value is interpreted and applied
+     * to the motor. The supported control modes include:
+     * <ul>
+     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
+     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
+     *   <li>{@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT} - Achieve a specific duty cycle percentage.
+     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
+     * </ul>
+     * </p>
+     *
+     * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
+     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profiledMaxVelocity profiledMaxVelocity}
+     * and {@link MotorConfiguration#profiledTargetAcceleration profiledTargetAcceleration} are set.
+     * </p>
+     *
+     * <p>The custom feedforward is used to provide additional control over the motor output, allowing for fine-tuned
+     * performance. Feedforward is applied only in {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes.
+     * </p>
+     *
+     * @param controlMode the control mode for the motor
+     * @param output      the desired output value (amperes for {@link MotorProperties.ControlMode#CURRENT CURRENT}, volts for {@link MotorProperties.ControlMode#VOLTAGE VOLTAGE},
+     *                    percentage for {@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT}, rotations for {@link MotorProperties.ControlMode#POSITION POSITION}
+     *                    or rotations per second for {@link MotorProperties.ControlMode#VELOCITY VELOCITY})
+     * @param feedforward the custom feedforward to be applied to the motor output
      */
     void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward);
 
+
+    /**
+     * Set the idle mode of the motor
+     *
+     * @param idleMode The new idle mode
+     */
     void setIdleMode(MotorProperties.IdleMode idleMode);
 
     /**
-     * Set the voltage of the motor to 0
+     * Stop the motor
      */
     void stopMotor();
 
+    /**
+     * Sets the encoder position of the motor to a specified value.
+     *
+     * <p>This method allows for manually setting the encoder position of the motor.
+     * This can be useful for resetting the encoder position to a known reference point
+     * or for calibrating the motor position in applications that require precise positional control.
+     * </p>
+     *
+     * @param position the desired encoder position to set, in rotations.
+     */
     void setMotorEncoderPosition(double position);
 
+    /**
+     * Get the ID of the motor
+     *
+     * @return The ID of the motor
+     */
     int getDeviceID();
 
     /**
-     * No gearing applied
+     * Retrieves the current position of the motor without any gearing applied.
      *
-     * @Units - In rotations
+     * <p>This method returns the position of the motor as measured by the encoder,
+     * without taking into account any gearing reductions or multipliers.
+     * </p>
+     *
+     * @return the current position of the motor in rotations
      */
     double getMotorPosition();
 
     /**
-     * No gearing applied
+     * Retrieves the current velocity of the motor, with no gearing applied.
      *
-     * @Units - In rotations per second
+     * <p>This method returns the velocity of the motor as measured by the encoder,
+     * without taking into account any gearing reductions or multipliers.
+     * </p>
+     *
+     * @return the current velocity of the motor, in rotations per second (RPS).
      */
     double getMotorVelocity();
+
 
     /**
      * Get the current running through the motor (STATOR current)

@@ -7,19 +7,44 @@ public class MotorProperties {
         COAST, BRAKE
     }
 
+    /**
+     * Enumeration of different control modes for a motor.
+     */
     public enum ControlMode {
-        /** Current, in amps */
+        /**
+         * Control the motor output based on the desired current.
+         * <p>Control type: Current control</p>
+         * <p>Units: Amperes (A)</p>
+         */
         CURRENT,
 
-        /** Voltage, in volts */
+        /**
+         * Control the motor output based on the desired voltage.
+         * <p>Control type: Voltage control</p>
+         * <p>Units: Volts (V)</p>
+         */
         VOLTAGE,
 
-        /** Duty cycle output. In what percentage of the cycle to input voltage. 0.5 being 50% percent.*/
+        /**
+         * Control the motor output based on the desired duty cycle.
+         * <p>Control type: Duty cycle control</p>
+         * <p>Units: Percentage (%)</p>
+         * <p>Note: 0.5 represents 50% duty cycle.</p>
+         */
         PERCENTAGE_OUTPUT,
 
-        /** In rotations */
+        /**
+         * Control the motor to achieve a specific position.
+         * <p>Control type: Position control</p>
+         * <p>Units: Rotations</p>
+         */
         POSITION,
-        /** In rotations per second */
+
+        /**
+         * Control the motor to achieve a specific velocity.
+         * <p>Control type: Velocity control</p>
+         * <p>Units: Rotations per second (RPS)</p>
+         */
         VELOCITY
     }
 

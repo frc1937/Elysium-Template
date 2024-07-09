@@ -32,8 +32,10 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     }
 
     @Override
-    public void setP(double kP, int slot) {
-        super.config_kP(slot, kP);
+    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
+        super.config_kP(slotNumber, slot.kP());
+        super.config_kI(slotNumber, slot.kI());
+        super.config_kD(slotNumber, slot.kD());
     }
 
     @Override

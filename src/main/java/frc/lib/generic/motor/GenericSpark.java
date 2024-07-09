@@ -3,20 +3,16 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkRelativeEncoder;
+import com.revrobotics.*;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import org.littletonrobotics.junction.Logger;
 
 public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
-
     private final RelativeEncoder encoder;
     private final SparkPIDController controller;
+
+    private MotorConfiguration currentConfiguration;
 
     private double closedLoopTarget;
     private Feedforward feedforward;
@@ -62,8 +58,6 @@ public class GenericSpark extends CANSparkBase implements Motor {
     @Override
     public void setMotorEncoderPosition(double position) {
         encoder.setPosition(position);
-        Logger.recordOutput("EncoderValue" + getDeviceID(), encoder.getPosition());
-        //Position to set the motor to, after gear ratio is applied
     }
 
     @Override
@@ -72,8 +66,14 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setP(double kP, int slot) {
-        controller.setP(kP, slot);
+    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
+        switch (slotNumber) {
+            case 0 -> currentConfiguration.slot0 = slot;
+            case 1 -> currentConfiguration.slot1 = slot;
+            case 2 -> currentConfiguration.slot2 = slot;
+        }
+
+        configure(currentConfiguration);
     }
 
     @Override
@@ -161,6 +161,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public boolean configure(MotorConfiguration configuration) {
+        currentConfiguration = configuration;
+
         super.restoreFactoryDefaults();
 
         super.setIdleMode(configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? IdleMode.kBrake : IdleMode.kCoast);

@@ -21,8 +21,7 @@ public class RealArm extends ArmIO {
     public void setTargetPosition(Rotation2d targetPosition) {
         this.targetPosition = targetPosition;
 
-        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,
-                targetPosition.getRotations());
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
     }
 
     @Override
