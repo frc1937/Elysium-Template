@@ -10,6 +10,8 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
 public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
+    private MotorConfiguration currentConfiguration;
+    private int slotToUse = 0;
 
     public GenericTalonSRX(int deviceNumber) {
         super(deviceNumber);
@@ -29,6 +31,16 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) {
         throw new UnsupportedOperationException("I ain't implementing this lmfao");
+    }
+
+    @Override
+    public MotorProperties.Slot getCurrentSlot() {
+        return getSlot(slotToUse, currentConfiguration);
+    }
+
+    @Override
+    public MotorConfiguration getCurrentConfiguration() {
+        return currentConfiguration;
     }
 
     @Override
@@ -111,6 +123,9 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     @Override
     public boolean configure(MotorConfiguration configuration) {
         super.configFactoryDefault();
+
+        currentConfiguration = configuration;
+        slotToUse = configuration.slotToUse;
 
         configureSlots(configuration);
 

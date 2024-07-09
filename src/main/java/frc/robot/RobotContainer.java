@@ -71,7 +71,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(35)));
 
-        configureButtons(ButtonLayout.CHARACTERIZE_FLYWHEEL);
+        configureButtons(ButtonLayout.TELEOP);
     }
 
     private void configureButtons(ButtonLayout layout) {

@@ -10,6 +10,21 @@ import frc.lib.generic.Properties;
  * in addition of better uniformity across the code.
  */
 public interface Motor {
+
+    /**
+     * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
+     *
+     * @return The configuration slot
+     */
+    MotorProperties.Slot getCurrentSlot();
+
+    /**
+     * Gets the currently used configuration used by the motor. If this is not set, it will return null.
+     *
+     * @return The configuration
+     */
+    MotorConfiguration getCurrentConfiguration();
+
     /**
      * In case you need to re-set the slot on runtime, use this.
      *
@@ -192,4 +207,20 @@ public interface Motor {
     TalonFXSimState getSimulationState();
 
     boolean configure(MotorConfiguration configuration);
+
+    default MotorProperties.Slot getSlot(int slotToUse, MotorConfiguration currentConfiguration) {
+        switch (slotToUse) {
+            case 0 -> {
+                return currentConfiguration.slot0;
+            }
+            case 1 -> {
+                return currentConfiguration.slot1;
+            }
+            case 2 -> {
+                return currentConfiguration.slot2;
+            }
+        }
+
+        return currentConfiguration.slot0;
+    }
 }

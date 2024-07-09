@@ -6,16 +6,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.util.commands.ExecuteEndCommand;
 import frc.robot.GlobalConstants;
-import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.SYSID_CONFIG;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.*;
 
 public class Flywheels extends SubsystemBase {
-    private final FlywheelsInputsAutoLogged flywheelsInputs = new FlywheelsInputsAutoLogged();
-    private final FlywheelsIO flywheels = FlywheelsIO.generateIO();
-
     private final FlywheelsConstants constants = FlywheelsConstants.generateConstants();
     private final SingleFlywheelIO[] singleFlywheels = getFlywheels();
 
@@ -51,9 +47,6 @@ public class Flywheels extends SubsystemBase {
 
     @Override
     public void periodic() {
-        flywheels.refreshInputs(flywheelsInputs);
-        Logger.processInputs("Flywheels", flywheelsInputs);
-
         for (SingleFlywheelIO currentFlywheel : singleFlywheels)
             currentFlywheel.periodic();
     }
@@ -82,7 +75,7 @@ public class Flywheels extends SubsystemBase {
 
     private void setTargetVelocity(double targetRPS) {
         for (SingleFlywheelIO currentFlywheel : singleFlywheels)
-            currentFlywheel.setTargetVelocityRPS(targetRPS);
+            currentFlywheel.setTargetVelocity(targetRPS);
     }
 
     private void setTargetTangentialVelocity(double velocityMetersPerSecond) {
@@ -105,8 +98,8 @@ public class Flywheels extends SubsystemBase {
     private SingleFlywheelIO[] getFlywheels() {
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
             return new SingleFlywheelIO[]{
-                    new SingleFlywheelIO("Left"),
-                    new SingleFlywheelIO("Right")
+                    new SingleFlywheelIO("Left", LEFT_FLYWHEEL_DIAMETER, LEFT_MOTOR_INVERT),
+                    new SingleFlywheelIO("Right", RIGHT_FLYWHEEL_DIAMETER, RIGHT_MOTOR_INVERT)
             };
         }
 

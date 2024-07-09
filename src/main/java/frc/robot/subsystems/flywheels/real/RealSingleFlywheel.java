@@ -7,28 +7,21 @@ import frc.robot.subsystems.flywheels.SingleFlywheelInputsAutoLogged;
 
 public class RealSingleFlywheel extends SingleFlywheelIO {
     private final Motor motor;
-    private final double flywheelDiameter;
 
     public RealSingleFlywheel(String name, Motor motor, double flywheelDiameter) {
-        super(name);
+        super(name, flywheelDiameter, motor.getCurrentConfiguration().inverted);
 
         this.motor = motor;
-        this.flywheelDiameter = flywheelDiameter;
     }
 
     @Override
-    protected void setTargetVelocityRPS(double velocityRPS) {
+    protected void setTargetVelocity(double velocityRPS) {
         motor.setOutput(MotorProperties.ControlMode.VELOCITY, velocityRPS);
     }
 
     @Override
     protected void setRawVoltage(double voltage) {
         motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
-    }
-
-    @Override
-    protected double getFlywheelDiameter() {
-        return flywheelDiameter;
     }
 
     @Override

@@ -1,15 +1,22 @@
 package frc.robot.subsystems.flywheels;
 
+import frc.lib.generic.simulation.mechanisms.SpeedMechanism2d;
 import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 public class SingleFlywheelIO {
     private final SingleFlywheelInputsAutoLogged singleFlywheelInputs = new SingleFlywheelInputsAutoLogged();
-    private final String name;
 
-    public SingleFlywheelIO(String name) {
+    private final SpeedMechanism2d speedMechanism2d;
+    private final String name;
+    private final double flywheelDiameter;
+
+    public SingleFlywheelIO(String name, double flywheelDiameter, boolean inverted) {
         this.name = name;
+        this.flywheelDiameter = flywheelDiameter;
+
+        speedMechanism2d = new SpeedMechanism2d("Flywheel" + name, FlywheelsConstants.MAXIMUM_VELOCITY_RPM / 60, inverted);
     }
 
     public String getName() {
@@ -20,38 +27,28 @@ public class SingleFlywheelIO {
         refreshInputs(singleFlywheelInputs);
         Logger.processInputs("Flywheel/" + name + "/", singleFlywheelInputs);
 
-        flywheelPeriodic();
+        speedMechanism2d.updateMechanism(singleFlywheelInputs.velocityRotationsPerSecond, singleFlywheelInputs.targetVelocityRotationsPerSecond);
     }
 
-    protected void setTargetVelocityRPS(double velocityRPS) { }
+    protected void setTargetVelocity(double velocityRPS) { }
 
     protected void setTargetTangentialVelocity(double tangentialVelocity) {
-        setTargetVelocityRPS(Conversions.mpsToRps(tangentialVelocity, getFlywheelDiameter()));
+        setTargetVelocity(Conversions.mpsToRps(tangentialVelocity, flywheelDiameter));
     }
 
     protected void setRawVoltage(double voltage) { }
     protected double getVoltage() { return singleFlywheelInputs.voltage; }
     protected double getVelocityRotationsPerSecond() { return singleFlywheelInputs.velocityRotationsPerSecond; }
 
-
     protected boolean hasReachedTarget() {
-        double positiveDifference = Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond -
-                singleFlywheelInputs.velocityRotationsPerSecond);
+        double difference = Math.min(
+                Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond - singleFlywheelInputs.velocityRotationsPerSecond),
+                Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond + singleFlywheelInputs.velocityRotationsPerSecond)
+        );
 
-        double negativeDifference = Math.abs(singleFlywheelInputs.targetVelocityRotationsPerSecond +
-                singleFlywheelInputs.velocityRotationsPerSecond); //to account for inverted motors
-
-        Logger.recordOutput("HAS REACHED? NO! + postivei" + name, positiveDifference);
-        Logger.recordOutput("HAS REACHED? NO! + negative " + name, negativeDifference);
-
-        return positiveDifference < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS || negativeDifference < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
+        return difference < FlywheelsConstants.TOLERANCE_ROTATIONS_PER_SECONDS;
     }
 
-    protected double getFlywheelDiameter() {
-        return 0;
-    }
-
-    protected void flywheelPeriodic() { }
     protected void stop() { }
     protected void refreshInputs(SingleFlywheelInputsAutoLogged singleFlywheelInputs) { }
 

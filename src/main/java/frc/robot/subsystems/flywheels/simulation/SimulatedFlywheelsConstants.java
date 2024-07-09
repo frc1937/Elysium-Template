@@ -43,9 +43,9 @@ public class SimulatedFlywheelsConstants extends FlywheelsConstants {
 
     @Override
     protected Optional<SingleFlywheelIO[]> getFlywheels() {
-        return ofReplayable(() -> new SingleFlywheelIO[] {
+        return ofReplayable(() -> new SingleFlywheelIO[]{
                 new SimulatedSingleFlywheel("LeftSim", LEFT_MOTOR, LEFT_FLYWHEEL_DIAMETER, LEFT_MOTOR_INVERT),
-                new SimulatedSingleFlywheel("RightSim",RIGHT_MOTOR, RIGHT_FLYWHEEL_DIAMETER, RIGHT_MOTOR_INVERT)
+                new SimulatedSingleFlywheel("RightSim", RIGHT_MOTOR, RIGHT_FLYWHEEL_DIAMETER, RIGHT_MOTOR_INVERT)
         });
     }
 }

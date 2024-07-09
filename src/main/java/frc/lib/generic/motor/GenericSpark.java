@@ -66,6 +66,16 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
+    public MotorProperties.Slot getCurrentSlot() {
+        return getSlot(slotToUse, currentConfiguration);
+    }
+
+    @Override
+    public MotorConfiguration getCurrentConfiguration() {
+        return currentConfiguration;
+    }
+
+    @Override
     public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
         switch (slotNumber) {
             case 0 -> currentConfiguration.slot0 = slot;

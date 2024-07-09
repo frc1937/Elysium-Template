@@ -3,6 +3,8 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 import static frc.robot.RobotContainer.*;
 
@@ -25,14 +27,16 @@ public class ShooterCommands {
     }
 
     public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
-        return ARM.setTargetPosition(armAngle)
-                .alongWith(FLYWHEELS.setFlywheelsTargetVelocity(targetRPS))
-                .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
-                )
-                //todo: fix it going back when reaching speed
-                .andThen(
-                        KICKER.setKickerPercentageOutput(0.5),
-                        FLYWHEELS.setFlywheelsTargetVelocity(targetRPS)
-                );
+        ConditionalCommand shootFromKicker = new ConditionalCommand(
+                KICKER.setKickerPercentageOutput(0.5),
+                KICKER.setKickerPercentageOutput(0.0),
+                () -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
+        );
+
+        return new ParallelCommandGroup(
+                ARM.setTargetPosition(armAngle),
+                FLYWHEELS.setFlywheelsTargetVelocity(targetRPS),
+                shootFromKicker
+        );
     }
 }
