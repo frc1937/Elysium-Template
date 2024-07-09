@@ -12,24 +12,33 @@ import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import org.littletonrobotics.junction.Logger;
 
-public class GenericSpark extends CANSparkBase implements Motor {
+public class TalonishSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
     private final SparkPIDController controller;
 
     private MotorConfiguration currentConfiguration;
-
     private double closedLoopTarget;
-
     private Feedforward feedforward;
-
     private int slotToUse = 0;
 
-    public GenericSpark(int deviceId, MotorProperties.SparkType sparkType) {
+    private final Motor motor;
+    private final TalonFXSimState motorSimulationState;
+
+    public TalonishSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
         model = sparkType;
 
         optimizeBusUsage();
+
+        motor = new GenericTalonFX(74 - 1);
+
+        Properties.SignalType[] signalTypes = Properties.SignalType.values();
+
+        motor.setSignalsUpdateFrequency(1.0 / 0.02, signalTypes);
+
+        motorSimulationState = motor.getSimulationState();
+        motorSimulationState.setSupplyVoltage(12); //Voltage compensation.
 
         encoder = this.getEncoder();
         controller = super.getPIDController();
@@ -53,7 +62,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
             case POSITION -> {
-                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
+                motor.setOutput(mode, output);
+                updateSimulation();
+                System.out.println("yay position");
             }
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
@@ -182,6 +193,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public boolean configure(MotorConfiguration configuration) {
+        motor.configure(configuration);
+
         currentConfiguration = configuration;
 
         super.restoreFactoryDefaults();
@@ -293,5 +306,14 @@ public class GenericSpark extends CANSparkBase implements Motor {
         }
 
         return null;
+    }
+
+    private void updateSimulation() {
+        setVoltage(motorSimulationState.getMotorVoltage());
+
+        Logger.recordOutput("ArmFF VOLTAGE!", motorSimulationState.getMotorVoltage());
+
+        motorSimulationState.setRawRotorPosition(getSystemPosition());
+        motorSimulationState.setRotorVelocity(getSystemVelocity());
     }
 }

@@ -8,56 +8,92 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkRelativeEncoder;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import org.littletonrobotics.junction.Logger;
 
-public class GenericSpark extends CANSparkBase implements Motor {
+import java.util.Objects;
+
+public class TestSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
-    private final SparkPIDController controller;
+
+    private final SparkPIDController builtinController;
 
     private MotorConfiguration currentConfiguration;
 
     private double closedLoopTarget;
 
+    private ProfiledPIDController controller;
     private Feedforward feedforward;
 
     private int slotToUse = 0;
 
-    public GenericSpark(int deviceId, MotorProperties.SparkType sparkType) {
+    public TestSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
         model = sparkType;
 
         optimizeBusUsage();
 
         encoder = this.getEncoder();
-        controller = super.getPIDController();
+        builtinController = super.getPIDController();
+
+        controller = null;
+    }
+
+    private void setGoal(double output) {
+        if(Objects.equals(controller.getGoal(), new TrapezoidProfile.State(output, 0))) {
+            return;
+        }
+
+        controller.setGoal(new TrapezoidProfile.State(output, 0));
+//        controller.reset(getSystemPosition());
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        double ffOutput = feedforward.calculate(output, 0, 0);
+        if (controller == null) return;
 
-        Logger.recordOutput("ArmFF", ffOutput);
+        setGoal(output);
+
+        double ffOutput = feedforward.calculate(
+                controller.getSetpoint().position,
+                controller.getSetpoint().velocity,
+                0
+        );
+
+        Logger.recordOutput("ArmFF FF", ffOutput);
+        Logger.recordOutput("ArmFF SETPOINT POSITION", controller.getSetpoint().position);
+        Logger.recordOutput("ArmFF SETPOINT VELOCITY", controller.getSetpoint().velocity);
 
         setOutput(controlMode, output, ffOutput);
-    } //todo: change ff to use rotation2d
+    }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
+            case PERCENTAGE_OUTPUT -> builtinController.setReference(output, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
+            case VELOCITY -> {
+//                controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
+            }
             case POSITION -> {
-                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
+                double controllerOutput = controller.calculate(getSystemPosition());
+
+                Logger.recordOutput("ArmFF CONTROLLER", controllerOutput);
+                Logger.recordOutput("ArmFF system position", getSystemPosition());
+
+
+                setOutput(MotorProperties.ControlMode.VOLTAGE, controllerOutput + feedforward);
+//                controller.setReference(output, ControlType.kPosition, slotToUse);
             }
 
-            case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
-            case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> builtinController.setReference(output, ControlType.kVoltage, slotToUse);
+            case CURRENT -> builtinController.setReference(output, ControlType.kCurrent, slotToUse);
         }
     }
 
@@ -194,6 +230,14 @@ public class GenericSpark extends CANSparkBase implements Motor {
         if (configuration.statorCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
+        controller = new ProfiledPIDController(
+                currentConfiguration.slot0.kP(), currentConfiguration.slot0.kI(), currentConfiguration.slot0.kD(),
+
+                new TrapezoidProfile.Constraints(
+                        currentConfiguration.profiledMaxVelocity, currentConfiguration.profiledTargetAcceleration
+
+                ));
+
         configureProfile(configuration);
 
         configurePID(configuration);
@@ -203,13 +247,13 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configureProfile(MotorConfiguration configuration) {
-        if(configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
+        if (configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
 
-        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
-        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
+        builtinController.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
+        builtinController.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
 
 //        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
-        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
+        builtinController.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
     }
 
     private void configureFeedForward(MotorConfiguration configuration) {
@@ -248,19 +292,19 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
+        builtinController.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
 
-        controller.setP(configuration.slot0.kP(), 0);
-        controller.setI(configuration.slot0.kI(), 0);
-        controller.setD(configuration.slot0.kD(), 0);
+        builtinController.setP(configuration.slot0.kP(), 0);
+        builtinController.setI(configuration.slot0.kI(), 0);
+        builtinController.setD(configuration.slot0.kD(), 0);
 
-        controller.setP(configuration.slot1.kP(), 1);
-        controller.setI(configuration.slot1.kI(), 1);
-        controller.setD(configuration.slot1.kD(), 1);
+        builtinController.setP(configuration.slot1.kP(), 1);
+        builtinController.setI(configuration.slot1.kI(), 1);
+        builtinController.setD(configuration.slot1.kD(), 1);
 
-        controller.setP(configuration.slot2.kP(), 2);
-        controller.setI(configuration.slot2.kI(), 2);
-        controller.setD(configuration.slot2.kD(), 2);
+        builtinController.setP(configuration.slot2.kP(), 2);
+        builtinController.setI(configuration.slot2.kI(), 2);
+        builtinController.setD(configuration.slot2.kD(), 2);
 
         slotToUse = configuration.slotToUse;
     }

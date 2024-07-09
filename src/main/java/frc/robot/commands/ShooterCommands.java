@@ -35,7 +35,7 @@ public class ShooterCommands {
 
         return new ParallelCommandGroup(
                 ARM.setTargetPosition(armAngle),
-                FLYWHEELS.setFlywheelsTargetVelocity(targetRPS),
+//                FLYWHEELS.setFlywheelsTargetVelocity(targetRPS),
                 shootFromKicker
         );
     }

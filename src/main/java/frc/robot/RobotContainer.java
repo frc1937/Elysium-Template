@@ -73,7 +73,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(40)));
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));
 
         userButton.toggleOnTrue(Commands.startEnd(
                 () -> {

@@ -143,6 +143,7 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
         return super.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
     }
 
+
     private void configureSlots(MotorConfiguration configuration) {
         super.config_kP(0, configuration.slot0.kP());
         super.config_kI(0, configuration.slot0.kI());

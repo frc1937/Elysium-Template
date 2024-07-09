@@ -3,6 +3,7 @@ package frc.lib.generic;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.util.Units;
 
 public class Feedforward {
     private final double kS; //Volts required to overcome the force of static friction
@@ -43,26 +44,26 @@ public class Feedforward {
     }
 
     /**
-     * @param position     - For arm ONLY. This should be in radians. For non-arms, this will not be used.
-     * @param velocity     - unit-less, preferably in rotations per second
-     * @param acceleration - unit-less, preferably rotations per second squared
+     * @param positionRotations     - For arm ONLY. This should be in rotations. For non-arms, this will not be used.
+     * @param velocityRotationsPerSec     - unit-less, preferably in rotations per second
+     * @param accelerationRotPerSecSquared - unit-less, preferably rotations per second squared
      * @return - the input for the motors
      */
-    public double calculate(double position, double velocity, double acceleration) {
+    public double calculate(double positionRotations, double velocityRotationsPerSec, double accelerationRotPerSecSquared) {
         switch (type) {
             case ARM -> {
                 exitIfNotPresent(armFeedforward);
-                return armFeedforward.calculate(position, velocity, acceleration);
+                return armFeedforward.calculate(Units.rotationsToRadians(positionRotations), velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
 
             case ELEVATOR -> {
                 exitIfNotPresent(elevatorFeedforward);
-                return elevatorFeedforward.calculate(velocity, acceleration);
+                return elevatorFeedforward.calculate(velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
 
             case SIMPLE -> {
                 exitIfNotPresent(simpleFeedforward);
-                return simpleFeedforward.calculate(velocity, acceleration);
+                return simpleFeedforward.calculate(velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
         }
 

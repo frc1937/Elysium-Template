@@ -7,16 +7,16 @@ import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.GenericCanCoder;
-import frc.lib.generic.motor.GenericSpark;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.PurpleSpark;
 
 public class RealArmConstants {
-    static final Motor ARM_MOTOR = new GenericSpark(1, MotorProperties.SparkType.FLEX);
+    static final Motor ARM_MOTOR = new PurpleSpark(1, MotorProperties.SparkType.FLEX);
     public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
 
-    static final double PITCH_GEAR_RATIO = 50;//149;
+    static final double PITCH_GEAR_RATIO = 149;
 
     static final Rotation2d PIVOT_ENCODER_OFFSET = Rotation2d.fromDegrees(21.478516);
 
@@ -57,9 +57,17 @@ public class RealArmConstants {
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;
 
+        motorConfiguration.profiledTargetAcceleration = 0.25;
+        motorConfiguration.profiledMaxVelocity = 0.15;
+
         motorConfiguration.slot0 =
 //                new MotorProperties.Slot(0, 0, 0, 0 , 0, 0, 1, GravityTypeValue.Arm_Cosine
-                new MotorProperties.Slot(0, 0, 0, 15.825 / 12 , 0.85843, 0.097736, 0.22308, GravityTypeValue.Arm_Cosine
+                new MotorProperties.Slot(
+//                        7,0,0,0,0,0,
+                        17, 0, 0, 0/*15.825 / 12*/, 0, 0,//0.85843, 0.097736,
+                        0.22308,
+//                        0,
+                        GravityTypeValue.Arm_Cosine
 //                PITCH_KP,
 //                PITCH_KI,
 //                PITCH_KD,

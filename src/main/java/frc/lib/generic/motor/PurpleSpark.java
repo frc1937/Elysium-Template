@@ -8,24 +8,39 @@ import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkRelativeEncoder;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import org.littletonrobotics.junction.Logger;
 
-public class GenericSpark extends CANSparkBase implements Motor {
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
+
+public class PurpleSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
     private final SparkPIDController controller;
 
     private MotorConfiguration currentConfiguration;
-
     private double closedLoopTarget;
-
     private Feedforward feedforward;
-
     private int slotToUse = 0;
 
-    public GenericSpark(int deviceId, MotorProperties.SparkType sparkType) {
+    private PIDController feedback;
+
+    private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State temporaryCurrentState = new TrapezoidProfile.State();
+
+    private final Supplier<TrapezoidProfile.State> currentStateSupplier = () -> new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
+    private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (motionProfileState) -> 0.0;
+
+    private TrapezoidProfile motionProfile;
+    private TrapezoidProfile.Constraints motionConstraints;
+
+    public PurpleSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
         model = sparkType;
 
@@ -47,13 +62,20 @@ public class GenericSpark extends CANSparkBase implements Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
+        desiredState = new TrapezoidProfile.State(output, 0.0);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
             case POSITION -> {
-                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
+                Logger.recordOutput("Sys POS", getSystemPosition());
+
+                temporaryCurrentState = currentStateSupplier.get();
+
+                handleSmoothMotion();
+
+//                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
             }
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
@@ -119,7 +141,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return encoder.getPosition() / currentConfiguration.gearRatio;
+        return ABSOLUTE_ARM_ENCODER.getEncoderPosition();// encoder.getPosition(); /// currentConfiguration.gearRatio;
     }
 
     @Override
@@ -205,6 +227,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
     private void configureProfile(MotorConfiguration configuration) {
         if(configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
 
+        motionConstraints = new TrapezoidProfile.Constraints(configuration.profiledMaxVelocity, configuration.profiledTargetAcceleration);
+        motionProfile = new TrapezoidProfile(motionConstraints);
+
         controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
         controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
 
@@ -245,6 +270,13 @@ public class GenericSpark extends CANSparkBase implements Motor {
                     currentSlot.kG()
             );
         }
+
+
+        feedforwardSupplier = (motionProfileState) ->
+                getCurrentSlot().kG() * Math.cos(motionProfileState.position * 2 * Math.PI)
+                + getCurrentSlot().kV() * motionProfileState.velocity
+        ;
+                //this.feedforward.calculate(motionProfileState.position, motionProfileState.velocity, 0);;
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -261,6 +293,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
         controller.setP(configuration.slot2.kP(), 2);
         controller.setI(configuration.slot2.kI(), 2);
         controller.setD(configuration.slot2.kD(), 2);
+
+        feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
 
         slotToUse = configuration.slotToUse;
     }
@@ -293,5 +327,23 @@ public class GenericSpark extends CANSparkBase implements Motor {
         }
 
         return null;
+    }
+
+    private void handleSmoothMotion() {
+        if(motionProfile == null) return;
+
+        temporaryCurrentState = motionProfile.calculate(0.02, temporaryCurrentState, desiredState);
+
+        double ff = feedforwardSupplier.apply(temporaryCurrentState);
+        double fb = feedback.calculate(getSystemPosition(), closedLoopTarget);
+
+        controller.setReference(
+                ff + fb,
+                ControlType.kVoltage
+        );
+
+        Logger.recordOutput("FeeFF", ff);
+        Logger.recordOutput("FeeFB", fb);
+        Logger.recordOutput("FeeVOLT", ff + fb  );
     }
 }
