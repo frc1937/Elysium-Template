@@ -3,17 +3,14 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkRelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import org.littletonrobotics.junction.Logger;
 
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -25,20 +22,19 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private final SparkPIDController controller;
 
     private MotorConfiguration currentConfiguration;
+
     private double closedLoopTarget;
     private Feedforward feedforward;
+
     private int slotToUse = 0;
 
-    private PIDController feedback;
-
-    private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
-    private TrapezoidProfile.State temporaryCurrentState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
 
     private final Supplier<TrapezoidProfile.State> currentStateSupplier = () -> new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
-    private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (motionProfileState) -> 0.0;
+    private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (targetState) -> 0.0;
 
+    private PIDController feedback;
     private TrapezoidProfile motionProfile;
-    private TrapezoidProfile.Constraints motionConstraints;
 
     public PurpleSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
@@ -52,31 +48,20 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        double ffOutput = feedforward.calculate(output, 0, 0);
-
-        Logger.recordOutput("ArmFF", ffOutput);
-
-        setOutput(controlMode, output, ffOutput);
-    } //todo: change ff to use rotation2d
+        setOutput(controlMode, output, 0);
+    }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
-        desiredState = new TrapezoidProfile.State(output, 0.0);
+        setGoal(mode, output);
+
+        //todo: Implement custom FF
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
 
-            case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> {
-                Logger.recordOutput("Sys POS", getSystemPosition());
-
-                temporaryCurrentState = currentStateSupplier.get();
-
-                handleSmoothMotion();
-
-//                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
-            }
+            case VELOCITY, POSITION -> setModeBasedTarget(mode);
 
             case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
@@ -224,19 +209,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         return super.burnFlash() == REVLibError.kOk;
     }
 
-    private void configureProfile(MotorConfiguration configuration) {
-        if(configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
-
-        motionConstraints = new TrapezoidProfile.Constraints(configuration.profiledMaxVelocity, configuration.profiledTargetAcceleration);
-        motionProfile = new TrapezoidProfile(motionConstraints);
-
-        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
-        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
-
-//        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
-        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
-    }
-
     private void configureFeedForward(MotorConfiguration configuration) {
         MotorProperties.Slot currentSlot = configuration.slot0;
 
@@ -271,32 +243,48 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             );
         }
 
+        feedforwardSupplier = (targetState) ->
+                feedforward.calculate(targetState.position, targetState.velocity, 0);
+    }
 
-        feedforwardSupplier = (motionProfileState) ->
-                getCurrentSlot().kG() * Math.cos(motionProfileState.position * 2 * Math.PI)
-                + getCurrentSlot().kV() * motionProfileState.velocity
-        ;
-                //this.feedforward.calculate(motionProfileState.position, motionProfileState.velocity, 0);;
+    private void configureProfile(MotorConfiguration configuration) {
+        if (configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0)
+            return;
+
+        final TrapezoidProfile.Constraints constraints = new TrapezoidProfile.Constraints(
+                configuration.profiledMaxVelocity,
+                configuration.profiledTargetAcceleration
+        );
+
+        motionProfile = new TrapezoidProfile(constraints);
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
-
-        controller.setP(configuration.slot0.kP(), 0);
-        controller.setI(configuration.slot0.kI(), 0);
-        controller.setD(configuration.slot0.kD(), 0);
-
-        controller.setP(configuration.slot1.kP(), 1);
-        controller.setI(configuration.slot1.kI(), 1);
-        controller.setD(configuration.slot1.kD(), 1);
-
-        controller.setP(configuration.slot2.kP(), 2);
-        controller.setI(configuration.slot2.kI(), 2);
-        controller.setD(configuration.slot2.kD(), 2);
-
         feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
 
+        if (configuration.closedLoopContinuousWrap)
+            feedback.enableContinuousInput(-0.5, +0.5);
+
         slotToUse = configuration.slotToUse;
+    }
+
+    private void setModeBasedTarget(MotorProperties.ControlMode controlMode) {
+        final double feedforwardOutput, feedbackOutput;
+
+        if (motionProfile == null) {
+            feedforwardOutput = feedforwardSupplier.apply(goalState);
+            feedbackOutput = getModeBasedFeedback(controlMode, goalState);
+        } else {
+            final TrapezoidProfile.State targetProfiledState = motionProfile.calculate(0.02, currentStateSupplier.get(), goalState);
+
+            feedforwardOutput = feedforwardSupplier.apply(targetProfiledState);
+            feedbackOutput = getModeBasedFeedback(controlMode, targetProfiledState);
+        }
+
+        controller.setReference(
+                feedforwardOutput + feedbackOutput,
+                ControlType.kVoltage
+        );
     }
 
     /**
@@ -329,21 +317,38 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         return null;
     }
 
-    private void handleSmoothMotion() {
-        if(motionProfile == null) return;
+    private void setGoal(MotorProperties.ControlMode controlMode, double output) {
+        final TrapezoidProfile.State newState = setModeBasedState(controlMode, output);
 
-        temporaryCurrentState = motionProfile.calculate(0.02, temporaryCurrentState, desiredState);
+        if (!Objects.equals(goalState, newState)) {
+            feedback.reset();
+            goalState = newState;
 
-        double ff = feedforwardSupplier.apply(temporaryCurrentState);
-        double fb = feedback.calculate(getSystemPosition(), closedLoopTarget);
-
-        controller.setReference(
-                ff + fb,
-                ControlType.kVoltage
-        );
-
-        Logger.recordOutput("FeeFF", ff);
-        Logger.recordOutput("FeeFB", fb);
-        Logger.recordOutput("FeeVOLT", ff + fb  );
+            DriverStation.reportError("[PurpleSpark] goal has changed", false);
+        }
     }
-}
+
+    private TrapezoidProfile.State setModeBasedState(MotorProperties.ControlMode controlMode, double output) {
+        final TrapezoidProfile.State newState;
+
+        switch (controlMode) {
+            case POSITION -> newState = new TrapezoidProfile.State(output, 0.0);
+            case VELOCITY -> newState = new TrapezoidProfile.State(0, output);
+
+            default -> throw new IllegalStateException("Unexpected value: " + controlMode);
+        }
+
+        return newState;
+    }
+
+    private double getModeBasedFeedback(MotorProperties.ControlMode controlMode, TrapezoidProfile.State targetState) {
+        final double feedbackOutput;
+
+        switch (controlMode) {
+            case POSITION -> feedbackOutput = feedback.calculate(getSystemPosition(), targetState.position);
+            case VELOCITY -> feedbackOutput = feedback.calculate(getSystemVelocity(), targetState.velocity);
+            default -> throw new IllegalStateException("Unexpected value: " + controlMode);
+        }
+
+        return feedbackOutput;
+    }}

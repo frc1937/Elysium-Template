@@ -44,10 +44,10 @@ public class Feedforward {
     }
 
     /**
-     * @param positionRotations     - For arm ONLY. This should be in rotations. For non-arms, this will not be used.
-     * @param velocityRotationsPerSec     - unit-less, preferably in rotations per second
-     * @param accelerationRotPerSecSquared - unit-less, preferably rotations per second squared
-     * @return - the input for the motors
+     * @param positionRotations            For arm ONLY. This should be in rotations. For non-arms, this will be ignored.
+     * @param velocityRotationsPerSec      unit-less, preferably in rotations per second
+     * @param accelerationRotPerSecSquared unit-less, preferably rotations per second squared
+     * @return The input for the motor, in voltage
      */
     public double calculate(double positionRotations, double velocityRotationsPerSec, double accelerationRotPerSecSquared) {
         switch (type) {
@@ -84,7 +84,7 @@ public class Feedforward {
     /**
      * For both simple motor and elevator feed forwards. With no position or acceleration
      *
-     * @param velocity     - unit-less, preferably in rotations per second
+     * @param velocity - unit-less, preferably in rotations per second
      * @return - the input for the motors
      */
     public double calculate(double velocity) {
