@@ -59,8 +59,8 @@ public class RealArmConstants {
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;
 
-        motorConfiguration.profiledTargetAcceleration = 1;
-        motorConfiguration.profiledMaxVelocity = 3;
+        motorConfiguration.profiledTargetAcceleration = 0.35;
+        motorConfiguration.profiledMaxVelocity = 0.5;
 
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
@@ -68,8 +68,8 @@ public class RealArmConstants {
 //                new MotorProperties.Slot(0, 0, 0, 0 , 0, 0, 1, GravityTypeValue.Arm_Cosine
                 new MotorProperties.Slot(
 //                        7,0,0,0,0,0,
-                        0, 0, 0, 15.825, 0.85843, 0.097736,
-                        0.22308,
+                        0, 0, 0, 15.625, 0.85843, 0.097736,
+                        0.21308,
 //                        0,
                         GravityTypeValue.Arm_Cosine
 //                PITCH_KP,

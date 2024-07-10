@@ -61,8 +61,7 @@ public class RealArm extends ArmIO {
     @Override
     public void refreshInputs(ArmInputsAutoLogged armInputs) {
         armInputs.positionRotations = ABSOLUTE_ARM_ENCODER.getEncoderPosition();
-        armInputs.velocityRotationsPerSecond = ARM_MOTOR.getSystemVelocity();
-
+        armInputs.velocityRotationsPerSecond = ABSOLUTE_ARM_ENCODER.getEncoderVelocity();
         armInputs.targetRotations = targetPosition.getRotations();
 
         armInputs.voltage = ARM_MOTOR.getVoltage();
