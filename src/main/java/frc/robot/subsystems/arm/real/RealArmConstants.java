@@ -12,6 +12,8 @@ import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.PurpleSpark;
 
+import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
+
 public class RealArmConstants {
     static final Motor ARM_MOTOR = new PurpleSpark(1, MotorProperties.SparkType.FLEX);
     public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
@@ -57,14 +59,16 @@ public class RealArmConstants {
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;
 
-        motorConfiguration.profiledTargetAcceleration = 0.25;
-        motorConfiguration.profiledMaxVelocity = 0.15;
+        motorConfiguration.profiledTargetAcceleration = 2;
+        motorConfiguration.profiledMaxVelocity = 2;
+
+        motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
         motorConfiguration.slot0 =
 //                new MotorProperties.Slot(0, 0, 0, 0 , 0, 0, 1, GravityTypeValue.Arm_Cosine
                 new MotorProperties.Slot(
 //                        7,0,0,0,0,0,
-                        17, 0, 0, 0/*15.825 / 12*/, 0, 0,//0.85843, 0.097736,
+                        0, 0, 0, 15.825 / 12 , /*0.85843*/0, 0.097736,
                         0.22308,
 //                        0,
                         GravityTypeValue.Arm_Cosine

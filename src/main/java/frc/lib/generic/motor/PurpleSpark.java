@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
+
 public class PurpleSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
@@ -34,6 +36,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     private PIDController feedback;
     private TrapezoidProfile motionProfile;
+
+    private double previousTimestamp = Logger.getTimestamp();
 
     public PurpleSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
@@ -55,7 +59,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         closedLoopTarget = output;
         setGoal(mode, output);
 
-        //todo: Implement custom FF
+        //todo: implement custom ff
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
@@ -125,15 +129,18 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
+        Logger.recordOutput("ArmMotor/Gear", currentConfiguration.gearRatio);
         Logger.recordOutput("ArmMotor/Position", encoder.getPosition());
-        Logger.recordOutput("ArmMotor/Position + GEARING APPLIED", encoder.getPosition() * currentConfiguration.gearRatio);
+        Logger.recordOutput("ArmMotor/Position + GEARING APPLIED", encoder.getPosition() / currentConfiguration.gearRatio);
 
-        return encoder.getPosition() * currentConfiguration.gearRatio;
+        return ABSOLUTE_ARM_ENCODER.getEncoderPosition();
+//        return encoder.getPosition() / currentConfiguration.gearRatio;
     }
 
     @Override
     public double getSystemVelocity() {
-        return (encoder.getVelocity() / (60)) * currentConfiguration.gearRatio;
+        return ABSOLUTE_ARM_ENCODER.getEncoderVelocity();
+        //(encoder.getVelocity() / (60 * currentConfiguration.gearRatio));
     }
 
     @Override
@@ -245,8 +252,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             );
         }
 
-        feedforwardSupplier = (targetState) ->
-                feedforward.calculate(targetState.position, targetState.velocity, 0);
+        feedforwardSupplier = targetState ->
+                        feedforward.calculate(targetState.position, targetState.velocity, 0);
     }
 
     private void configureProfile(MotorConfiguration configuration) {
@@ -277,15 +284,22 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             feedforwardOutput = feedforwardSupplier.apply(goalState);
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
         } else {
-            final TrapezoidProfile.State targetProfiledState = motionProfile.calculate(0.02, currentStateSupplier.get(), goalState);
+            final TrapezoidProfile.State targetProfiledState =
+                    motionProfile.calculate
+                            ((Logger.getTimestamp() - previousTimestamp) / 10000000, currentStateSupplier.get(), goalState);
+
+            Logger.recordOutput("Motor/ProfiledState currentPosition", currentStateSupplier.get().position);
+            Logger.recordOutput("Motor/ProfiledState currentVelocity", currentStateSupplier.get().velocity);
+
+            Logger.recordOutput("Motor/ProfiledState goalPosition", goalState.position);
+            Logger.recordOutput("Motor/ProfiledState goalVelocity", goalState.velocity);
 
             feedforwardOutput = feedforwardSupplier.apply(targetProfiledState);
             feedbackOutput = getModeBasedFeedback(controlMode, targetProfiledState);
 
-            Logger.recordOutput("Motor/ProfiledState position", targetProfiledState.position);
-            Logger.recordOutput("Motor/ProfiledState velocity", targetProfiledState.velocity);
+            Logger.recordOutput("Motor/ProfiledState profiledPosition", targetProfiledState.position);
+            Logger.recordOutput("Motor/ProfiledState profiledVelocity", targetProfiledState.velocity);
         }
-
 
         Logger.recordOutput("Motor/ProfiledState feedforwardOutput", feedforwardOutput);
         Logger.recordOutput("Motor/ProfiledState feedbackOutput", feedbackOutput);
@@ -296,6 +310,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
                 feedforwardOutput + feedbackOutput,
                 ControlType.kVoltage
         );
+
+        previousTimestamp = Logger.getTimestamp();
     }
 
     /**

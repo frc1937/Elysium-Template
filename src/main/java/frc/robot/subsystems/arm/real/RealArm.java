@@ -4,12 +4,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmInputsAutoLogged;
+import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ARM_MOTOR;
 
 public class RealArm extends ArmIO {
     private Rotation2d targetPosition = new Rotation2d();
+
+    public RealArm() {
+        resetRelativeEncoder();
+    }
+
+    private void resetRelativeEncoder() {
+        ARM_MOTOR.setMotorEncoderPosition(ABSOLUTE_ARM_ENCODER.getEncoderPosition());
+    }
 
     @Override
     public void periodic() {
@@ -26,6 +35,7 @@ public class RealArm extends ArmIO {
 
     @Override
     public boolean hasReachedTarget() {
+        Logger.recordOutput("IsArmAtSetpoint", ARM_MOTOR.isAtSetpoint());
         return ARM_MOTOR.isAtSetpoint();
 
 //        if (targetPosition == null) return false;

@@ -55,7 +55,7 @@ public class RobotContainer {
     private void configureBindings() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
-        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEBUG_MODE, 0));
+        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
         new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
@@ -73,7 +73,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(1)));
 
         userButton.toggleOnTrue(
                 Commands.startEnd(
