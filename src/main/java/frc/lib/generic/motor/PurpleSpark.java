@@ -9,12 +9,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 
 public class PurpleSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
@@ -126,7 +125,10 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return ABSOLUTE_ARM_ENCODER.getEncoderPosition();// encoder.getPosition(); /// currentConfiguration.gearRatio;
+        Logger.recordOutput("ArmMotor/Position", encoder.getPosition());
+        Logger.recordOutput("ArmMotor/Position + GEARING APPLIED", encoder.getPosition() * currentConfiguration.gearRatio);
+
+        return  encoder.getPosition();
     }
 
     @Override
@@ -279,7 +281,17 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
             feedforwardOutput = feedforwardSupplier.apply(targetProfiledState);
             feedbackOutput = getModeBasedFeedback(controlMode, targetProfiledState);
+
+            Logger.recordOutput("Motor/ProfiledState position", targetProfiledState.position);
+            Logger.recordOutput("Motor/ProfiledState velocity", targetProfiledState.velocity);
         }
+
+
+
+        Logger.recordOutput("Motor/ProfiledState feedforwardOutput", feedforwardOutput);
+        Logger.recordOutput("Motor/ProfiledState feedbackOutput", feedbackOutput);
+
+        Logger.recordOutput("Motor/ProfiledState voltageOutput", feedbackOutput + feedforwardOutput);
 
         controller.setReference(
                 feedforwardOutput + feedbackOutput,

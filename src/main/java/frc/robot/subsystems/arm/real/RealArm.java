@@ -14,7 +14,8 @@ public class RealArm extends ArmIO {
 
     @Override
     public void periodic() {
-        ARM_MOTOR.setMotorEncoderPosition(ABSOLUTE_ARM_ENCODER.getEncoderPosition());
+//        ARM_MOTOR.setMotorEncoderPosition(ABSOLUTE_ARM_ENCODER.getEncoderPosition());
+        //todo test without this
     }
 
     @Override
