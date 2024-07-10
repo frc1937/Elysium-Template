@@ -55,7 +55,7 @@ public class RobotContainer {
     private void configureBindings() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
-        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
+        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEBUG_MODE, 0));
         new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
@@ -75,16 +75,18 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));
 
-        userButton.toggleOnTrue(Commands.startEnd(
-                () -> {
-                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
-                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
-                },
+        userButton.toggleOnTrue(
+                Commands.startEnd(
+                        () -> {
+                            ARM.setIdleMode(MotorProperties.IdleMode.COAST);
+                            LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
+                        },
 
-                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+                        () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
 
-                ARM, LEDS).ignoringDisable(true)
+                        ARM, LEDS).ignoringDisable(true)
         ).debounce(0.5);
+
         configureButtons(ButtonLayout.TELEOP);
     }
 
