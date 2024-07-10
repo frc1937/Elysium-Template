@@ -145,6 +145,7 @@ public interface Motor {
      */
     double getMotorVelocity();
 
+
     /**
      * Get the current running through the motor (STATOR current)
      *
@@ -223,9 +224,11 @@ public interface Motor {
         return currentConfiguration.slot0;
     }
 
+
+
     default boolean isAtSetpoint() {
         if (getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new UnsupportedOperationException("Must set closed loop tolerance!");
+            throw new RuntimeException("Must set closed loop tolerance!");
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }

@@ -73,20 +73,27 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(1)));
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(50)));
 
-        userButton.toggleOnTrue(
-                Commands.startEnd(
-                        () -> {
-                            ARM.setIdleMode(MotorProperties.IdleMode.COAST);
-                            LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
-                        },
+        driveController.getButton(Controller.Inputs.B)
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));
 
-                        () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+        driveController.getButton(Controller.Inputs.Y)
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(-10)));
 
-                        ARM, LEDS).ignoringDisable(true)
+        driveController.getButton(Controller.Inputs.X)
+                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(110)));
+
+        userButton.toggleOnTrue(Commands.startEnd(
+                () -> {
+                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
+                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
+                },
+
+                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+
+                ARM, LEDS).ignoringDisable(true)
         ).debounce(0.5);
-
         configureButtons(ButtonLayout.TELEOP);
     }
 
