@@ -15,18 +15,25 @@ public class MotorConfiguration {
 
     /**
      * If non-zero, this determines how much time to ramp from 0% output to 100% during open-loop modes.
-     * @| Minimum Value: 0
-     * @| Maximum Value: 1
-     * @| Default Value: 0
-     * @| Units: sec
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Maximum Value:</b> 1
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> sec
+     * </ul>
      */
     public double dutyCycleOpenLoopRampPeriod = 0;
+
     /**
      * If non-zero, this determines how much time to ramp from 0% output to 100% during closed-loop modes.
-     * @| Minimum Value: 0
-     * @| Maximum Value: 1
-     * @| Default Value: 0
-     * @| Units: sec
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Maximum Value:</b> 1
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> sec
+     * </ul>
      */
     public double dutyCycleClosedLoopRampPeriod = 0;
 
@@ -39,7 +46,15 @@ public class MotorConfiguration {
 
     public double supplyCurrentLimit = -1, statorCurrentLimit = -1;
 
-    /** Convert between 1 system rotation to motor rotation. 1 / number*/
+    /**
+     * Convert between 1 system rotation to motor rotation.
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> > 0
+     *   <li> <b>Default Value:</b> 1
+     *   <li> <b>Units:</b> SYSTEM/MOTOR (ratio)
+     * </ul>
+     */
     public double gearRatio = 1;
 
     /**
@@ -66,4 +81,17 @@ public class MotorConfiguration {
      * </ul>
      */
     public double profiledTargetAcceleration = 0;
+
+    /**
+     * Tolerance for closed-loop control, used for determining if the target is reached.
+     * If this is not set, {@link Motor#isAtSetpoint()} will throw an exception
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> rotations
+     * </ul>
+     *
+     * <p>Ignored if set to 0. Used for checking isAtTarget.</p>
+     */
+    public double closedLoopTolerance = 0;
 }
