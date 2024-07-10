@@ -225,7 +225,7 @@ public interface Motor {
 
     default boolean isAtSetpoint() {
         if (getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new RuntimeException("Must set closed loop tolerance!");
+            throw new UnsupportedOperationException("Must set closed loop tolerance!");
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }

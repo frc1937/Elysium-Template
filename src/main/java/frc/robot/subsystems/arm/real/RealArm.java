@@ -5,7 +5,6 @@ import frc.lib.generic.motor.MotorProperties;
 import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmInputsAutoLogged;
 
-import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ARM_MOTOR;
 
@@ -27,9 +26,11 @@ public class RealArm extends ArmIO {
 
     @Override
     public boolean hasReachedTarget() {
-        if (targetPosition == null) return false;
+        return ARM_MOTOR.isAtSetpoint();
 
-        return Math.abs(ABSOLUTE_ARM_ENCODER.getEncoderPosition() - targetPosition.getRotations()) < TOLERANCE_ROTATIONS;
+//        if (targetPosition == null) return false;
+//
+//        return Math.abs(ABSOLUTE_ARM_ENCODER.getEncoderPosition() - targetPosition.getRotations()) < TOLERANCE_ROTATIONS;
     }
 
     @Override

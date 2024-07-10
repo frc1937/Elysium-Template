@@ -128,12 +128,12 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         Logger.recordOutput("ArmMotor/Position", encoder.getPosition());
         Logger.recordOutput("ArmMotor/Position + GEARING APPLIED", encoder.getPosition() * currentConfiguration.gearRatio);
 
-        return  encoder.getPosition();
+        return encoder.getPosition() * currentConfiguration.gearRatio;
     }
 
     @Override
     public double getSystemVelocity() {
-        return encoder.getVelocity() / (60 * currentConfiguration.gearRatio);
+        return (encoder.getVelocity() / (60)) * currentConfiguration.gearRatio;
     }
 
     @Override
@@ -287,7 +287,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         }
 
 
-
         Logger.recordOutput("Motor/ProfiledState feedforwardOutput", feedforwardOutput);
         Logger.recordOutput("Motor/ProfiledState feedbackOutput", feedbackOutput);
 
@@ -363,4 +362,5 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         }
 
         return feedbackOutput;
-    }}
+    }
+}
