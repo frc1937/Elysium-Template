@@ -14,6 +14,8 @@ import org.littletonrobotics.junction.Logger;
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 
 public class PurpleSpark extends CANSparkBase implements Motor {
+    private final double useBuiltinFeedforwardNumber = 69420;
+
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
     private final SparkPIDController controller;
@@ -44,8 +46,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        setOutput(controlMode, output, 0.0);
-        //todo: fix this to ACTUALLY use the FF provided here.
+        setOutput(controlMode, output, useBuiltinFeedforwardNumber);
     }
 
     @Override
@@ -56,7 +57,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         switch (mode) {
             case PERCENTAGE_OUTPUT -> set(output);
 
-            case POSITION, VELOCITY -> handleSmoothMotion(mode);
+            case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
 
             case VOLTAGE -> setVoltage(output);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
@@ -306,7 +307,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         return null;
     }
 
-    private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
+    private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
         final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
 
         double feedforwardOutput = 0, feedbackOutput, acceleration = 0;
@@ -330,6 +331,9 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             Logger.recordOutput("ProfiledPOSITION", currentSetpoint.position * 360);
             Logger.recordOutput("ProfiledVELOCITY", currentSetpoint.velocity * 360);
         }
+
+        if (feedforward != useBuiltinFeedforwardNumber)
+            feedforwardOutput = feedforward;
 
         super.setVoltage(feedforwardOutput + feedbackOutput);
 
