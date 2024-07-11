@@ -111,7 +111,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-//todo: do
+        //todo: Implement.
     }
 
     @Override
@@ -182,7 +182,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public void setFollowerOf(int masterPort) {
-        setControl(new StrictFollower(masterPort)); //check if this should be called 1 times or once is enough
+        setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
     }
 
     @Override

@@ -6,26 +6,41 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
 import com.revrobotics.SparkRelativeEncoder;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
 public class GenericSpark extends CANSparkBase implements Motor {
+    private static final double useBuiltinFeedforwardNumber = 69420;
+
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
-    private final SparkPIDController controller;
 
     private MotorConfiguration currentConfiguration;
 
     private double closedLoopTarget;
-
     private Feedforward feedforward;
 
     private int slotToUse = 0;
+    private double conversionFactor = 1;
+
+    private PIDController feedback;
+
+    private DoubleSupplier positionSupplier;
+    private DoubleSupplier velocitySupplier;
+
+    private TrapezoidProfile motionProfile;
+    private TrapezoidProfile.State previousSetpoint;
+    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
+
+    private double previousTimestamp = Logger.getTimestamp();
 
     public GenericSpark(int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
@@ -34,32 +49,25 @@ public class GenericSpark extends CANSparkBase implements Motor {
         optimizeBusUsage();
 
         encoder = this.getEncoder();
-        controller = super.getPIDController();
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        double ffOutput = feedforward.calculate(output, 0, 0);
-
-        Logger.recordOutput("ArmFF", ffOutput);
-
-        setOutput(controlMode, output, ffOutput);
-    } //todo: change ff to use rotation2d
+        setOutput(controlMode, output, useBuiltinFeedforwardNumber);
+    }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
+        setGoal(mode, output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
+            case PERCENTAGE_OUTPUT -> set(output);
 
-            case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> {
-                controller.setReference(output, ControlType.kSmartMotion, slotToUse, feedforward);
-            }
+            case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
 
-            case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
-            case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> setVoltage(output);
+            case CURRENT -> super.getPIDController().setReference(output, ControlType.kCurrent, slotToUse);
         }
     }
 
@@ -79,13 +87,13 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setExternalPositionSupplier(DoubleSupplier position) {
-        //todo: do
+    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) {
+        this.positionSupplier = positionSupplier;
     }
 
     @Override
-    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-        //todo: do
+    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
+        this.velocitySupplier = velocitySupplier;
     }
 
     @Override
@@ -131,12 +139,12 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return encoder.getPosition() / currentConfiguration.gearRatio;
+        return encoder.getPosition() * conversionFactor;
     }
 
     @Override
     public double getSystemVelocity() {
-        return encoder.getVelocity() / (60 * currentConfiguration.gearRatio);
+        return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
     }
 
     @Override
@@ -148,7 +156,6 @@ public class GenericSpark extends CANSparkBase implements Motor {
     public double getVoltage() {
         return super.getBusVoltage() * getAppliedOutput();
     }
-
 
     @Override
     public void setFollowerOf(int masterPort) {
@@ -203,34 +210,32 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
         super.enableVoltageCompensation(12);
 
+        conversionFactor = (1.0 / configuration.gearRatio);
+
         if (configuration.statorCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
         configureProfile(configuration);
-
         configurePID(configuration);
-        configureFeedForward(configuration);
+
+        configureFeedForward();
 
         return super.burnFlash() == REVLibError.kOk;
     }
 
     private void configureProfile(MotorConfiguration configuration) {
-        if(configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
+        if (configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
 
-        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
-        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
+        final TrapezoidProfile.Constraints motionConstraints = new TrapezoidProfile.Constraints(
+                configuration.profiledMaxVelocity,
+                configuration.profiledTargetAcceleration
+        );
 
-//        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
-        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
+        motionProfile = new TrapezoidProfile(motionConstraints);
     }
 
-    private void configureFeedForward(MotorConfiguration configuration) {
-        MotorProperties.Slot currentSlot = configuration.slot0;
-
-        switch (slotToUse) {
-            case 1 -> currentSlot = configuration.slot1;
-            case 2 -> currentSlot = configuration.slot2;
-        }
+    private void configureFeedForward() {
+        MotorProperties.Slot currentSlot = getCurrentSlot();
 
         if (currentSlot.gravityType() == null) {
             feedforward = new Feedforward(Properties.FeedforwardType.SIMPLE,
@@ -260,21 +265,15 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
-
-        controller.setP(configuration.slot0.kP(), 0);
-        controller.setI(configuration.slot0.kI(), 0);
-        controller.setD(configuration.slot0.kD(), 0);
-
-        controller.setP(configuration.slot1.kP(), 1);
-        controller.setI(configuration.slot1.kI(), 1);
-        controller.setD(configuration.slot1.kD(), 1);
-
-        controller.setP(configuration.slot2.kP(), 2);
-        controller.setI(configuration.slot2.kI(), 2);
-        controller.setD(configuration.slot2.kD(), 2);
-
         slotToUse = configuration.slotToUse;
+
+        feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
+
+        if (slotToUse == 1) feedback = new PIDController(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD());
+        if (slotToUse == 2) feedback = new PIDController(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD());
+
+        if (configuration.closedLoopContinuousWrap)
+            feedback.enableContinuousInput(-0.5, 0.5);
     }
 
     /**
@@ -305,5 +304,92 @@ public class GenericSpark extends CANSparkBase implements Motor {
         }
 
         return null;
+    }
+
+    private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
+        final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
+
+        double feedforwardOutput = 0, feedbackOutput, acceleration = 0;
+
+        if (motionProfile == null) {
+            feedbackOutput = getModeBasedFeedback(controlMode, goalState);
+            //todo: acceleration
+
+            if (controlMode == MotorProperties.ControlMode.VELOCITY) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
+            if (controlMode == MotorProperties.ControlMode.POSITION) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
+        } else {
+            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, goalState);
+
+            acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
+
+            feedforwardOutput = getFeedforwardOutput(currentSetpoint, acceleration);
+            feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
+
+            previousSetpoint = currentSetpoint;
+
+            Logger.recordOutput("ProfiledPOSITION", currentSetpoint.position * 360);
+            Logger.recordOutput("ProfiledVELOCITY", currentSetpoint.velocity * 360);
+        }
+
+        if (feedforward != useBuiltinFeedforwardNumber)
+            feedforwardOutput = feedforward;
+
+        super.setVoltage(feedforwardOutput + feedbackOutput);
+
+        previousTimestamp = Logger.getTimestamp();
+
+        Logger.recordOutput("Profiled CURRENT POSITION", getEffectivePosition() * 360);
+        Logger.recordOutput("Profiled CURRENT VELOCITY", getEffectiveVelocity() * 360);
+
+        Logger.recordOutput("FeeFF", feedforwardOutput);
+        Logger.recordOutput("FeeFB", feedbackOutput);
+        Logger.recordOutput("FeeVOLT", feedforwardOutput + feedbackOutput);
+    }
+
+
+    private void setGoal(MotorProperties.ControlMode controlMode, double output) {
+        TrapezoidProfile.State stateFromOutput = null;
+
+        if (controlMode == MotorProperties.ControlMode.POSITION) stateFromOutput = new TrapezoidProfile.State(output, 0);
+        if (controlMode == MotorProperties.ControlMode.VELOCITY) stateFromOutput = new TrapezoidProfile.State(0, output);
+
+        if (stateFromOutput != null && goalState == null || !goalState.equals(stateFromOutput)) {
+            feedback.reset();
+
+            previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+            goalState = stateFromOutput;
+
+            DriverStation.reportError("[PurpleSpark] goal has changed", false);
+        }
+    }
+
+    private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
+        if (mode == null) return 0;
+
+        if (mode == MotorProperties.ControlMode.POSITION) {
+
+            return feedback.calculate(getEffectivePosition(), goal.position);
+        }
+
+        if (mode == MotorProperties.ControlMode.VELOCITY) {
+            return feedback.calculate(getEffectiveVelocity(), goal.velocity);
+        }
+
+        return 0;
+    }
+
+    private double getFeedforwardOutput(TrapezoidProfile.State goal, double acceleration) {
+        if (getCurrentSlot().gravityType() == null || getCurrentSlot().gravityType() == GravityTypeValue.Elevator_Static)
+            return feedforward.calculate(goal.velocity, acceleration);
+
+        return feedforward.calculate(goal.position, goal.velocity, acceleration);
+    }
+
+    private double getEffectivePosition() {
+        return positionSupplier == null ? getSystemPosition() : positionSupplier.getAsDouble();
+    }
+
+    private double getEffectiveVelocity() {
+        return velocitySupplier == null ? getSystemVelocity() : velocitySupplier.getAsDouble();
     }
 }

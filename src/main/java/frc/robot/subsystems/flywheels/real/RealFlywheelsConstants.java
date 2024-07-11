@@ -1,10 +1,10 @@
 package frc.robot.subsystems.flywheels.real;
 
 import frc.lib.generic.Properties;
-import frc.lib.generic.motor.GenericSpark;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.GenericSpark;
 import frc.robot.subsystems.flywheels.FlywheelsConstants;
 import frc.robot.subsystems.flywheels.SingleFlywheelIO;
 

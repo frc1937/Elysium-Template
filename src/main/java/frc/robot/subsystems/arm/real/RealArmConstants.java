@@ -10,12 +10,12 @@ import frc.lib.generic.encoder.GenericCanCoder;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.PurpleSpark;
+import frc.lib.generic.motor.GenericSpark;
 
 import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
 
 public class RealArmConstants {
-    static final Motor ARM_MOTOR = new PurpleSpark(1, MotorProperties.SparkType.FLEX);
+    static final Motor ARM_MOTOR = new GenericSpark(1, MotorProperties.SparkType.FLEX);
     public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
 
     static final double PITCH_GEAR_RATIO = 149;
@@ -64,5 +64,8 @@ public class RealArmConstants {
         ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
         ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
         ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
+
+        ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
+        ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);
     }
 }
