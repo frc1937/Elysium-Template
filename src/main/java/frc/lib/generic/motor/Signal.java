@@ -25,6 +25,10 @@ public class Signal {
         return type.name();
     }
 
+    public double getUpdateRate() {
+        return useFasterThread() ? 200 : 50;
+    }
+
     public boolean useFasterThread() {
         return useFasterThread;
     }

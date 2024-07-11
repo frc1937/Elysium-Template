@@ -185,7 +185,9 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
+    public void setupSignalUpdates(Signal signal) {
+        final double updateFrequencyHz = signal.getUpdateRate();
+
         switch (signal.getType()) {
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
             case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
@@ -197,9 +199,9 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals) {
+    public void setupSignalsUpdates(Signal... signals) {
         for (Signal signal : signals) {
-            setSignalUpdateFrequency(signal, updateFrequencyHz);
+            setupSignalUpdates(signal);
         }
     }
 

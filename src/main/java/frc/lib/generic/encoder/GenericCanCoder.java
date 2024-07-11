@@ -28,10 +28,13 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
+    public void setSignalUpdateFrequency(Signal signal) {
+        final double updateRateHz = signal.getUpdateRate();
+
         switch (signal.getType()) {
-            case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
-            case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
+            case POSITION -> positionSignal.setUpdateFrequency(updateRateHz);
+            case VELOCITY -> velocitySignal.setUpdateFrequency(updateRateHz);
+
             case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
                     throw new UnsupportedOperationException("CANCoders don't support checking for " + signal.getName());
         }

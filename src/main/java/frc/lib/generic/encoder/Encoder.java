@@ -9,7 +9,8 @@ public interface Encoder {
     double getEncoderPosition();
     double getEncoderVelocity();
 
-    void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz);
+    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
+    void setSignalUpdateFrequency(Signal signal);
 
     StatusSignal<Double> getRawStatusSignal(Signal signal);
 

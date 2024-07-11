@@ -167,8 +167,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
      * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
      */
     @Override
-    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
-        int ms = (int) (1000 / updateFrequencyHz);
+    public void setupSignalUpdates(Signal signal) {
+        int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
             case VELOCITY, CURRENT -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus1, ms);
@@ -178,9 +178,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals) {
+    public void setupSignalsUpdates(Signal... signals) {
         for (Signal signalType : signals) {
-            setSignalUpdateFrequency(signalType, updateFrequencyHz);
+            setupSignalUpdates(signalType);
         }
     }
 

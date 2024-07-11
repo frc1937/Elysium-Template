@@ -25,7 +25,9 @@ public class RealSwerveModule extends SwerveModuleIO {
     private final Motor driveMotor, steerMotor;
     private final Encoder steerEncoder;
 
-    private Signal positionSignal = new Signal(POSITION, true), velocitySignal = new Signal(VELOCITY, true);
+    private final Signal
+            positionSignal = new Signal(POSITION, true),
+            velocitySignal = new Signal(VELOCITY, true);
 
     private final Queue<Double> steerPositionQueue, drivePositionQueue;
 

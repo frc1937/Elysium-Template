@@ -207,9 +207,11 @@ public interface Motor {
 
     void setFollowerOf(int masterPort);
 
-    void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz);
+    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
+    void setupSignalUpdates(Signal signal);
 
-    void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals);
+    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
+    void setupSignalsUpdates(Signal... signals);
 
     /**
      * Get the raw StatusSignal of the motor. DO NOT USE if not necessary.

@@ -107,12 +107,12 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
+    public void setupSignalUpdates(Signal signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signal) {
+    public void setupSignalsUpdates(Signal... signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
     }
 

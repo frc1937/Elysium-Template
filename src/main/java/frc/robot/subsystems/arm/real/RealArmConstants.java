@@ -33,8 +33,8 @@ public class RealArmConstants {
 
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(POSITION), 50);
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(VELOCITY), 50);
+        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(POSITION));
+        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(VELOCITY));
     }
 
     private static void configureMotor() {
@@ -58,9 +58,9 @@ public class RealArmConstants {
 
         ARM_MOTOR.configure(motorConfiguration);
 
-        ARM_MOTOR.setSignalUpdateFrequency(new Signal(POSITION), 50);
-        ARM_MOTOR.setSignalUpdateFrequency(new Signal(VELOCITY), 50);
-        ARM_MOTOR.setSignalUpdateFrequency(new Signal(VOLTAGE), 50);
+        ARM_MOTOR.setupSignalUpdates(new Signal(POSITION));
+        ARM_MOTOR.setupSignalUpdates(new Signal(VELOCITY));
+        ARM_MOTOR.setupSignalUpdates(new Signal(VOLTAGE));
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

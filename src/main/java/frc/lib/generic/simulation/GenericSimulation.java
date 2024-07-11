@@ -6,8 +6,6 @@ import frc.lib.generic.motor.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
-
 public abstract class GenericSimulation {
     /**
      * This instance is shared between all inheritors
@@ -23,13 +21,13 @@ public abstract class GenericSimulation {
         motor = new GenericTalonFX(REGISTERED_SIMULATIONS.size() - 1);
 
         //This is simulation. we don't give a damn fuck! about performance.
-        Signal[] signalTypes = new Signal[]{
-                new Signal(Signal.SignalType.POSITION), new Signal(Signal.SignalType.VELOCITY),
-                new Signal(Signal.SignalType.CURRENT), new Signal(Signal.SignalType.VOLTAGE),
-                new Signal(Signal.SignalType.TEMPERATURE), new Signal(Signal.SignalType.CLOSED_LOOP_TARGET)
+        Signal[] signals = new Signal[]{
+                new Signal(Signal.SignalType.POSITION, true), new Signal(Signal.SignalType.VELOCITY, true),
+                new Signal(Signal.SignalType.CURRENT, true), new Signal(Signal.SignalType.VOLTAGE, true),
+                new Signal(Signal.SignalType.TEMPERATURE, true), new Signal(Signal.SignalType.CLOSED_LOOP_TARGET, true)
         };
 
-        motor.setSignalsUpdateFrequency(1.0 / ROBORIO_LOOP_TIME, signalTypes);
+        motor.setupSignalsUpdates(signals);
 
         motorSimulationState = motor.getSimulationState();
         motorSimulationState.setSupplyVoltage(12); //Voltage compensation.

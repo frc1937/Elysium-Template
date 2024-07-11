@@ -15,7 +15,6 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 import java.util.Optional;
 
 import static frc.lib.generic.motor.Signal.SignalType.*;
-import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 public class RealSwerveConstants extends SwerveConstants {
     static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
@@ -34,6 +33,11 @@ public class RealSwerveConstants extends SwerveConstants {
     static final int ANGLE_CURRENT_LIMIT = 30;
     static final int DRIVE_SUPPLY_CURRENT_LIMIT = 35;
     static final int DRIVE_STATOR_CURRENT_LIMIT = 50;
+
+    static final Signal
+            STEER_POSITION_SIGNAL = new Signal(POSITION, true),
+            DRIVE_POSITION_SIGNAL = new Signal(POSITION, true),
+            DRIVE_VELOCITY_SIGNAL = new Signal(VELOCITY, true);
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(0.053067, 0.0, 0.0,
             0.10861,
@@ -104,21 +108,22 @@ public class RealSwerveConstants extends SwerveConstants {
 
         steerEncoder.configure(encoderConfiguration);
 
-        steerEncoder.setSignalUpdateFrequency(new Signal(POSITION), ODOMETRY_FREQUENCY_HERTZ);
+        steerEncoder.setSignalUpdateFrequency(STEER_POSITION_SIGNAL);
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
-        driveMotor.setSignalUpdateFrequency(new Signal(VELOCITY), ODOMETRY_FREQUENCY_HERTZ);
-        driveMotor.setSignalUpdateFrequency(new Signal(POSITION), ODOMETRY_FREQUENCY_HERTZ);
+        driveMotor.setupSignalUpdates(DRIVE_VELOCITY_SIGNAL);
+        driveMotor.setupSignalUpdates(DRIVE_POSITION_SIGNAL);
 
-        driveMotor.setSignalUpdateFrequency(new Signal(VOLTAGE), 50);
-        driveMotor.setSignalUpdateFrequency(new Signal(TEMPERATURE), 50);
+        driveMotor.setupSignalUpdates(new Signal(VOLTAGE));
+        driveMotor.setupSignalUpdates(new Signal(TEMPERATURE));
 
         driveMotor.configure(driveMotorConfiguration);
     }
 
     private static void configureSteerMotor(Motor steerMotor) {
-        steerMotor.setSignalUpdateFrequency(new Signal(POSITION), ODOMETRY_FREQUENCY_HERTZ);
+        steerMotor.setupSignalUpdates(new Signal(POSITION));
+
         steerMotor.configure(steerMotorConfiguration);
     }
 
