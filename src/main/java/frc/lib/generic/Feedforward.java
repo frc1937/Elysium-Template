@@ -1,10 +1,5 @@
 package frc.lib.generic;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.math.util.Units;
-
 public class Feedforward {
     private final double kS; //Volts required to overcome the force of static friction
     private final double kV; //Volts required to maintain a velocity of one unit
@@ -12,10 +7,6 @@ public class Feedforward {
     private final double kG; //Volts required to overcome the force of gravity
 
     private final Properties.FeedforwardType type;
-
-    private final ArmFeedforward armFeedforward;
-    private final ElevatorFeedforward elevatorFeedforward;
-    private final SimpleMotorFeedforward simpleFeedforward;
 
     public Feedforward(Properties.FeedforwardType type, double kS, double kV, double kA) {
         this.kS = kS;
@@ -25,9 +16,6 @@ public class Feedforward {
 
         this.type = type;
 
-        armFeedforward = null;
-        elevatorFeedforward = null;
-        simpleFeedforward = new SimpleMotorFeedforward(kS, kV, kA);
     }
 
     public Feedforward(Properties.FeedforwardType type, double kS, double kV, double kA, double kG) {
@@ -38,9 +26,6 @@ public class Feedforward {
 
         this.type = type;
 
-        armFeedforward = new ArmFeedforward(kS, kV, kA, kG);
-        elevatorFeedforward = new ElevatorFeedforward(kS, kV, kA, kG);
-        simpleFeedforward = null;
     }
 
     /**
@@ -52,18 +37,15 @@ public class Feedforward {
     public double calculate(double positionRotations, double velocityRotationsPerSec, double accelerationRotPerSecSquared) {
         switch (type) {
             case ARM -> {
-                exitIfNotPresent(armFeedforward);
-                return armFeedforward.calculate(Units.rotationsToRadians(positionRotations), velocityRotationsPerSec, accelerationRotPerSecSquared);
+                return calculateArmFeedforward(positionRotations, velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
 
             case ELEVATOR -> {
-                exitIfNotPresent(elevatorFeedforward);
-                return elevatorFeedforward.calculate(velocityRotationsPerSec, accelerationRotPerSecSquared);
+                return calculateElevatorFeedforward(velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
 
             case SIMPLE -> {
-                exitIfNotPresent(simpleFeedforward);
-                return simpleFeedforward.calculate(velocityRotationsPerSec, accelerationRotPerSecSquared);
+                return calculateSimpleMotorFeedforward(velocityRotationsPerSec, accelerationRotPerSecSquared);
             }
         }
 
@@ -94,5 +76,25 @@ public class Feedforward {
     private void exitIfNotPresent(Object feedforward) {
         if (feedforward == null)
             throw new UnsupportedOperationException("Can't use feedforward with " + type.name() + " type");
+    }
+
+    private double calculateSimpleMotorFeedforward(double velocity, double acceleration) {
+        return kS * Math.signum(velocity)
+                + kV * velocity
+                + kA * acceleration;
+    }
+
+    private double calculateElevatorFeedforward(double velocity, double acceleration) {
+        return kG
+                + kS * Math.signum(velocity)
+                + kV * velocity
+                + kA * acceleration;
+    }
+
+    private double calculateArmFeedforward(double positionRadians, double velocity, double acceleration) {
+        return kG * Math.cos(positionRadians * 2 * Math.PI)
+                + kS * Math.signum(velocity)
+                + kV * velocity
+                + kA * acceleration;
     }
 }

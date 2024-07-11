@@ -3,15 +3,17 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkRelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.Logger;
-
-import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 
 public class PurpleSpark extends CANSparkBase implements Motor {
     private final double useBuiltinFeedforwardNumber = 69420;
@@ -24,6 +26,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private Feedforward feedforward;
 
     private int slotToUse = 0;
+    private double conversionFactor = 1;
 
     private PIDController feedback;
 
@@ -120,13 +123,12 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemPosition() {
-        return ABSOLUTE_ARM_ENCODER.getEncoderPosition();// encoder.getPosition(); /// currentConfiguration.gearRatio;
+        return encoder.getPosition() * conversionFactor;
     }
 
     @Override
     public double getSystemVelocity() {
-        //todo: use ACTUAL relative ENCODERS...
-        return ABSOLUTE_ARM_ENCODER.getEncoderVelocity();//encoder.getVelocity() / (60 * currentConfiguration.gearRatio);
+        return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
     }
 
     @Override
@@ -192,13 +194,15 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
         super.enableVoltageCompensation(12);
 
+        conversionFactor = (1.0 / configuration.gearRatio);
+
         if (configuration.statorCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
         configureProfile(configuration);
-
         configurePID(configuration);
-        configureFeedForward(configuration);
+
+        configureFeedForward();
 
         return super.burnFlash() == REVLibError.kOk;
     }
@@ -214,13 +218,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         motionProfile = new TrapezoidProfile(motionConstraints);
     }
 
-    private void configureFeedForward(MotorConfiguration configuration) {
-        MotorProperties.Slot currentSlot = configuration.slot0;
-
-        switch (slotToUse) {
-            case 1 -> currentSlot = configuration.slot1;
-            case 2 -> currentSlot = configuration.slot2;
-        }
+    private void configureFeedForward() {
+        MotorProperties.Slot currentSlot = getCurrentSlot();
 
         if (currentSlot.gravityType() == null) {
             feedforward = new Feedforward(Properties.FeedforwardType.SIMPLE,
@@ -349,52 +348,18 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     }
 
     private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
-        switch (mode) {
-            case POSITION -> {
-                return feedback.calculate(getSystemPosition(), goal.position);
-            }
+        if (mode == null) return 0;
 
-            case VELOCITY -> {
-                return feedback.calculate(getSystemVelocity(), goal.velocity);
-            }
-        }
+        if (mode == MotorProperties.ControlMode.POSITION) return feedback.calculate(getSystemPosition(), goal.position);
+        if (mode == MotorProperties.ControlMode.VELOCITY) return feedback.calculate(getSystemVelocity(), goal.velocity);
 
         return 0;
     }
 
     private double getFeedforwardOutput(TrapezoidProfile.State goal, double acceleration) {
-        switch (getCurrentSlot().gravityType()) {
-            case Elevator_Static -> {
-                return calculateElevatorFeedforward(goal, acceleration);
-            }
-            case Arm_Cosine -> {
-                return calculateArmFeedforward(goal, acceleration);
-            }
+        if (getCurrentSlot().gravityType() == null || getCurrentSlot().gravityType() == GravityTypeValue.Elevator_Static)
+            return feedforward.calculate(goal.velocity, acceleration);
 
-            default -> {
-                return calculateSimpleMotorFeedforward(goal, acceleration);
-            }
-        }
-    }
-
-    private double calculateSimpleMotorFeedforward(TrapezoidProfile.State goal, double acceleration) {
-        return getCurrentSlot().kV() * goal.velocity
-                + getCurrentSlot().kS() * Math.signum(goal.velocity)
-                + getCurrentSlot().kA() * acceleration;
-    }
-
-    private double calculateElevatorFeedforward(TrapezoidProfile.State goal, double acceleration) {
-        return getCurrentSlot().kG()
-                + getCurrentSlot().kV() * goal.velocity
-                + getCurrentSlot().kS() * Math.signum(goal.velocity)
-                + getCurrentSlot().kA() * acceleration;
-    }
-
-    //todo: move all of these to a separate class
-    private double calculateArmFeedforward(TrapezoidProfile.State goal, double acceleration) {
-        return getCurrentSlot().kG() * Math.cos(goal.position * 2 * Math.PI)
-                + getCurrentSlot().kV() * goal.velocity
-                + getCurrentSlot().kS() * Math.signum(goal.velocity)
-                + getCurrentSlot().kA() * acceleration;
+        return feedforward.calculate(goal.position, goal.velocity, acceleration);
     }
 }

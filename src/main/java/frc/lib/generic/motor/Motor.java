@@ -224,8 +224,6 @@ public interface Motor {
         return currentConfiguration.slot0;
     }
 
-
-
     default boolean isAtSetpoint() {
         if (getCurrentConfiguration().closedLoopTolerance == 0)
             throw new RuntimeException("Must set closed loop tolerance!");
