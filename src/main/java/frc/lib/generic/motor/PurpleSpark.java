@@ -28,7 +28,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State previousSetpoint;
-    private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
 
     private double previousTimestamp = Logger.getTimestamp();
 
@@ -311,7 +311,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         if (motionProfile == null) return; //todo: Profile-less motion (For velocity: USE FF. for POSITION: DONT USE FF.)
 
         final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
-        final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, desiredState);
+        final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, goalState);
 
         final double acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
 
@@ -336,14 +336,16 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
-        final TrapezoidProfile.State newState = new TrapezoidProfile.State(output, 0);
-        //todo: Honor control mode and use VELOCITY CONTROL for other things.
+        TrapezoidProfile.State stateFromOutput = null;
 
-        if (desiredState == null || !desiredState.equals(newState)) {
+        if (controlMode == MotorProperties.ControlMode.POSITION) stateFromOutput = new TrapezoidProfile.State(output, 0);
+        if (controlMode == MotorProperties.ControlMode.VELOCITY) stateFromOutput = new TrapezoidProfile.State(0, output);
+
+        if (stateFromOutput != null && goalState == null || !goalState.equals(stateFromOutput)) {
             feedback.reset();
 
             previousSetpoint = new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
-            desiredState = new TrapezoidProfile.State(output, 0.0);
+            goalState = new TrapezoidProfile.State(output, 0.0);
 
             DriverStation.reportError("[PurpleSpark] goal has changed", false);
         }
