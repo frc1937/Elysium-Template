@@ -3,11 +3,7 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import com.revrobotics.SparkRelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -59,12 +55,9 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        double ffOutput = feedforward.calculate(output, 0, 0);
-
-        Logger.recordOutput("ArmFF", ffOutput);
-
-        setOutput(controlMode, output, ffOutput);
-    } //todo: change ff to use rotation2d
+        setOutput(controlMode, output, 0.0);
+        //todo: fix this to ACTUALLY use the FF provided here.
+    }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
@@ -72,18 +65,15 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         setGoal(mode, output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> controller.setReference(output, ControlType.kDutyCycle);
+            case PERCENTAGE_OUTPUT -> set(output);
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
             case POSITION -> {
-                Logger.recordOutput("Sys POS", getSystemPosition());
-
                 temporaryCurrentState = currentStateSupplier.get();
-
                 handleSmoothMotion();
             }
 
-            case VOLTAGE -> controller.setReference(output, ControlType.kVoltage, slotToUse);
+            case VOLTAGE -> setVoltage(output);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
         }
     }
@@ -239,7 +229,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
 
 //        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
-        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse); //todo: add a way to edit this. only if needed tho. meh
+        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse);
     }
 
     private void configureFeedForward(MotorConfiguration configuration) {
@@ -275,7 +265,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
                     currentSlot.kG()
             );
         }
-
 
         feedforwardSupplier = (motionProfileState) -> {
             double acceleration = motionProfileState.velocity - previousState.velocity / previousTimeDifference;
@@ -347,10 +336,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         double ff = feedforwardSupplier.apply(temporaryCurrentState);
         double fb = feedback.calculate(getSystemPosition(), temporaryCurrentState.position);
 
-        controller.setReference(
-                ff + fb,
-                ControlType.kVoltage
-        );
+        super.setVoltage(
+                ff + fb);
 
         previousState = temporaryCurrentState;
         previousTimestamp = Logger.getTimestamp();

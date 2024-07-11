@@ -22,17 +22,6 @@ public class RealArmConstants {
 
     static final Rotation2d PIVOT_ENCODER_OFFSET = Rotation2d.fromDegrees(21.478516);
 
-    static final double
-            PITCH_KS = 0,
-            PITCH_KV = 14,
-            PITCH_KA = 1.2632,
-            PITCH_KG = 0.23,
-            PITCH_KP = 40,
-            PITCH_KI = 0.0,
-            PITCH_KD = 0.0,
-            PITCH_MAX_VELOCITY = 0.5,
-            PITCH_MAX_ACCELERATION = 0.5;
-
     static {
         configureMotor();
         configureEncoder();
@@ -64,22 +53,10 @@ public class RealArmConstants {
 
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
-        motorConfiguration.slot0 =
-//                new MotorProperties.Slot(0, 0, 0, 0 , 0, 0, 1, GravityTypeValue.Arm_Cosine
-                new MotorProperties.Slot(
-//                        7,0,0,0,0,0,
-                        0, 0, 0, 15.625, 0.85843, 0.097736,
-                        0.21308,
-//                        0,
+        motorConfiguration.slot0 = new MotorProperties.Slot(
+                        0, 0, 0,
+                        15.625, 0.85843, 0.097736, 0.21308,
                         GravityTypeValue.Arm_Cosine
-//                PITCH_KP,
-//                PITCH_KI,
-//                PITCH_KD,
-//                PITCH_KV,
-//                PITCH_KA,
-//                PITCH_KS,
-//                PITCH_KG,
-//                GravityTypeValue.Arm_Cosine
         );
 
         ARM_MOTOR.configure(motorConfiguration);
