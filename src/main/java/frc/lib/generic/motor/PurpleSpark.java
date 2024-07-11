@@ -25,6 +25,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private MotorConfiguration currentConfiguration;
     private double closedLoopTarget;
     private Feedforward feedforward;
+
     private int slotToUse = 0;
 
     private PIDController feedback;
@@ -36,8 +37,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (motionProfileState) -> 0.0;
 
     private TrapezoidProfile motionProfile;
-    private TrapezoidProfile.Constraints motionConstraints;
-
     private TrapezoidProfile.State previousState;
 
     private double previousTimeDifference = 0;
@@ -222,7 +221,12 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private void configureProfile(MotorConfiguration configuration) {
         if (configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
 
-        motionConstraints = new TrapezoidProfile.Constraints(configuration.profiledMaxVelocity, configuration.profiledTargetAcceleration);
+        final TrapezoidProfile.Constraints motionConstraints = new TrapezoidProfile.Constraints(
+                configuration.profiledMaxVelocity,
+                configuration.profiledTargetAcceleration
+        );
+
+
         motionProfile = new TrapezoidProfile(motionConstraints);
 
         controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
