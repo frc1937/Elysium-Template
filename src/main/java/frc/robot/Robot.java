@@ -4,18 +4,11 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.generic.advantagekit.HardwareManager;
 import frc.lib.generic.simulation.GenericSimulation;
-import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
@@ -25,28 +18,14 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotInit() {
         robotContainer = new RobotContainer();
-
-        String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
-
-        if (CURRENT_MODE == GlobalConstants.Mode.REAL || CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            Logger.addDataReceiver(new NT4Publisher());
-//            Logger.addDataReceiver(new WPILOGWriter(logPath));
-        } else {
-            setUseTiming(true);
-            logPath = LogFileUtil.findReplayLog();
-
-            final String logWriterPath = LogFileUtil.addPathSuffix(logPath, "_replay");
-
-            Logger.setReplaySource(new WPILOGReader(logPath));
-            Logger.addDataReceiver(new WPILOGWriter(logWriterPath));
-        }
-
-        Logger.start();
+        HardwareManager.initialize(this);
     }
 
     @Override
     public void robotPeriodic() {
         commandScheduler.run();
+
+        HardwareManager.update();
         RobotContainer.POSE_ESTIMATOR.periodic();
     }
 
@@ -106,28 +85,11 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationInit() {
-//        final TalonFXConfiguration config = new TalonFXConfiguration();
-//
-//        config.Slot0.kP = P;
-//        config.Slot0.kI = I;
-//        config.Slot0.kD = D;
-//        config.Slot0.kG = KG;
-//        config.Slot0.kV = KV;
-//        config.Slot0.kA = KA;
-//        config.Slot0.kS = KS;
-//        config.ClosedLoopGeneral.ContinuousWrap = true;
-//        config.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
-//
-//        config.MotionMagic.MotionMagicCruiseVelocity = MAXIMUM_VELOCITY;
-//        config.MotionMagic.MotionMagicAcceleration = MAXIMUM_ACCELERATION;
-//
-//        talonFX.getConfigurator().apply(config);
-//
-//        Timer.delay(0.5);
     }
 
     @Override
     public void simulationPeriodic() {
+        //TODO: Fuse this with the hardware manager!!
         GenericSimulation.updateAllSimulations();
     }
 
