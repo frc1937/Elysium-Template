@@ -127,6 +127,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getSystemVelocity() {
+        //todo: use ACTUAL relative ENCODERS...
         return ABSOLUTE_ARM_ENCODER.getEncoderVelocity();//encoder.getVelocity() / (60 * currentConfiguration.gearRatio);
     }
 
@@ -307,19 +308,15 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     }
 
     private void handleSmoothMotion() {
-        if (motionProfile == null) return;
+        if (motionProfile == null) return; //todo: Profile-less motion (For velocity: USE FF. for POSITION: DONT USE FF.)
 
         final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
         final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, desiredState);
 
-        double acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
+        final double acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
 
-        double feedforwardOutput = getCurrentSlot().kG() * Math.cos(currentSetpoint.position * 2 * Math.PI)
-                + getCurrentSlot().kV() * currentSetpoint.velocity
-                + getCurrentSlot().kS() * Math.signum(currentSetpoint.velocity);
-        //+ getCurrentSlot().kA() * acceleration// todo: acceleration for another day.
-
-        double feedbackOutput = feedback.calculate(getSystemPosition(), currentSetpoint.position);
+        final double feedforwardOutput = calculateArmFeedforward(currentSetpoint, acceleration); //TODO: Change calculation based on FF type.
+        final double feedbackOutput = feedback.calculate(getSystemPosition(), currentSetpoint.position);
 
         super.setVoltage(feedforwardOutput + feedbackOutput);
 
@@ -340,6 +337,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
         final TrapezoidProfile.State newState = new TrapezoidProfile.State(output, 0);
+        //todo: Honor control mode and use VELOCITY CONTROL for other things.
 
         if (desiredState == null || !desiredState.equals(newState)) {
             feedback.reset();
@@ -349,5 +347,25 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
             DriverStation.reportError("[PurpleSpark] goal has changed", false);
         }
+    }
+
+    private double calculateSimpleMotorFeedforward(TrapezoidProfile.State goal, double acceleration) {
+        return getCurrentSlot().kV() * goal.velocity
+                + getCurrentSlot().kS() * Math.signum(goal.velocity)
+                + getCurrentSlot().kA() * acceleration;
+    }
+
+    private double calculateElevatorFeedforward(TrapezoidProfile.State goal, double acceleration) {
+        return getCurrentSlot().kG()
+                + getCurrentSlot().kV() * goal.velocity
+                + getCurrentSlot().kS() * Math.signum(goal.velocity)
+                + getCurrentSlot().kA() * acceleration;
+    }
+//todo: move all of these to a separate class
+    private double calculateArmFeedforward(TrapezoidProfile.State goal, double acceleration) {
+        return getCurrentSlot().kG() * Math.cos(goal.position * 2 * Math.PI)
+                + getCurrentSlot().kV() * goal.velocity
+                + getCurrentSlot().kS() * Math.signum(goal.velocity)
+                + getCurrentSlot().kA() * acceleration;
     }
 }
