@@ -18,7 +18,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
-    private final SparkPIDController controller;
 
     private MotorConfiguration currentConfiguration;
     private double closedLoopTarget;
@@ -41,7 +40,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         optimizeBusUsage();
 
         encoder = this.getEncoder();
-        controller = super.getPIDController();
     }
 
     @Override
@@ -60,7 +58,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
 
             case VOLTAGE -> setVoltage(output);
-            case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
+            case CURRENT -> super.getPIDController().setReference(output, ControlType.kCurrent, slotToUse);
         }
     }
 
@@ -214,12 +212,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         );
 
         motionProfile = new TrapezoidProfile(motionConstraints);
-
-        controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
-        controller.setSmartMotionMaxAccel(configuration.profiledTargetAcceleration / 60, slotToUse);
-
-//        controller.setSmartMotionAllowedClosedLoopError(configuration.closedLoopError, slotToUse);//todo: Might be needed. do test.
-        controller.setSmartMotionAccelStrategy(SparkPIDController.AccelStrategy.kTrapezoidal, slotToUse);
     }
 
     private void configureFeedForward(MotorConfiguration configuration) {
@@ -258,23 +250,15 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     }
 
     private void configurePID(MotorConfiguration configuration) {
-        controller.setPositionPIDWrappingEnabled(configuration.closedLoopContinuousWrap);
-
-        controller.setP(configuration.slot0.kP(), 0);
-        controller.setI(configuration.slot0.kI(), 0);
-        controller.setD(configuration.slot0.kD(), 0);
-
-        controller.setP(configuration.slot1.kP(), 1);
-        controller.setI(configuration.slot1.kI(), 1);
-        controller.setD(configuration.slot1.kD(), 1);
-
-        controller.setP(configuration.slot2.kP(), 2);
-        controller.setI(configuration.slot2.kI(), 2);
-        controller.setD(configuration.slot2.kD(), 2);
+        slotToUse = configuration.slotToUse;
 
         feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
 
-        slotToUse = configuration.slotToUse;
+        if (slotToUse == 1) feedback = new PIDController(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD());
+        if (slotToUse == 2) feedback = new PIDController(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD());
+
+        if (configuration.closedLoopContinuousWrap)
+            feedback.enableContinuousInput(-0.5, 0.5);
     }
 
     /**
