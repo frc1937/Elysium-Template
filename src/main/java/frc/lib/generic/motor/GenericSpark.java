@@ -23,9 +23,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
 
-    private MotorConfiguration currentConfiguration;
-
     private double closedLoopTarget;
+
+    private MotorConfiguration currentConfiguration;
     private Feedforward feedforward;
 
     private int slotToUse = 0;
@@ -33,12 +33,10 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     private PIDController feedback;
 
-    private DoubleSupplier positionSupplier;
-    private DoubleSupplier velocitySupplier;
+    private DoubleSupplier positionSupplier, velocitySupplier;
 
     private TrapezoidProfile motionProfile;
-    private TrapezoidProfile.State previousSetpoint;
-    private TrapezoidProfile.State goalState = new TrapezoidProfile.State();
+    private TrapezoidProfile.State previousSetpoint, goalState;
 
     private double previousTimestamp = Logger.getTimestamp();
 
