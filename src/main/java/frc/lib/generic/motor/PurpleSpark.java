@@ -11,9 +11,6 @@ import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.Objects;
-import java.util.function.Function;
-
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 
 public class PurpleSpark extends CANSparkBase implements Motor {
@@ -29,15 +26,10 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
     private PIDController feedback;
 
-    private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
-    private TrapezoidProfile.State temporaryCurrentState = new TrapezoidProfile.State();
-
-    private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (motionProfileState) -> 0.0;
-
     private TrapezoidProfile motionProfile;
-    private TrapezoidProfile.State previousState;
+    private TrapezoidProfile.State previousSetpoint;
+    private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
 
-    private double previousTimeDifference = 0;
     private double previousTimestamp = Logger.getTimestamp();
 
     public PurpleSpark(int deviceId, MotorProperties.SparkType sparkType) {
@@ -65,9 +57,7 @@ public class PurpleSpark extends CANSparkBase implements Motor {
             case PERCENTAGE_OUTPUT -> set(output);
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
-            case POSITION -> {
-                handleSmoothMotion();
-            }
+            case POSITION -> handleSmoothMotion();
 
             case VOLTAGE -> setVoltage(output);
             case CURRENT -> controller.setReference(output, ControlType.kCurrent, slotToUse);
@@ -150,7 +140,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         return super.getBusVoltage() * getAppliedOutput();
     }
 
-
     @Override
     public void setFollowerOf(int masterPort) {
         super.follow(new GenericSpark(masterPort, model));
@@ -223,7 +212,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
                 configuration.profiledTargetAcceleration
         );
 
-
         motionProfile = new TrapezoidProfile(motionConstraints);
 
         controller.setSmartMotionMaxVelocity(configuration.profiledMaxVelocity / 60, slotToUse);
@@ -266,15 +254,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
                     currentSlot.kG()
             );
         }
-
-        feedforwardSupplier = (motionProfileState) -> {
-            double acceleration = motionProfileState.velocity - previousState.velocity / previousTimeDifference;
-
-            return getCurrentSlot().kG() * Math.cos(motionProfileState.position * 2 * Math.PI)
-                    + getCurrentSlot().kV() * motionProfileState.velocity
-                    + getCurrentSlot().kS() * Math.signum(motionProfileState.velocity);
-                    //+ getCurrentSlot().kA() * acceleration// todo: acceleration for another day.
-        };
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -330,37 +309,42 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private void handleSmoothMotion() {
         if (motionProfile == null) return;
 
-        previousTimeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
+        final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
+        final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, desiredState);
 
-        temporaryCurrentState = motionProfile.calculate(previousTimeDifference, previousState, desiredState);
+        double acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
 
-        double ff = feedforwardSupplier.apply(temporaryCurrentState);
-        double fb = feedback.calculate(getSystemPosition(), temporaryCurrentState.position);
+        double feedforwardOutput = getCurrentSlot().kG() * Math.cos(currentSetpoint.position * 2 * Math.PI)
+                + getCurrentSlot().kV() * currentSetpoint.velocity
+                + getCurrentSlot().kS() * Math.signum(currentSetpoint.velocity);
+        //+ getCurrentSlot().kA() * acceleration// todo: acceleration for another day.
 
-        super.setVoltage(
-                ff + fb);
+        double feedbackOutput = feedback.calculate(getSystemPosition(), currentSetpoint.position);
 
-        previousState = temporaryCurrentState;
+        super.setVoltage(feedforwardOutput + feedbackOutput);
+
+        previousSetpoint = currentSetpoint;
         previousTimestamp = Logger.getTimestamp();
 
-        Logger.recordOutput("ProfiledPOSITION", temporaryCurrentState.position * 360);
-        Logger.recordOutput("ProfiledVELOCITY", temporaryCurrentState.velocity * 360);
+        Logger.recordOutput("ProfiledPOSITION", currentSetpoint.position * 360);
+        Logger.recordOutput("ProfiledVELOCITY", currentSetpoint.velocity * 360);
 
         Logger.recordOutput("Profiled CURRENT POSITION", getSystemPosition() * 360);
         Logger.recordOutput("Profiled CURRENT VELOCITY", getSystemVelocity() * 360);
 
-        Logger.recordOutput("FeeFF", ff);
-        Logger.recordOutput("FeeFB", fb);
-        Logger.recordOutput("FeeVOLT", ff + fb);
+        Logger.recordOutput("FeeFF", feedforwardOutput);
+        Logger.recordOutput("FeeFB", feedbackOutput);
+        Logger.recordOutput("FeeVOLT", feedforwardOutput + feedbackOutput);
     }
+
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
         final TrapezoidProfile.State newState = new TrapezoidProfile.State(output, 0);
 
-        if (!Objects.equals(desiredState, newState)) {
+        if (desiredState == null || !desiredState.equals(newState)) {
             feedback.reset();
 
-            previousState = new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
+            previousSetpoint = new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
             desiredState = new TrapezoidProfile.State(output, 0.0);
 
             DriverStation.reportError("[PurpleSpark] goal has changed", false);
