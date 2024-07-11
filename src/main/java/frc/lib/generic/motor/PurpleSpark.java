@@ -308,14 +308,15 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     }
 
     private void handleSmoothMotion() {
-        if (motionProfile == null) return; //todo: Profile-less motion (For velocity: USE FF. for POSITION: DONT USE FF.)
+        if (motionProfile == null)
+            return; //todo: Profile-less motion (For velocity: USE FF. for POSITION: DONT USE FF.)
 
         final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
         final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, goalState);
 
         final double acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
 
-        final double feedforwardOutput = calculateArmFeedforward(currentSetpoint, acceleration); //TODO: Change calculation based on FF type.
+        final double feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
         final double feedbackOutput = feedback.calculate(getSystemPosition(), currentSetpoint.position);
 
         super.setVoltage(feedforwardOutput + feedbackOutput);
@@ -351,6 +352,21 @@ public class PurpleSpark extends CANSparkBase implements Motor {
         }
     }
 
+    private double getFeedforwardOutput(TrapezoidProfile.State goal, double acceleration) {
+        switch (getCurrentSlot().gravityType()) {
+            case Elevator_Static -> {
+                return calculateElevatorFeedforward(goal, acceleration);
+            }
+            case Arm_Cosine -> {
+                return calculateArmFeedforward(goal, acceleration);
+            }
+
+            default -> {
+                return calculateSimpleMotorFeedforward(goal, acceleration);
+            }
+        }
+    }
+
     private double calculateSimpleMotorFeedforward(TrapezoidProfile.State goal, double acceleration) {
         return getCurrentSlot().kV() * goal.velocity
                 + getCurrentSlot().kS() * Math.signum(goal.velocity)
@@ -363,7 +379,8 @@ public class PurpleSpark extends CANSparkBase implements Motor {
                 + getCurrentSlot().kS() * Math.signum(goal.velocity)
                 + getCurrentSlot().kA() * acceleration;
     }
-//todo: move all of these to a separate class
+
+    //todo: move all of these to a separate class
     private double calculateArmFeedforward(TrapezoidProfile.State goal, double acceleration) {
         return getCurrentSlot().kG() * Math.cos(goal.position * 2 * Math.PI)
                 + getCurrentSlot().kV() * goal.velocity
