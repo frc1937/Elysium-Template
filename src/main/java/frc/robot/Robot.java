@@ -7,7 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.advantagekit.HardwareManager;
-import frc.lib.generic.simulation.GenericSimulation;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
@@ -25,7 +24,8 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         commandScheduler.run();
 
-        HardwareManager.update();
+        HardwareManager.updateReal();
+
         RobotContainer.POSE_ESTIMATOR.periodic();
     }
 
@@ -89,8 +89,7 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationPeriodic() {
-        //TODO: Fuse this with the hardware manager!!
-        GenericSimulation.updateAllSimulations();
+        HardwareManager.updateSimulation();
     }
 
     @Override

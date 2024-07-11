@@ -1,6 +1,7 @@
 package frc.lib.generic.advantagekit;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -82,8 +83,12 @@ public enum HardwareManager {
      * <p>
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
-    public static void update() {
+    public static void updateReal() {
         hardware.forEach(LoggableHardware::periodic);
         periodicRunnable.forEach(Runnable::run);
+    }
+
+    public static void updateSimulation() {
+        GenericSimulation.updateAllSimulations();
     }
 }

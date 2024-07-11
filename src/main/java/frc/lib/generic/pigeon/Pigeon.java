@@ -1,10 +1,22 @@
 package frc.lib.generic.pigeon;
 
-public interface Pigeon {
+import frc.lib.generic.advantagekit.LoggableHardware;
+
+public interface Pigeon extends LoggableHardware {
+
+    enum PigeonMode {
+        ROTATION
+    }
 
     void resetConfigurations();
 
     double getYaw();
+    double getPitch();
+    double getRoll();
 
     void setGyroYaw(double yawDegrees);
+
+
+    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
+    void setupSignalUpdates(PigeonSignal signal);
 }
