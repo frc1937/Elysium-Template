@@ -3,7 +3,6 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.Properties;
 
 import java.util.function.DoubleSupplier;
 
@@ -208,21 +207,21 @@ public interface Motor {
 
     void setFollowerOf(int masterPort);
 
-    void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz);
+    void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz);
 
-    void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes);
+    void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals);
 
     /**
      * Get the raw StatusSignal of the motor. DO NOT USE if not necessary.
      */
-    StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType);
+    StatusSignal<Double> getRawStatusSignal(Signal signal);
 
     /**
      * Refreshes all status signals.
      * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}.
      * DO NOT USE if not necessary.
      */
-    void refreshStatusSignals(Properties.SignalType... signalTypes);
+    void refreshStatusSignals(Signal... signals);
 
     TalonFXSimState getSimulationState();
 

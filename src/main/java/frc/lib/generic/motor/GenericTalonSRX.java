@@ -7,7 +7,6 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.Properties;
 
 import java.util.function.DoubleSupplier;
 
@@ -108,22 +107,22 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz) {
+    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
         throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes) {
+    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
+    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use status signals. Use GenericTalonFX instead");
     }
 
     @Override
-    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
+    public void refreshStatusSignals(Signal... signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use status signals. Use GenericTalonFX instead");
     }
 

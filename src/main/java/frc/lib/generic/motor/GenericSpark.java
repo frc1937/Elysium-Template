@@ -167,10 +167,10 @@ public class GenericSpark extends CANSparkBase implements Motor {
      * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
      */
     @Override
-    public void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz) {
+    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
         int ms = (int) (1000 / updateFrequencyHz);
 
-        switch (signalType) {
+        switch (signal.getType()) {
             case VELOCITY, CURRENT -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus1, ms);
             case POSITION -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus3, ms);
@@ -178,19 +178,19 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes) {
-        for (Properties.SignalType signalType : signalTypes) {
+    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals) {
+        for (Signal signalType : signals) {
             setSignalUpdateFrequency(signalType, updateFrequencyHz);
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
+    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
         throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 
     @Override
-    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
+    public void refreshStatusSignals(Signal... signals) {
         throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 

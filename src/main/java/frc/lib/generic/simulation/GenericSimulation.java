@@ -1,11 +1,7 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.Properties;
-import frc.lib.generic.motor.GenericTalonFX;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +9,9 @@ import java.util.List;
 import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
 
 public abstract class GenericSimulation {
-    /** This instance is shared between all inheritors */
+    /**
+     * This instance is shared between all inheritors
+     */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
     private final Motor motor;
@@ -25,7 +23,11 @@ public abstract class GenericSimulation {
         motor = new GenericTalonFX(REGISTERED_SIMULATIONS.size() - 1);
 
         //This is simulation. we don't give a damn fuck! about performance.
-        Properties.SignalType[] signalTypes = Properties.SignalType.values();
+        Signal[] signalTypes = new Signal[]{
+                new Signal(Signal.SignalType.POSITION), new Signal(Signal.SignalType.VELOCITY),
+                new Signal(Signal.SignalType.CURRENT), new Signal(Signal.SignalType.VOLTAGE),
+                new Signal(Signal.SignalType.TEMPERATURE), new Signal(Signal.SignalType.CLOSED_LOOP_TARGET)
+        };
 
         motor.setSignalsUpdateFrequency(1.0 / ROBORIO_LOOP_TIME, signalTypes);
 
@@ -67,10 +69,13 @@ public abstract class GenericSimulation {
     }
 
     public abstract double getPositionRotations();
+
     public abstract double getVelocityRotationsPerSecond();
+
     public abstract double getCurrent();
 
     //These have weaker access because they're used in this package only.
     abstract void update();
+
     abstract void setVoltage(double voltage);
 }

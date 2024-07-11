@@ -2,16 +2,13 @@ package frc.robot.subsystems.arm.real;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.generic.Properties;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.GenericCanCoder;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.GenericSpark;
+import frc.lib.generic.motor.*;
 
+import static frc.lib.generic.motor.Signal.SignalType.*;
 import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
 
 public class RealArmConstants {
@@ -36,8 +33,8 @@ public class RealArmConstants {
 
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
+        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(POSITION), 50);
+        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new Signal(VELOCITY), 50);
     }
 
     private static void configureMotor() {
@@ -61,9 +58,9 @@ public class RealArmConstants {
 
         ARM_MOTOR.configure(motorConfiguration);
 
-        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.POSITION, 50);
-        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
-        ARM_MOTOR.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
+        ARM_MOTOR.setSignalUpdateFrequency(new Signal(POSITION), 50);
+        ARM_MOTOR.setSignalUpdateFrequency(new Signal(VELOCITY), 50);
+        ARM_MOTOR.setSignalUpdateFrequency(new Signal(VOLTAGE), 50);
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

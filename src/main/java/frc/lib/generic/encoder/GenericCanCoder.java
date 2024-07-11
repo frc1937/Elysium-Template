@@ -7,7 +7,7 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import frc.lib.generic.Properties;
+import frc.lib.generic.motor.Signal;
 
 import java.util.ArrayList;
 
@@ -28,22 +28,22 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz) {
-        switch (signalType) {
+    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
+        switch (signal.getType()) {
             case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
             case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
-                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signalType.name());
+                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signal.getName());
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
-        return switch (signalType) {
+    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
+        return switch (signal.getType()) {
             case POSITION -> positionSignal;
             case VELOCITY -> velocitySignal;
             case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
-                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signalType.name());
+                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signal.getName());
         };
     }
 
@@ -58,14 +58,14 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
-    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
-        ArrayList<BaseStatusSignal> signals = new ArrayList<>();
+    public void refreshStatusSignals(Signal... signals) {
+        ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
 
-        for (Properties.SignalType signalType : signalTypes) {
-            signals.add(getRawStatusSignal(signalType));
+        for (Signal signal : signals) {
+            baseStatusSignals.add(getRawStatusSignal(signal));
         }
 
-        BaseStatusSignal.refreshAll(signals.toArray(new BaseStatusSignal[0]));
+        BaseStatusSignal.refreshAll(baseStatusSignals.toArray(new BaseStatusSignal[0]));
     }
 
     @Override

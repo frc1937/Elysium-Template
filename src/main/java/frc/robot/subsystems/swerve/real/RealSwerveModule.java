@@ -4,6 +4,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.Signal;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
@@ -11,8 +12,8 @@ import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 
 import java.util.Queue;
 
-import static frc.lib.generic.Properties.SignalType.POSITION;
-import static frc.lib.generic.Properties.SignalType.VELOCITY;
+import static frc.lib.generic.motor.Signal.SignalType.POSITION;
+import static frc.lib.generic.motor.Signal.SignalType.VELOCITY;
 import static frc.lib.math.Conversions.degreesToRotations;
 import static frc.lib.math.Conversions.rotationsToDegrees;
 import static frc.lib.math.Conversions.rotationsToMetres;
@@ -23,6 +24,8 @@ import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 public class RealSwerveModule extends SwerveModuleIO {
     private final Motor driveMotor, steerMotor;
     private final Encoder steerEncoder;
+
+    private Signal positionSignal = new Signal(POSITION, true), velocitySignal = new Signal(VELOCITY, true);
 
     private final Queue<Double> steerPositionQueue, drivePositionQueue;
 
@@ -66,8 +69,8 @@ public class RealSwerveModule extends SwerveModuleIO {
 
     @Override
     protected void refreshInputs(SwerveModuleInputsAutoLogged swerveModuleInputs) {
-        driveMotor.refreshStatusSignals(VELOCITY, POSITION);
-        steerEncoder.refreshStatusSignals(POSITION);
+        driveMotor.refreshStatusSignals(positionSignal, velocitySignal);
+        steerEncoder.refreshStatusSignals(positionSignal);
 
         swerveModuleInputs.steerAngleDegrees = getAngleDegrees();
         swerveModuleInputs.steerVoltage = steerMotor.getVoltage();

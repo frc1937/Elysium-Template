@@ -10,7 +10,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.Properties;
 
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
@@ -186,8 +185,8 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Properties.SignalType signalType, double updateFrequencyHz) {
-        switch (signalType) {
+    public void setSignalUpdateFrequency(Signal signal, double updateFrequencyHz) {
+        switch (signal.getType()) {
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
             case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
             case VOLTAGE -> voltageSignal.setUpdateFrequency(updateFrequencyHz);
@@ -198,15 +197,15 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(double updateFrequencyHz, Properties.SignalType... signalTypes) {
-        for (Properties.SignalType type : signalTypes) {
-            setSignalUpdateFrequency(type, updateFrequencyHz);
+    public void setSignalsUpdateFrequency(double updateFrequencyHz, Signal... signals) {
+        for (Signal signal : signals) {
+            setSignalUpdateFrequency(signal, updateFrequencyHz);
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Properties.SignalType signalType) {
-        return switch (signalType) {
+    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
+        return switch (signal.getType()) {
             case VELOCITY -> velocitySignal;
             case POSITION -> positionSignal;
             case VOLTAGE -> voltageSignal;
@@ -217,14 +216,14 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void refreshStatusSignals(Properties.SignalType... signalTypes) {
-        ArrayList<BaseStatusSignal> signals = new ArrayList<>();
+    public void refreshStatusSignals(Signal... signals) {
+        ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
 
-        for (Properties.SignalType signalType : signalTypes) {
-            signals.add(getRawStatusSignal(signalType));
+        for (Signal signal : signals) {
+            baseStatusSignals.add(getRawStatusSignal(signal));
         }
 
-        BaseStatusSignal.refreshAll(signals.toArray(new BaseStatusSignal[0]));
+        BaseStatusSignal.refreshAll(baseStatusSignals.toArray(new BaseStatusSignal[0]));
     }
 
 

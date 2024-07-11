@@ -1,15 +1,12 @@
 package frc.robot.subsystems.flywheels.real;
 
-import frc.lib.generic.Properties;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.GenericSpark;
+import frc.lib.generic.motor.*;
 import frc.robot.subsystems.flywheels.FlywheelsConstants;
 import frc.robot.subsystems.flywheels.SingleFlywheelIO;
 
 import java.util.Optional;
 
+import static frc.lib.generic.motor.Signal.SignalType.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
 
 public class RealFlywheelsConstants extends FlywheelsConstants {
@@ -47,10 +44,10 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
             i++;
         }
 
-        motor.setSignalUpdateFrequency(Properties.SignalType.CLOSED_LOOP_TARGET, 50);
-        motor.setSignalUpdateFrequency(Properties.SignalType.VELOCITY, 50);
-        motor.setSignalUpdateFrequency(Properties.SignalType.TEMPERATURE, 50);
-        motor.setSignalUpdateFrequency(Properties.SignalType.VOLTAGE, 50);
+        motor.setSignalUpdateFrequency(new Signal(CLOSED_LOOP_TARGET), 50);
+        motor.setSignalUpdateFrequency(new Signal(VELOCITY), 50);
+        motor.setSignalUpdateFrequency(new Signal(TEMPERATURE), 50);
+        motor.setSignalUpdateFrequency(new Signal(VOLTAGE), 50);
     }
 
     @Override
