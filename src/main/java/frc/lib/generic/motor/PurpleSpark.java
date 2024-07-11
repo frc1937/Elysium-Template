@@ -13,7 +13,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static frc.robot.subsystems.arm.real.RealArmConstants.ABSOLUTE_ARM_ENCODER;
 
@@ -33,7 +32,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
     private TrapezoidProfile.State desiredState = new TrapezoidProfile.State();
     private TrapezoidProfile.State temporaryCurrentState = new TrapezoidProfile.State();
 
-    private final Supplier<TrapezoidProfile.State> currentStateSupplier = () -> new TrapezoidProfile.State(getSystemPosition(), getSystemVelocity());
     private Function<TrapezoidProfile.State, Double> feedforwardSupplier = (motionProfileState) -> 0.0;
 
     private TrapezoidProfile motionProfile;
@@ -68,7 +66,6 @@ public class PurpleSpark extends CANSparkBase implements Motor {
 
             case VELOCITY -> controller.setReference(output * 60, ControlType.kVelocity, slotToUse, feedforward);
             case POSITION -> {
-                temporaryCurrentState = currentStateSupplier.get();
                 handleSmoothMotion();
             }
 
