@@ -44,21 +44,6 @@ public class GenericIMU extends WPI_PigeonIMU implements Pigeon {
     }
 
     @Override
-    public double getRoll() {
-        return super.getRoll();
-    }
-
-    @Override
-    public double getPitch() {
-        return super.getPitch();
-    }
-
-    @Override
-    public double getYaw() {
-        return super.getYaw();
-    }
-
-    @Override
     public void periodic() {
         refreshInputs();
         Logger.processInputs(name, inputs);
