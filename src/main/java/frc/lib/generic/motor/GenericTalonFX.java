@@ -13,6 +13,7 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
 import java.util.ArrayList;
+import java.util.function.DoubleSupplier;
 
 public class GenericTalonFX extends TalonFX implements Motor {
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
@@ -101,6 +102,16 @@ public class GenericTalonFX extends TalonFX implements Motor {
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         currentConfiguration.idleMode = idleMode;
         configure(currentConfiguration);
+    }
+
+    @Override
+    public void setExternalPositionSupplier(DoubleSupplier position) {
+//todo: do
+    }
+
+    @Override
+    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
+//todo: do
     }
 
     @Override

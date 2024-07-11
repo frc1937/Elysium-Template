@@ -9,6 +9,8 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
+import java.util.function.DoubleSupplier;
+
 public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     private MotorConfiguration currentConfiguration;
     private int slotToUse = 0;
@@ -31,6 +33,16 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) {
         throw new UnsupportedOperationException("I ain't implementing this lmfao");
+    }
+
+    @Override
+    public void setExternalPositionSupplier(DoubleSupplier position) {
+        //todo: do
+    }
+
+    @Override
+    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
+        //todo: implement
     }
 
     @Override

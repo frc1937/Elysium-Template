@@ -5,11 +5,32 @@ import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.Properties;
 
+import java.util.function.DoubleSupplier;
+
 /**
  * Custom Motor class to allow switching and replacing motors quickly,
  * in addition of better uniformity across the code.
  */
 public interface Motor {
+    /**
+     * Supplies an external position for the motor control system. This method allows
+     * the feedforward and PID controllers to use an external encoder position value instead
+     * of the system's position, allowing for more precise control using external {@link frc.lib.generic.encoder.Encoder Encoders}.
+     *
+     * @param position A {@link DoubleSupplier} providing the position to be used
+     *                 by the motor control system.
+     */
+    void setExternalPositionSupplier(DoubleSupplier position);
+
+    /**
+     * Supplies velocity from an external source for the motor control system. This method allows
+     * the feedforward and PID controllers to use the externally supplied velocity value instead
+     * of the system's calculated velocity, allowing for more precise control using external {@link frc.lib.generic.encoder.Encoder Encoders}.
+     *
+     * @param velocity A {@link DoubleSupplier} providing the velocity to be used
+     *                 by the motor control system.
+     */
+    void setExternalVelocitySupplier(DoubleSupplier velocity);
 
     /**
      * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
@@ -51,6 +72,7 @@ public interface Motor {
      * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
      * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profiledMaxVelocity profiledMaxVelocity}
      * and {@link MotorConfiguration#profiledTargetAcceleration profiledTargetAcceleration} are set.
+     * The motor will calculate the needed feedforward based on the provided gains.
      * </p>
      *
      * @param controlMode the control mode for the motor
@@ -90,7 +112,6 @@ public interface Motor {
      * @param feedforward the custom feedforward to be applied to the motor output
      */
     void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward);
-
 
     /**
      * Set the idle mode of the motor
@@ -145,18 +166,17 @@ public interface Motor {
      */
     double getMotorVelocity();
 
-
     /**
      * Get the current running through the motor (STATOR current)
      *
-     * @Units - In amps
+     * @Units In amps
      */
     double getCurrent();
 
     /**
      * Get the voltage running through the motor
      *
-     * @Units - In volts
+     * @Units In volts
      */
     double getVoltage();
 
@@ -168,21 +188,21 @@ public interface Motor {
     /**
      * Get the temperature of the motor
      *
-     * @Units - In celsius
+     * @Units In celsius
      */
     double getTemperature();
 
     /**
      * Gearing applied
      *
-     * @Units - In rotations
+     * @Units In rotations
      */
     double getSystemPosition();
 
     /**
      * Gearing applied
      *
-     * @Units - In rotations per second
+     * @Units In rotations per second
      */
     double getSystemVelocity();
 

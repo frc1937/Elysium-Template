@@ -12,6 +12,8 @@ import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.DoubleSupplier;
+
 public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
@@ -74,6 +76,16 @@ public class GenericSpark extends CANSparkBase implements Motor {
     @Override
     public int getDeviceID() {
         return getDeviceId();
+    }
+
+    @Override
+    public void setExternalPositionSupplier(DoubleSupplier position) {
+        //todo: do
+    }
+
+    @Override
+    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
+        //todo: do
     }
 
     @Override
