@@ -18,7 +18,7 @@ public abstract class GenericSimulation {
     protected GenericSimulation() {
         REGISTERED_SIMULATIONS.add(this);
 
-        motor = new GenericTalonFX(REGISTERED_SIMULATIONS.size() - 1);
+        motor = new GenericTalonFX("YEHUDA", REGISTERED_SIMULATIONS.size() - 1);
 
         //This is simulation. we don't give a damn fuck! about performance.
         Signal[] signals = new Signal[]{

@@ -1,9 +1,9 @@
 package frc.robot.subsystems.swerve.simulation;
 
-import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.pigeon.GenericIMU;
 import frc.lib.generic.simulation.GyroSimulation;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.robot.GlobalConstants;
@@ -80,7 +80,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    protected Optional<WPI_PigeonIMU> getPigeon() {
+    protected Optional<GenericIMU> getPigeon() {
         return Optional.empty();
     }
 

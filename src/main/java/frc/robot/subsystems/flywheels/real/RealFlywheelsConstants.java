@@ -10,8 +10,8 @@ import static frc.lib.generic.motor.Signal.SignalType.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
 
 public class RealFlywheelsConstants extends FlywheelsConstants {
-    private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark(28, MotorProperties.SparkType.FLEX);
-    private static final Motor RIGHT_FLYWHEEL_MOTOR = new GenericSpark(15, MotorProperties.SparkType.FLEX);
+    private static final Motor LEFT_FLYWHEEL_MOTOR = new GenericSpark("LEFT_FLYWHEEL", 28, MotorProperties.SparkType.FLEX);
+    private static final Motor RIGHT_FLYWHEEL_MOTOR = new GenericSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
 //    private static final MotorProperties.Slot LEFT_SLOT =
 //            new MotorProperties.Slot(0.003, 0.0, 0.0, 0.0969743, 0.0, 0.02426);

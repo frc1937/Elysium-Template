@@ -205,7 +205,7 @@ public interface Motor {
      */
     double getSystemVelocity();
 
-    void setFollowerOf(int masterPort);
+    void setFollowerOf(String name, int masterPort);
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
     void setupSignalUpdates(Signal signal);

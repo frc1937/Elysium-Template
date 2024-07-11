@@ -8,7 +8,7 @@ import frc.lib.generic.motor.MotorProperties;
 
 public class RealKickerConstants {
     public static final DigitalInput BEAM_BREAKER = new DigitalInput(0);
-    public static final Motor MOTOR = new GenericTalonSRX(8);
+    public static final Motor MOTOR = new GenericTalonSRX("KICKER", 8);
 
     static {
         configureMotor();

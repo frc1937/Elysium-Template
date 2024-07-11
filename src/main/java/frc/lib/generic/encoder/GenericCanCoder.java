@@ -20,8 +20,12 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
     private final StatusSignal<Double> positionSignal, velocitySignal;
 
-    public GenericCanCoder(int canCoderID) {
+    private final String name;
+
+    public GenericCanCoder(String name, int canCoderID) {
         super(canCoderID);
+
+        this.name = name;
 
         positionSignal = super.getPosition().clone();
         velocitySignal = super.getVelocity().clone();

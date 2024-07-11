@@ -6,7 +6,7 @@ import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 
 public class RealIntakeConstants {
-    protected static final Motor MOTOR = new GenericTalonSRX(5);
+    protected static final Motor MOTOR = new GenericTalonSRX("INTAKE", 5);
 
     static {
         configureMotor();

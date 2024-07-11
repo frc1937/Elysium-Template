@@ -16,7 +16,7 @@ public class RealSwerve extends SwerveIO {
 
     @Override
     protected void setGyroHeading(Rotation2d heading) {
-        GYRO.get().setYaw(heading.getDegrees());
+        GYRO.get().setGyroYaw(heading.getDegrees());
     }
 
     @Override

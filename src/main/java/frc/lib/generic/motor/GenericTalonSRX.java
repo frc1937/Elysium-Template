@@ -14,7 +14,9 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     private MotorConfiguration currentConfiguration;
     private int slotToUse = 0;
 
-    public GenericTalonSRX(int deviceNumber) {
+    private String name;
+
+    public GenericTalonSRX(String name, int deviceNumber) {
         super(deviceNumber);
     }
 
@@ -67,7 +69,7 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     }
 
     @Override
-    public void setFollowerOf(int masterPort) {
+    public void setFollowerOf(String name, int masterPort) {
         super.set(ControlMode.Follower, masterPort);
     }
 

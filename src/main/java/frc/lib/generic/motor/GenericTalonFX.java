@@ -33,8 +33,12 @@ public class GenericTalonFX extends TalonFX implements Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
-    public GenericTalonFX(int deviceId) {
+    private final String name;
+
+    public GenericTalonFX(String name, int deviceId) {
         super(deviceId);
+
+        this.name = name;
 
         talonConfigurator = super.getConfigurator();
 
@@ -180,7 +184,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setFollowerOf(int masterPort) {
+    public void setFollowerOf(String name, int masterPort) {
         setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
     }
 

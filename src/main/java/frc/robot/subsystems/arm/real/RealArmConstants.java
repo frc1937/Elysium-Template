@@ -12,8 +12,8 @@ import static frc.lib.generic.motor.Signal.SignalType.*;
 import static frc.robot.subsystems.arm.ArmConstants.TOLERANCE_ROTATIONS;
 
 public class RealArmConstants {
-    static final Motor ARM_MOTOR = new GenericSpark(1, MotorProperties.SparkType.FLEX);
-    public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder(22);
+    static final Motor ARM_MOTOR = new GenericSpark("ARM_MOTOR", 1, MotorProperties.SparkType.FLEX);
+    public static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder("ARM_ENCODER", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
 

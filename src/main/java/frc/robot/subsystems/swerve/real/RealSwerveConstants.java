@@ -1,13 +1,12 @@
 package frc.robot.subsystems.swerve.real;
 
-import com.ctre.phoenix.sensors.PigeonIMU;
-import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.GenericCanCoder;
 import frc.lib.generic.motor.*;
+import frc.lib.generic.pigeon.GenericIMU;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
@@ -44,20 +43,20 @@ public class RealSwerveConstants extends SwerveConstants {
             0.023132,
             0.27053);
 
-    protected static final Motor FL_STEER_MOTOR = new GenericSpark(11, MotorProperties.SparkType.MAX),
-            FR_STEER_MOTOR = new GenericSpark(10, MotorProperties.SparkType.MAX),
-            RL_STEER_MOTOR = new GenericSpark(6, MotorProperties.SparkType.MAX),
-            RR_STEER_MOTOR = new GenericSpark(9, MotorProperties.SparkType.MAX);
+    protected static final Motor FL_STEER_MOTOR = new GenericSpark("FL_STEER_MOTOR", 11, MotorProperties.SparkType.MAX),
+            FR_STEER_MOTOR = new GenericSpark("FR_STEER_MOTOR", 10, MotorProperties.SparkType.MAX),
+            RL_STEER_MOTOR = new GenericSpark("RL_STEER_MOTOR", 6, MotorProperties.SparkType.MAX),
+            RR_STEER_MOTOR = new GenericSpark("RR_STEER_MOTOR", 9, MotorProperties.SparkType.MAX);
 
-    protected static final Motor FL_DRIVE_MOTOR = new GenericTalonFX(14),
-            FR_DRIVE_MOTOR = new GenericTalonFX(3),
-            RL_DRIVE_MOTOR = new GenericTalonFX(13),
-            RR_DRIVE_MOTOR = new GenericTalonFX(2);
+    protected static final Motor FL_DRIVE_MOTOR = new GenericTalonFX("FL_DRIVE_MOTOR", 14),
+            FR_DRIVE_MOTOR = new GenericTalonFX("FR_DRIVE_MOTOR", 13),
+            RL_DRIVE_MOTOR = new GenericTalonFX("RL_DRIVE_MOTOR", 13),
+            RR_DRIVE_MOTOR = new GenericTalonFX("RR_DRIVE_MOTOR", 12);
 
-    protected static final Encoder FL_STEER_ENCODER = new GenericCanCoder(18),
-            FR_STEER_ENCODER = new GenericCanCoder(20),
-            RL_STEER_ENCODER = new GenericCanCoder(19),
-            RR_STEER_ENCODER = new GenericCanCoder(21);
+    protected static final Encoder FL_STEER_ENCODER = new GenericCanCoder("FL_STEER_ENCODER", 18),
+            FR_STEER_ENCODER = new GenericCanCoder("FR_STEER_ENCODER", 20),
+            RL_STEER_ENCODER = new GenericCanCoder("RL_STEER_ENCODER", 19),
+            RR_STEER_ENCODER = new GenericCanCoder("RR_STEER_ENCODER", 21);
 
     static final double[] STEER_ENCODER_OFFSET = {0.677246, 0.282715, 0.533447, 0.313721};
 
@@ -65,7 +64,7 @@ public class RealSwerveConstants extends SwerveConstants {
     static final Motor[] STEER_MOTOR = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
     static final Motor[] DRIVE_MOTOR = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
 
-    static final Optional<WPI_PigeonIMU> GYRO = ofReplayable(() -> new WPI_PigeonIMU(30));
+    static final Optional<GenericIMU> GYRO = ofReplayable(() -> new GenericIMU("GYRO", 30));
 
     static {
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
@@ -78,7 +77,7 @@ public class RealSwerveConstants extends SwerveConstants {
                 configureSteerMotor(STEER_MOTOR[i]);
             }
 
-            GYRO.ifPresent(PigeonIMU::configFactoryDefault);
+            GYRO.ifPresent(GenericIMU::resetConfigurations);
         }
     }
 
@@ -90,7 +89,7 @@ public class RealSwerveConstants extends SwerveConstants {
     });
 
     @Override
-    public Optional<WPI_PigeonIMU> getPigeon() {
+    public Optional<GenericIMU> getPigeon() {
         return GYRO;
     }
 

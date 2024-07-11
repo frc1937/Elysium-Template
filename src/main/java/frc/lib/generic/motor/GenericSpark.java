@@ -23,6 +23,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
     private final MotorProperties.SparkType model;
     private final RelativeEncoder encoder;
 
+    private final String name;
+
     private double closedLoopTarget;
 
     private MotorConfiguration currentConfiguration;
@@ -40,9 +42,11 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     private double previousTimestamp = Logger.getTimestamp();
 
-    public GenericSpark(int deviceId, MotorProperties.SparkType sparkType) {
+    public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
+
         model = sparkType;
+        this.name = name;
 
         optimizeBusUsage();
 
@@ -156,8 +160,8 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setFollowerOf(int masterPort) {
-        super.follow(new GenericSpark(masterPort, model));
+    public void setFollowerOf(String name, int masterPort) {
+        super.follow(new GenericSpark(name, masterPort, model));
         super.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
     }
 
