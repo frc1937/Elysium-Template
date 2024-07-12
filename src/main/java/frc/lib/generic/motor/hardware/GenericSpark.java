@@ -18,7 +18,7 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-public class GenericSpark implements Motor {
+public class GenericSpark extends Motor {
     private static final double useBuiltinFeedforwardNumber = 69420;
 
     private final CANSparkBase spark;
@@ -44,11 +44,8 @@ public class GenericSpark implements Motor {
     private double previousTimestamp = Logger.getTimestamp();
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
-        if(sparkType == MotorProperties.SparkType.FLEX) {
-            spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
-        } else {
-            spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
-        }
+        if (sparkType == MotorProperties.SparkType.FLEX) spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
+        else spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
 
         this.name = name;
 
@@ -105,11 +102,6 @@ public class GenericSpark implements Motor {
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
         this.velocitySupplier = velocitySupplier;
-    }
-
-    @Override
-    public MotorProperties.Slot getCurrentSlot() {
-        return getSlot(slotToUse, currentConfiguration);
     }
 
     @Override
@@ -170,22 +162,8 @@ public class GenericSpark implements Motor {
 
     @Override
     public void setFollowerOf(String name, int masterPort) {
-        spark.follow(new GenericSpark(name, masterPort, MotorProperties.SparkType.FLEX).spark); //todo: WTF
+        spark.follow(new CANSparkMax(masterPort, CANSparkMax.MotorType.kBrushless));
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
-    }
-
-    /**
-     * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
-     */
-    @Override
-    public void setupSignalUpdates(MotorSignal signal) {
-        int ms = (int) (1000 / signal.getUpdateRate());
-
-        switch (signal.getType()) {
-            case VELOCITY, CURRENT -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
-            case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
-            case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
-        }
     }
 
     @Override
@@ -387,5 +365,19 @@ public class GenericSpark implements Motor {
 
     private double getEffectiveVelocity() {
         return velocitySupplier == null ? getSystemVelocity() : velocitySupplier.getAsDouble();
+    }
+
+
+    /**
+     * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
+     */
+    private void setupSignalUpdates(MotorSignal signal) {
+        int ms = (int) (1000 / signal.getUpdateRate());
+
+        switch (signal.getType()) {
+            case VELOCITY, CURRENT -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
+            case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
+        }
     }
 }

@@ -14,7 +14,7 @@ import frc.lib.generic.motor.MotorSignal;
 
 import java.util.function.DoubleSupplier;
 
-public class GenericTalonSRX implements Motor {
+public class GenericTalonSRX extends Motor {
     private final WPI_TalonSRX talonSRX;
 
     private MotorConfiguration currentConfiguration;
@@ -50,11 +50,6 @@ public class GenericTalonSRX implements Motor {
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocity) {
         //todo: implement
-    }
-
-    @Override
-    public MotorProperties.Slot getCurrentSlot() {
-        return getSlot(slotToUse, currentConfiguration);
     }
 
     @Override
@@ -132,11 +127,6 @@ public class GenericTalonSRX implements Motor {
     @Override
     public int getDeviceID() {
         return talonSRX.getDeviceID();
-    }
-
-    @Override
-    public void setupSignalUpdates(MotorSignal signal) {
-        throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
     }
 
     @Override

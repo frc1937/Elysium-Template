@@ -18,7 +18,7 @@ import frc.lib.generic.motor.MotorSignal;
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
-public class GenericTalonFX implements Motor {
+public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
@@ -129,11 +129,6 @@ public class GenericTalonFX implements Motor {
     }
 
     @Override
-    public MotorProperties.Slot getCurrentSlot() {
-        return getSlot(slotToUse, currentConfiguration);
-    }
-
-    @Override
     public MotorConfiguration getCurrentConfiguration() {
         return currentConfiguration;
     }
@@ -202,20 +197,6 @@ public class GenericTalonFX implements Motor {
     @Override
     public void setFollowerOf(String name, int masterPort) {
         talonFX.setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
-    }
-
-    @Override
-    public void setupSignalUpdates(MotorSignal signal) {
-        final double updateFrequencyHz = signal.getUpdateRate();
-
-        switch (signal.getType()) {
-            case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
-            case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
-            case VOLTAGE -> voltageSignal.setUpdateFrequency(updateFrequencyHz);
-            case CURRENT -> currentSignal.setUpdateFrequency(updateFrequencyHz);
-            case TEMPERATURE -> temperatureSignal.setUpdateFrequency(updateFrequencyHz);
-            case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(updateFrequencyHz);
-        }
     }
 
     @Override
@@ -362,5 +343,18 @@ public class GenericTalonFX implements Motor {
         }
 
         return statusCode == StatusCode.OK;
+    }
+
+    private void setupSignalUpdates(MotorSignal signal) {
+        final double updateFrequencyHz = signal.getUpdateRate();
+
+        switch (signal.getType()) {
+            case VELOCITY -> velocitySignal.setUpdateFrequency(updateFrequencyHz);
+            case POSITION -> positionSignal.setUpdateFrequency(updateFrequencyHz);
+            case VOLTAGE -> voltageSignal.setUpdateFrequency(updateFrequencyHz);
+            case CURRENT -> currentSignal.setUpdateFrequency(updateFrequencyHz);
+            case TEMPERATURE -> temperatureSignal.setUpdateFrequency(updateFrequencyHz);
+            case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(updateFrequencyHz);
+        }
     }
 }

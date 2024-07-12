@@ -37,7 +37,6 @@ public class Swerve extends SubsystemBase {
     private final Pigeon gyro = getGyro();
     private PigeonInputsAutoLogged gyroInputs = getGyro().getInputs();
 
-
     public Swerve() {
         configurePathPlanner();
     }

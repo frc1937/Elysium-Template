@@ -10,7 +10,7 @@ import java.util.function.DoubleSupplier;
  * Custom Motor class to allow switching and replacing motors quickly,
  * in addition of better uniformity across the code.
  */
-public interface Motor {
+public class Motor {
     /**
      * Supplies an external position for the motor control system. This method allows
      * the feedforward and PID controllers to use an external encoder position value instead
@@ -19,7 +19,7 @@ public interface Motor {
      * @param position A {@link DoubleSupplier} providing the position to be used
      *                 by the motor control system.
      */
-    void setExternalPositionSupplier(DoubleSupplier position);
+    public void setExternalPositionSupplier(DoubleSupplier position) { }
 
     /**
      * Supplies velocity from an external source for the motor control system. This method allows
@@ -29,21 +29,7 @@ public interface Motor {
      * @param velocity A {@link DoubleSupplier} providing the velocity to be used
      *                 by the motor control system.
      */
-    void setExternalVelocitySupplier(DoubleSupplier velocity);
-
-    /**
-     * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
-     *
-     * @return The configuration slot
-     */
-    MotorProperties.Slot getCurrentSlot();
-
-    /**
-     * Gets the currently used configuration used by the motor. If this is not set, it will return null.
-     *
-     * @return The configuration
-     */
-    MotorConfiguration getCurrentConfiguration();
+    public void setExternalVelocitySupplier(DoubleSupplier velocity) { }
 
     /**
      * In case you need to re-set the slot on runtime, use this.
@@ -51,7 +37,7 @@ public interface Motor {
      * @param slot       The new slot values
      * @param slotNumber The slot number to modify
      */
-    void resetSlot(MotorProperties.Slot slot, int slotNumber);
+    public void resetSlot(MotorProperties.Slot slot, int slotNumber) { }
 
     /**
      * Sets the output of the motor based on the specified control mode and desired output value.
@@ -77,7 +63,7 @@ public interface Motor {
      * @param controlMode the control mode for the motor
      * @param output      the desired output value
      */
-    void setOutput(MotorProperties.ControlMode controlMode, double output);
+    public void setOutput(MotorProperties.ControlMode controlMode, double output) { }
 
 
     /**
@@ -110,19 +96,19 @@ public interface Motor {
      *                    or rotations per second for {@link MotorProperties.ControlMode#VELOCITY VELOCITY})
      * @param feedforward the custom feedforward to be applied to the motor output
      */
-    void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward);
+    public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) { }
 
     /**
      * Set the idle mode of the motor
      *
      * @param idleMode The new idle mode
      */
-    void setIdleMode(MotorProperties.IdleMode idleMode);
+    public void setIdleMode(MotorProperties.IdleMode idleMode) { }
 
     /**
      * Stop the motor
      */
-    void stopMotor();
+    public void stopMotor() { }
 
     /**
      * Sets the encoder position of the motor to a specified value.
@@ -134,14 +120,14 @@ public interface Motor {
      *
      * @param position the desired encoder position to set, in rotations.
      */
-    void setMotorEncoderPosition(double position);
+    public void setMotorEncoderPosition(double position) { }
 
     /**
      * Get the ID of the motor
      *
      * @return The ID of the motor
      */
-    int getDeviceID();
+    public int getDeviceID() { return -1; }
 
     /**
      * Retrieves the current position of the motor without any gearing applied.
@@ -152,7 +138,7 @@ public interface Motor {
      *
      * @return the current position of the motor in rotations
      */
-    double getMotorPosition();
+    public double getMotorPosition() { return 0; }
 
     /**
      * Retrieves the current velocity of the motor, with no gearing applied.
@@ -163,73 +149,86 @@ public interface Motor {
      *
      * @return the current velocity of the motor, in rotations per second (RPS).
      */
-    double getMotorVelocity();
+    public double getMotorVelocity() { return 0; }
 
     /**
      * Get the current running through the motor (STATOR current)
      *
      * @Units In amps
      */
-    double getCurrent();
+    public double getCurrent() { return 0; }
 
     /**
      * Get the voltage running through the motor
      *
      * @Units In volts
      */
-    double getVoltage();
+    public double getVoltage() { return 0; }
 
     /**
      * Get the current target of the closed-loop PID
      */
-    double getClosedLoopTarget();
+    public double getClosedLoopTarget() { return 0; }
 
     /**
      * Get the temperature of the motor
      *
      * @Units In celsius
      */
-    double getTemperature();
+    public double getTemperature() { return 0; }
 
     /**
      * Gearing applied
      *
      * @Units In rotations
      */
-    double getSystemPosition();
+    public double getSystemPosition() { return 0; }
 
     /**
      * Gearing applied
      *
      * @Units In rotations per second
      */
-    double getSystemVelocity();
+    public double getSystemVelocity() { return 0; }
 
-    void setFollowerOf(String name, int masterPort);
-
-    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    void setupSignalUpdates(MotorSignal signal);
+    public void setFollowerOf(String name, int masterPort) { }
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    void setupSignalsUpdates(MotorSignal... signals);
+    public void setupSignalsUpdates(MotorSignal... signals) { }
 
     /**
      * Get the raw StatusSignal of the motor. DO NOT USE if not necessary.
      */
-    StatusSignal<Double> getRawStatusSignal(MotorSignal signal);
+    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) { return null; }
 
     /**
      * Refreshes all status signals.
      * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}.
      * DO NOT USE if not necessary.
      */
-    void refreshStatusSignals(MotorSignal... signals);
+    public void refreshStatusSignals(MotorSignal... signals) { }
 
-    TalonFXSimState getSimulationState();
+    public TalonFXSimState getSimulationState() { return null; }
 
-    boolean configure(MotorConfiguration configuration);
+    public boolean configure(MotorConfiguration configuration) { return true; }
 
-    default MotorProperties.Slot getSlot(int slotToUse, MotorConfiguration currentConfiguration) {
+    /**
+     * Gets the currently used configuration used by the motor. If this is not set, it will return null.
+     *
+     * @return The configuration
+     */
+    public MotorConfiguration getCurrentConfiguration() { return null; }
+
+    /**
+     * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
+     *
+     * @return The configuration slot
+     */
+    public MotorProperties.Slot getCurrentSlot() {
+        return getSlot(getCurrentConfiguration().slotToUse, getCurrentConfiguration());
+    }
+
+    public MotorProperties.Slot getSlot(int slotToUse, MotorConfiguration currentConfiguration) {
         switch (slotToUse) {
             case 1 -> { return currentConfiguration.slot1; }
             case 2 -> { return currentConfiguration.slot2; }
@@ -237,7 +236,7 @@ public interface Motor {
         }
     }
 
-    default boolean isAtSetpoint() {
+    public boolean isAtSetpoint() {
         if (getCurrentConfiguration().closedLoopTolerance == 0)
             throw new RuntimeException("Must set closed loop tolerance!");
 
