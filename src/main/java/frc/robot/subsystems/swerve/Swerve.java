@@ -35,7 +35,7 @@ public class Swerve extends SubsystemBase {
     private final SwerveModuleIO[] modulesIO = getModulesIO();
 
     private final Pigeon gyro = getGyro();
-    private final PigeonInputsAutoLogged gyroInputs = getGyro().getInputs();
+    private PigeonInputsAutoLogged gyroInputs = getGyro().getInputs();
 
 
     public Swerve() {
@@ -197,6 +197,8 @@ public class Swerve extends SubsystemBase {
     }
 
     private void updateAllInputs() {
+        gyroInputs = getGyro().getInputs();
+
         for (SwerveModuleIO currentModule : modulesIO)
             currentModule.periodic();
     }
@@ -248,7 +250,7 @@ public class Swerve extends SubsystemBase {
 
     private Pigeon getGyro() {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Pigeon("Pigeon");
+            return new Pigeon("GYRO");
         }
 
         return constants.getPigeon().get();

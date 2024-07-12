@@ -17,15 +17,9 @@ public class Pigeon implements LoggableHardware {
     }
 
     public void resetConfigurations() {}
-    public double getYaw() {
-        return 0;
-    }
-    public double getPitch() {
-        return 0;
-    }
-    public double getRoll() {
-        return 0;
-    }
+    public double getYaw() {return 0;}
+    public double getPitch() {return 0;}
+    public double getRoll() {return 0;}
     public void setGyroYaw(double yawDegrees) {}
     /**
      * Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.
