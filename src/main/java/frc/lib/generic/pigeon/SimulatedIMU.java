@@ -2,7 +2,6 @@ package frc.lib.generic.pigeon;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
-import frc.lib.generic.advantagekit.HardwareManager;
 
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 import static frc.robot.RobotContainer.SWERVE;
@@ -12,9 +11,6 @@ public class SimulatedIMU extends Pigeon {
 
     public SimulatedIMU(String name) {
         super(name);
-
-        periodic();
-        HardwareManager.addHardware(this);
     }
 
     public void update(double omegaRadiansPerSecond, double timeSeconds) {
@@ -33,8 +29,9 @@ public class SimulatedIMU extends Pigeon {
 
     @Override
     protected void refreshInputs(PigeonInputsAutoLogged inputs) {
-        if (SWERVE != null)
-            update(SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
+        if (SWERVE == null) return; //The gyro is initialized before the swerve at the beginning
+
+        update(SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
 
         inputs.gyroYawDegrees = getYaw();
 

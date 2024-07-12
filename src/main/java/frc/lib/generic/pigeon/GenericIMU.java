@@ -10,8 +10,8 @@ import java.util.Queue;
 public class GenericIMU extends Pigeon {
     private final WPI_PigeonIMU pigeon;
 
-    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
+    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
     public GenericIMU(String name, int deviceNumber) {
         super(name);
@@ -24,6 +24,22 @@ public class GenericIMU extends Pigeon {
         pigeon.configFactoryDefault();
     }
 
+    @Override
+    public double getPitch() {
+        return pigeon.getPitch();
+    }
+
+    @Override
+    public double getRoll() {
+        return pigeon.getRoll();
+    }
+
+    @Override
+    public double getYaw() {
+        return pigeon.getYaw();
+    }
+
+    @Override
     public void setGyroYaw(double yawDegrees) {
         pigeon.setYaw(yawDegrees);
     }
