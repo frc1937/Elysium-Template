@@ -8,7 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.generic.pigeon.GenericIMU;
+import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.util.LoggedTunableNumber;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.real.RealSwerveConstants;
@@ -84,6 +84,6 @@ public abstract class SwerveConstants {
         return new RealSwerveConstants();
     }
 
-    protected abstract Optional<GenericIMU> getPigeon();
+    protected abstract Optional<Pigeon> getPigeon();
     protected abstract Optional<SwerveModuleIO[]> getModulesIO();
 }

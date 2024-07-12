@@ -18,7 +18,9 @@
       "/SmartDashboard/Mechanism/FlywheelLeftSim": "Mechanism2d",
       "/SmartDashboard/Mechanism/FlywheelRightSim": "Mechanism2d",
       "/SmartDashboard/Mechanisms/ArmMechanism": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/FlywheelLeft": "Mechanism2d",
       "/SmartDashboard/Mechanisms/FlywheelLeftSim": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/FlywheelRight": "Mechanism2d",
       "/SmartDashboard/Mechanisms/FlywheelRightSim": "Mechanism2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },

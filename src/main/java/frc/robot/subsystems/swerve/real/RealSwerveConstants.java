@@ -7,6 +7,8 @@ import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.GenericCanCoder;
 import frc.lib.generic.motor.*;
 import frc.lib.generic.pigeon.GenericIMU;
+import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.PigeonSignal;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.SwerveConstants;
 import frc.robot.subsystems.swerve.SwerveModuleIO;
@@ -64,7 +66,7 @@ public class RealSwerveConstants extends SwerveConstants {
     static final Motor[] STEER_MOTOR = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
     static final Motor[] DRIVE_MOTOR = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
 
-    static final Optional<GenericIMU> GYRO = ofReplayable(() -> new GenericIMU("GYRO", 30));
+    static final Optional<Pigeon> GYRO = ofReplayable(() -> new GenericIMU("GYRO", 30));
 
     static {
         if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
@@ -77,7 +79,7 @@ public class RealSwerveConstants extends SwerveConstants {
                 configureSteerMotor(STEER_MOTOR[i]);
             }
 
-            GYRO.ifPresent(GenericIMU::resetConfigurations);
+            configureGyro();
         }
     }
 
@@ -89,13 +91,20 @@ public class RealSwerveConstants extends SwerveConstants {
     });
 
     @Override
-    public Optional<GenericIMU> getPigeon() {
+    public Optional<Pigeon> getPigeon() {
         return GYRO;
     }
 
     @Override
     protected Optional<SwerveModuleIO[]> getModulesIO() {
         return MODULES_IO;
+    }
+
+    private static void configureGyro() {
+        GYRO.ifPresent(gyro -> {
+            gyro.resetConfigurations();
+            gyro.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
+        });
     }
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {

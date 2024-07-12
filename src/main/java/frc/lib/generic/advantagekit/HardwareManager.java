@@ -35,7 +35,7 @@ public enum HardwareManager {
      * @param robot Robot object
      */
     public static void initialize(LoggedRobot robot) {
-        boolean shouldWriteLogs = false; //for when the roborio doesn't have enough space...
+        boolean shouldWriteLogs = true; //for when the roborio doesn't have enough space...
 
         String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
 
@@ -83,7 +83,7 @@ public enum HardwareManager {
      * <p>
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
-    public static void updateReal() {
+    public static void update() {
         hardware.forEach(LoggableHardware::periodic);
         periodicRunnable.forEach(Runnable::run);
     }

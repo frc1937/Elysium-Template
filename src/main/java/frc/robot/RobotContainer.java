@@ -28,6 +28,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator();
@@ -72,8 +73,8 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.A)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(50)));
+        driveController.getButton(Controller.Inputs.A).whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()));
+
 
         driveController.getButton(Controller.Inputs.B)
                 .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));

@@ -24,7 +24,7 @@ public class Robot extends LoggedRobot {
     public void robotPeriodic() {
         commandScheduler.run();
 
-        HardwareManager.updateReal();
+        HardwareManager.update();
 
         RobotContainer.POSE_ESTIMATOR.periodic();
     }

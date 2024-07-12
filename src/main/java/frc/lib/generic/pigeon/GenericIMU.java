@@ -4,33 +4,36 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import frc.lib.generic.advantagekit.HardwareManager;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
-public class GenericIMU extends WPI_PigeonIMU implements Pigeon {
-    private final GenericPigeonInputsAutoLogged inputs = new GenericPigeonInputsAutoLogged();
+public class GenericIMU extends Pigeon {
+    private final WPI_PigeonIMU pigeon;
+
+    private final PigeonInputsAutoLogged inputs = new PigeonInputsAutoLogged();
     private final String name;
 
     private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
     public GenericIMU(String name, int deviceNumber) {
-        super(deviceNumber);
+        pigeon = new WPI_PigeonIMU(deviceNumber);
 
         this.name = name;
+
+        periodic();
         HardwareManager.addHardware(this);
     }
 
     @Override
     public void resetConfigurations() {
-        super.configFactoryDefault();
+        pigeon.configFactoryDefault();
     }
 
     public void setGyroYaw(double yawDegrees) {
-        super.setYaw(yawDegrees);
+        pigeon.setYaw(yawDegrees);
     }
 
     @Override
@@ -51,7 +54,7 @@ public class GenericIMU extends WPI_PigeonIMU implements Pigeon {
     }
 
     @Override
-    public LoggableInputs getInputs() {
+    public PigeonInputsAutoLogged getInputs() {
         return inputs;
     }
 

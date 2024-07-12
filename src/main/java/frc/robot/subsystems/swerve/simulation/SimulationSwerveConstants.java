@@ -3,8 +3,8 @@ package frc.robot.subsystems.swerve.simulation;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.pigeon.GenericIMU;
-import frc.lib.generic.simulation.GyroSimulation;
+import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.SimulatedIMU;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.SwerveConstants;
@@ -68,7 +68,7 @@ public class SimulationSwerveConstants extends SwerveConstants {
             new SimulationSwerveModule(REAR_LEFT_DRIVE_MOTOR, REAR_LEFT_STEER_MOTOR, "RearLeft")
     });
 
-    static final GyroSimulation GYRO = new GyroSimulation();
+    static final SimulatedIMU GYRO = new SimulatedIMU("GYRO");
 
     static {
         if(GlobalConstants.CURRENT_MODE != GlobalConstants.Mode.REPLAY) {
@@ -80,8 +80,8 @@ public class SimulationSwerveConstants extends SwerveConstants {
     }
 
     @Override
-    protected Optional<GenericIMU> getPigeon() {
-        return Optional.empty();
+    protected Optional<Pigeon> getPigeon() {
+        return Optional.of(GYRO);
     }
 
     @Override

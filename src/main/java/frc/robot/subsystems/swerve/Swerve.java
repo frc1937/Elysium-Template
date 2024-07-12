@@ -5,22 +5,19 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.PigeonInputsAutoLogged;
 import frc.lib.math.Optimizations;
 import frc.lib.util.commands.InitExecuteCommand;
 import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.GlobalConstants;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -28,20 +25,18 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.swerve.SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
 
 public class Swerve extends SubsystemBase {
-    private final SwerveInputsAutoLogged swerveInputs = new SwerveInputsAutoLogged();
-    private final SwerveIO swerveIO = SwerveIO.generateIO();
-
     private final SwerveConstants constants = SwerveConstants.generateConstants();
     private final SwerveModuleIO[] modulesIO = getModulesIO();
+
+    private final Pigeon gyro = getGyro();
+    private final PigeonInputsAutoLogged gyroInputs = getGyro().getInputs();
+
 
     public Swerve() {
         configurePathPlanner();
@@ -111,12 +106,12 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getGyroHeading() {
-        final double inputtedHeading = MathUtil.inputModulus(swerveInputs.gyroYawDegrees, -180, 180);
+        final double inputtedHeading = MathUtil.inputModulus(gyroInputs.gyroYawDegrees, -180, 180);
         return Rotation2d.fromDegrees(inputtedHeading);
     }
 
     public void setGyroHeading(Rotation2d heading) {
-        swerveIO.setGyroHeading(heading);
+        gyro.setGyroYaw(heading.getDegrees());
     }
 
     public ChassisSpeeds getSelfRelativeVelocity() {
@@ -179,17 +174,17 @@ public class Swerve extends SubsystemBase {
     }
 
     private void updatePoseEstimatorStates() {
-        final int odometryUpdates = swerveInputs.odometryUpdatesYawDegrees.length;
+        final int odometryUpdates = gyroInputs.odometryUpdatesYawDegrees.length;
 
         final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
         for (int i = 0; i < odometryUpdates; i++) {
             swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromDegrees(swerveInputs.odometryUpdatesYawDegrees[i]);
+            gyroRotations[i] = Rotation2d.fromDegrees(gyroInputs.odometryUpdatesYawDegrees[i]);
         }
 
-        POSE_ESTIMATOR.updatePoseEstimatorStates(swerveWheelPositions, gyroRotations, swerveInputs.odometryUpdatesTimestamp);
+        POSE_ESTIMATOR.updatePoseEstimatorStates(swerveWheelPositions, gyroRotations, gyroInputs.odometryUpdatesTimestamp);
     }
 
     private SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
@@ -202,9 +197,6 @@ public class Swerve extends SubsystemBase {
     }
 
     private void updateAllInputs() {
-        swerveIO.refreshInputs(swerveInputs);
-        Logger.processInputs("Swerve", swerveInputs);
-
         for (SwerveModuleIO currentModule : modulesIO)
             currentModule.periodic();
     }
@@ -252,6 +244,14 @@ public class Swerve extends SubsystemBase {
             states[i] = modulesIO[i].getTargetState();
 
         return states;
+    }
+
+    private Pigeon getGyro() {
+        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
+            return new Pigeon();
+        }
+
+        return constants.getPigeon().get();
     }
 
     private SwerveModuleIO[] getModulesIO() {
