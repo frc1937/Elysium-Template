@@ -1,12 +1,13 @@
 package frc.robot.subsystems.flywheels.real;
 
 import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.hardware.GenericSpark;
 import frc.robot.subsystems.flywheels.FlywheelsConstants;
 import frc.robot.subsystems.flywheels.SingleFlywheelIO;
 
 import java.util.Optional;
 
-import static frc.lib.generic.motor.Signal.SignalType.*;
+import static frc.lib.generic.motor.MotorSignal.SignalType.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.ofReplayable;
 
 public class RealFlywheelsConstants extends FlywheelsConstants {
@@ -44,10 +45,10 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
             i++;
         }
 
-        motor.setupSignalUpdates(new Signal(CLOSED_LOOP_TARGET));
-        motor.setupSignalUpdates(new Signal(VELOCITY));
-        motor.setupSignalUpdates(new Signal(TEMPERATURE));
-        motor.setupSignalUpdates(new Signal(VOLTAGE));
+        motor.setupSignalUpdates(new MotorSignal(CLOSED_LOOP_TARGET));
+        motor.setupSignalUpdates(new MotorSignal(VELOCITY));
+        motor.setupSignalUpdates(new MotorSignal(TEMPERATURE));
+        motor.setupSignalUpdates(new MotorSignal(VOLTAGE));
     }
 
     @Override

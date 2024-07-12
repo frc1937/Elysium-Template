@@ -1,6 +1,6 @@
 package frc.lib.generic.motor;
 
-public class Signal {
+public class MotorSignal {
     public enum SignalType {
         CURRENT, POSITION, VELOCITY, VOLTAGE, TEMPERATURE, CLOSED_LOOP_TARGET
     }
@@ -8,12 +8,12 @@ public class Signal {
     private final SignalType type;
     private final boolean useFasterThread;
 
-    public Signal(SignalType type, boolean useFasterThread) {
+    public MotorSignal(SignalType type, boolean useFasterThread) {
         this.type = type;
         this.useFasterThread = useFasterThread;
     }
 
-    public Signal(SignalType type) {
+    public MotorSignal(SignalType type) {
         this(type, false);
     }
 

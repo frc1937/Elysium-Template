@@ -1,7 +1,9 @@
-package frc.lib.generic.pigeon;
+package frc.lib.generic.pigeon.hardware;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.PigeonInputsAutoLogged;
 
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 import static frc.robot.RobotContainer.SWERVE;

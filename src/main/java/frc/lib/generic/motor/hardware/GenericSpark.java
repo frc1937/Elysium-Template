@@ -1,4 +1,4 @@
-package frc.lib.generic.motor;
+package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
@@ -12,6 +12,10 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.Logger;
 
@@ -169,7 +173,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
      * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
      */
     @Override
-    public void setupSignalUpdates(Signal signal) {
+    public void setupSignalUpdates(MotorSignal signal) {
         int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
@@ -180,19 +184,19 @@ public class GenericSpark extends CANSparkBase implements Motor {
     }
 
     @Override
-    public void setupSignalsUpdates(Signal... signals) {
-        for (Signal signalType : signals) {
+    public void setupSignalsUpdates(MotorSignal... signals) {
+        for (MotorSignal signalType : signals) {
             setupSignalUpdates(signalType);
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
+    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
         throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 
     @Override
-    public void refreshStatusSignals(Signal... signals) {
+    public void refreshStatusSignals(MotorSignal... signals) {
         throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 

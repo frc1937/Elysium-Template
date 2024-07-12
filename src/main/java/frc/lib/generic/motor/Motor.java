@@ -208,22 +208,22 @@ public interface Motor {
     void setFollowerOf(String name, int masterPort);
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    void setupSignalUpdates(Signal signal);
+    void setupSignalUpdates(MotorSignal signal);
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    void setupSignalsUpdates(Signal... signals);
+    void setupSignalsUpdates(MotorSignal... signals);
 
     /**
      * Get the raw StatusSignal of the motor. DO NOT USE if not necessary.
      */
-    StatusSignal<Double> getRawStatusSignal(Signal signal);
+    StatusSignal<Double> getRawStatusSignal(MotorSignal signal);
 
     /**
      * Refreshes all status signals.
      * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}.
      * DO NOT USE if not necessary.
      */
-    void refreshStatusSignals(Signal... signals);
+    void refreshStatusSignals(MotorSignal... signals);
 
     TalonFXSimState getSimulationState();
 

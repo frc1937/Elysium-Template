@@ -1,6 +1,6 @@
 package frc.robot.subsystems.intake.real;
 
-import frc.lib.generic.motor.GenericTalonSRX;
+import frc.lib.generic.motor.hardware.GenericTalonSRX;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;

@@ -4,7 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.pigeon.Pigeon;
-import frc.lib.generic.pigeon.SimulatedIMU;
+import frc.lib.generic.pigeon.hardware.SimulatedIMU;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.robot.GlobalConstants;
 import frc.robot.subsystems.swerve.SwerveConstants;

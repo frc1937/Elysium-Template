@@ -1,4 +1,4 @@
-package frc.lib.generic.motor;
+package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -10,6 +10,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
@@ -189,7 +193,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setupSignalUpdates(Signal signal) {
+    public void setupSignalUpdates(MotorSignal signal) {
         final double updateFrequencyHz = signal.getUpdateRate();
 
         switch (signal.getType()) {
@@ -203,14 +207,14 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void setupSignalsUpdates(Signal... signals) {
-        for (Signal signal : signals) {
+    public void setupSignalsUpdates(MotorSignal... signals) {
+        for (MotorSignal signal : signals) {
             setupSignalUpdates(signal);
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
+    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
         return switch (signal.getType()) {
             case VELOCITY -> velocitySignal;
             case POSITION -> positionSignal;
@@ -222,10 +226,10 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
-    public void refreshStatusSignals(Signal... signals) {
+    public void refreshStatusSignals(MotorSignal... signals) {
         ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
 
-        for (Signal signal : signals) {
+        for (MotorSignal signal : signals) {
             baseStatusSignals.add(getRawStatusSignal(signal));
         }
 

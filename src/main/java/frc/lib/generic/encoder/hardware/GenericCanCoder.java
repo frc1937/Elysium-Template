@@ -1,4 +1,4 @@
-package frc.lib.generic.encoder;
+package frc.lib.generic.encoder.hardware;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -7,7 +7,10 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import frc.lib.generic.motor.Signal;
+import frc.lib.generic.encoder.Encoder;
+import frc.lib.generic.encoder.EncoderConfiguration;
+import frc.lib.generic.encoder.EncoderProperties;
+import frc.lib.generic.encoder.EncoderSignal;
 
 import java.util.ArrayList;
 
@@ -32,25 +35,20 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
-    public void setSignalUpdateFrequency(Signal signal) {
+    public void setSignalUpdateFrequency(EncoderSignal signal) {
         final double updateRateHz = signal.getUpdateRate();
 
         switch (signal.getType()) {
             case POSITION -> positionSignal.setUpdateFrequency(updateRateHz);
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateRateHz);
-
-            case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
-                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signal.getName());
         }
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(Signal signal) {
+    public StatusSignal<Double> getRawStatusSignal(EncoderSignal signal) {
         return switch (signal.getType()) {
             case POSITION -> positionSignal;
             case VELOCITY -> velocitySignal;
-            case TEMPERATURE, CURRENT, VOLTAGE, CLOSED_LOOP_TARGET ->
-                    throw new UnsupportedOperationException("CANCoders don't support checking for " + signal.getName());
         };
     }
 
@@ -65,10 +63,10 @@ public class GenericCanCoder extends CANcoder implements Encoder {
     }
 
     @Override
-    public void refreshStatusSignals(Signal... signals) {
+    public void refreshStatusSignals(EncoderSignal... signals) {
         ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
 
-        for (Signal signal : signals) {
+        for (EncoderSignal signal : signals) {
             baseStatusSignals.add(getRawStatusSignal(signal));
         }
 

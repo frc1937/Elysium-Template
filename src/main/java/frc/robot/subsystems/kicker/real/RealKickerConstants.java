@@ -1,7 +1,7 @@
 package frc.robot.subsystems.kicker.real;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import frc.lib.generic.motor.GenericTalonSRX;
+import frc.lib.generic.motor.hardware.GenericTalonSRX;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;

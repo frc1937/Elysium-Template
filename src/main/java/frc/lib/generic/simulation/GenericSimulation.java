@@ -2,6 +2,7 @@ package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.hardware.GenericTalonFX;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,10 +22,10 @@ public abstract class GenericSimulation {
         motor = new GenericTalonFX("YEHUDA", REGISTERED_SIMULATIONS.size() - 1);
 
         //This is simulation. we don't give a damn fuck! about performance.
-        Signal[] signals = new Signal[]{
-                new Signal(Signal.SignalType.POSITION, true), new Signal(Signal.SignalType.VELOCITY, true),
-                new Signal(Signal.SignalType.CURRENT, true), new Signal(Signal.SignalType.VOLTAGE, true),
-                new Signal(Signal.SignalType.TEMPERATURE, true), new Signal(Signal.SignalType.CLOSED_LOOP_TARGET, true)
+        MotorSignal[] signals = new MotorSignal[]{
+                new MotorSignal(MotorSignal.SignalType.POSITION, true), new MotorSignal(MotorSignal.SignalType.VELOCITY, true),
+                new MotorSignal(MotorSignal.SignalType.CURRENT, true), new MotorSignal(MotorSignal.SignalType.VOLTAGE, true),
+                new MotorSignal(MotorSignal.SignalType.TEMPERATURE, true), new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET, true)
         };
 
         motor.setupSignalsUpdates(signals);

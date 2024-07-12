@@ -1,6 +1,9 @@
-package frc.lib.generic.pigeon;
+package frc.lib.generic.pigeon.hardware;
 
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
+import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.PigeonInputsAutoLogged;
+import frc.lib.generic.pigeon.PigeonSignal;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.HashMap;

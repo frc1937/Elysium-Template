@@ -4,9 +4,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
-import frc.lib.generic.encoder.GenericCanCoder;
+import frc.lib.generic.encoder.EncoderSignal;
+import frc.lib.generic.encoder.hardware.GenericCanCoder;
 import frc.lib.generic.motor.*;
-import frc.lib.generic.pigeon.GenericIMU;
+import frc.lib.generic.motor.hardware.GenericSpark;
+import frc.lib.generic.motor.hardware.GenericTalonFX;
+import frc.lib.generic.pigeon.hardware.GenericIMU;
 import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.generic.pigeon.PigeonSignal;
 import frc.robot.GlobalConstants;
@@ -15,7 +18,7 @@ import frc.robot.subsystems.swerve.SwerveModuleIO;
 
 import java.util.Optional;
 
-import static frc.lib.generic.motor.Signal.SignalType.*;
+import static frc.lib.generic.motor.MotorSignal.SignalType.*;
 
 public class RealSwerveConstants extends SwerveConstants {
     static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
@@ -35,10 +38,10 @@ public class RealSwerveConstants extends SwerveConstants {
     static final int DRIVE_SUPPLY_CURRENT_LIMIT = 35;
     static final int DRIVE_STATOR_CURRENT_LIMIT = 50;
 
-    static final Signal
-            STEER_POSITION_SIGNAL = new Signal(POSITION, true),
-            DRIVE_POSITION_SIGNAL = new Signal(POSITION, true),
-            DRIVE_VELOCITY_SIGNAL = new Signal(VELOCITY, true);
+    static final EncoderSignal STEER_POSITION_SIGNAL = new EncoderSignal(EncoderSignal.SignalType.POSITION, true);
+    static final MotorSignal
+            DRIVE_POSITION_SIGNAL = new MotorSignal(POSITION, true),
+            DRIVE_VELOCITY_SIGNAL = new MotorSignal(VELOCITY, true);
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(0.053067, 0.0, 0.0,
             0.10861,
@@ -123,14 +126,14 @@ public class RealSwerveConstants extends SwerveConstants {
         driveMotor.setupSignalUpdates(DRIVE_VELOCITY_SIGNAL);
         driveMotor.setupSignalUpdates(DRIVE_POSITION_SIGNAL);
 
-        driveMotor.setupSignalUpdates(new Signal(VOLTAGE));
-        driveMotor.setupSignalUpdates(new Signal(TEMPERATURE));
+        driveMotor.setupSignalUpdates(new MotorSignal(VOLTAGE));
+        driveMotor.setupSignalUpdates(new MotorSignal(TEMPERATURE));
 
         driveMotor.configure(driveMotorConfiguration);
     }
 
     private static void configureSteerMotor(Motor steerMotor) {
-        steerMotor.setupSignalUpdates(new Signal(POSITION));
+        steerMotor.setupSignalUpdates(new MotorSignal(POSITION));
 
         steerMotor.configure(steerMotorConfiguration);
     }
