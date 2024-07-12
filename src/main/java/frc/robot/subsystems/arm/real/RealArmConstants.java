@@ -60,9 +60,9 @@ public class RealArmConstants {
 
         ARM_MOTOR.configure(motorConfiguration);
 
-        ARM_MOTOR.setupSignalUpdates(new MotorSignal(POSITION));
-        ARM_MOTOR.setupSignalUpdates(new MotorSignal(VELOCITY));
-        ARM_MOTOR.setupSignalUpdates(new MotorSignal(VOLTAGE));
+        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(POSITION));
+        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VELOCITY));
+        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VOLTAGE));
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

@@ -66,10 +66,10 @@ public class GenericIMU extends Pigeon {
 
         if (signalQueueList.isEmpty()) return;
 
-        inputs.odometryUpdatesYawDegrees = signalQueueList.get("yaw").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.odometryUpdatesPitchDegrees = signalQueueList.get("pitch").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.odometryUpdatesRollDegrees = signalQueueList.get("roll").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.odometryUpdatesTimestamp = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadGyroYawDegrees = signalQueueList.get("yaw").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadGyroPitchDegrees = signalQueueList.get("pitch").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadGyroRollDegrees = signalQueueList.get("roll").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
 
         timestampQueue.clear();
         signalQueueList.forEach((k, v) -> v.clear());

@@ -3,6 +3,10 @@ package frc.lib.generic.motor;
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
+import frc.lib.generic.advantagekit.HardwareManager;
+import frc.lib.generic.advantagekit.LoggableHardware;
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
@@ -10,7 +14,17 @@ import java.util.function.DoubleSupplier;
  * Custom Motor class to allow switching and replacing motors quickly,
  * in addition of better uniformity across the code.
  */
-public class Motor {
+public class Motor implements LoggableHardware {
+    private final MotorInputsAutoLogged inputs = new MotorInputsAutoLogged();
+    private final String name;
+
+    public Motor(String name) {
+        this.name = name;
+
+        periodic();
+        HardwareManager.addHardware(this);
+    }
+
     /**
      * Supplies an external position for the motor control system. This method allows
      * the feedforward and PID controllers to use an external encoder position value instead
@@ -241,5 +255,36 @@ public class Motor {
             throw new RuntimeException("Must set closed loop tolerance!");
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
+    }
+
+    protected void refreshInputs(MotorInputsAutoLogged inputs) { }
+
+    @Override
+    public void periodic() {
+        refreshInputs(inputs);
+        Logger.processInputs(name, inputs);
+    }
+
+    @Override
+    public MotorInputsAutoLogged getInputs() {
+        return inputs;
+    }
+
+    @AutoLog
+    public static class MotorInputs {
+        public double voltage = 0;
+        public double current = 0;
+        public double temperature = 0;
+        public double target = 0;
+        public double systemPosition = 0;
+        public double systemVelocity = 0;
+
+        public double[] timestamps = new double[0];
+        public double[] threadVoltage = new double[0];
+        public double[] threadCurrent = new double[0];
+        public double[] threadTemperature = new double[0];
+        public double[] threadTarget = new double[0];
+        public double[] threadSystemPosition = new double[0];
+        public double[] threadSystemVelocity = new double[0];
     }
 }

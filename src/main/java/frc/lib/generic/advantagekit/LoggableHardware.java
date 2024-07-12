@@ -15,9 +15,6 @@ public interface LoggableHardware extends AutoCloseable {
      */
     LoggableInputs getInputs();
 
-    /**
-     * Closes the hardware device
-     */
     @Override
-    void close();
+    default void close() {}
 }

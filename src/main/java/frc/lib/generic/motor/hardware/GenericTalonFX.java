@@ -42,6 +42,8 @@ public class GenericTalonFX extends Motor {
     private final String name;
 
     public GenericTalonFX(String name, int deviceId) {
+        super(name);
+
         talonFX = new TalonFX(deviceId);
 
         this.name = name;

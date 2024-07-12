@@ -37,7 +37,7 @@ public class SimulatedIMU extends Pigeon {
 
         inputs.gyroYawDegrees = getYaw();
 
-        inputs.odometryUpdatesYawDegrees = new double[]{inputs.gyroYawDegrees};
-        inputs.odometryUpdatesTimestamp = new double[]{Timer.getFPGATimestamp()};
+        inputs.threadGyroYawDegrees = new double[]{inputs.gyroYawDegrees};
+        inputs.timestamps = new double[]{Timer.getFPGATimestamp()};
     }
 }

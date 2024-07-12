@@ -9,13 +9,14 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.*;
 import frc.lib.math.Conversions;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 public class GenericSpark extends Motor {
@@ -24,7 +25,8 @@ public class GenericSpark extends Motor {
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
 
-    private final String name;
+    private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
+    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
     private double closedLoopTarget;
 
@@ -44,10 +46,10 @@ public class GenericSpark extends Motor {
     private double previousTimestamp = Logger.getTimestamp();
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
+        super(name);
+
         if (sparkType == MotorProperties.SparkType.FLEX) spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
         else spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
-
-        this.name = name;
 
         optimizeBusUsage();
 
@@ -338,18 +340,13 @@ public class GenericSpark extends Motor {
     }
 
     private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
-        if (mode == null) return 0;
+        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY) return 0;
 
         if (mode == MotorProperties.ControlMode.POSITION) {
-
             return feedback.calculate(getEffectivePosition(), goal.position);
         }
 
-        if (mode == MotorProperties.ControlMode.VELOCITY) {
-            return feedback.calculate(getEffectiveVelocity(), goal.velocity);
-        }
-
-        return 0;
+        return feedback.calculate(getEffectiveVelocity(), goal.velocity);
     }
 
     private double getFeedforwardOutput(TrapezoidProfile.State goal, double acceleration) {
@@ -367,17 +364,57 @@ public class GenericSpark extends Motor {
         return velocitySupplier == null ? getSystemVelocity() : velocitySupplier.getAsDouble();
     }
 
-
     /**
-     * Explanation here: <a href="https://docs.revrobotics.com/sparkmax/operating-modes/control-interfaces#periodic-status-frames">REV DOCS</a>
+     * Explanation here: <a href="https://docs.revrobotics.com/brushless/spark-max/control-interfaces">REV DOCS</a>
      */
     private void setupSignalUpdates(MotorSignal signal) {
         int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
+
+        if (!signal.useFasterThread()) return;
+
+        switch (signal.getType()) {
+            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPosition));
+            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocity));
+
+            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(this::getCurrent));
+            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltage));
+
+            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(this::getTemperature));
+            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(this::getClosedLoopTarget));
+        }
+    }
+
+    @Override
+    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        inputs.systemPosition = getSystemPosition();
+        inputs.systemVelocity = getSystemVelocity();
+
+        inputs.voltage = getVoltage();
+        inputs.current = getCurrent();
+        inputs.temperature = getTemperature();
+
+        inputs.target = getClosedLoopTarget();
+
+        if (signalQueueList.isEmpty()) return;
+
+        inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+
+        inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadCurrent = signalQueueList.get("current").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadTemperature = signalQueueList.get("temperature").stream().mapToDouble(Double::doubleValue).toArray();
+
+        inputs.threadTarget = signalQueueList.get("target").stream().mapToDouble(Double::doubleValue).toArray();
+
+        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
+
+        signalQueueList.forEach((k, v) -> v.clear());
+        timestampQueue.clear();
     }
 }

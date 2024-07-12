@@ -27,9 +27,6 @@ public class Pigeon implements LoggableHardware {
     public void setupSignalUpdates(PigeonSignal signal) {}
 
     @Override
-    public void close() {}
-
-    @Override
     public void periodic() {
         refreshInputs(inputs);
         Logger.processInputs(name, inputs);
@@ -48,9 +45,9 @@ public class Pigeon implements LoggableHardware {
         public double gyroRollDegrees = 0;
         public double gyroPitchDegrees = 0;
 
-        public double[] odometryUpdatesTimestamp = new double[0];
-        public double[] odometryUpdatesYawDegrees = new double[0];
-        public double[] odometryUpdatesPitchDegrees = new double[0];
-        public double[] odometryUpdatesRollDegrees = new double[0];
+        public double[] timestamps = new double[0];
+        public double[] threadGyroYawDegrees = new double[0];
+        public double[] threadGyroPitchDegrees = new double[0];
+        public double[] threadGyroRollDegrees = new double[0];
     }
 }

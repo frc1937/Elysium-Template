@@ -123,17 +123,17 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
-        driveMotor.setupSignalUpdates(DRIVE_VELOCITY_SIGNAL);
-        driveMotor.setupSignalUpdates(DRIVE_POSITION_SIGNAL);
+        driveMotor.setupSignalsUpdates(DRIVE_VELOCITY_SIGNAL);
+        driveMotor.setupSignalsUpdates(DRIVE_POSITION_SIGNAL);
 
-        driveMotor.setupSignalUpdates(new MotorSignal(VOLTAGE));
-        driveMotor.setupSignalUpdates(new MotorSignal(TEMPERATURE));
+        driveMotor.setupSignalsUpdates(new MotorSignal(VOLTAGE));
+        driveMotor.setupSignalsUpdates(new MotorSignal(TEMPERATURE));
 
         driveMotor.configure(driveMotorConfiguration);
     }
 
     private static void configureSteerMotor(Motor steerMotor) {
-        steerMotor.setupSignalUpdates(new MotorSignal(POSITION));
+        steerMotor.setupSignalsUpdates(new MotorSignal(POSITION));
 
         steerMotor.configure(steerMotorConfiguration);
     }

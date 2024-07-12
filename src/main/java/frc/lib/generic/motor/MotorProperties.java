@@ -7,6 +7,10 @@ public class MotorProperties {
         COAST, BRAKE
     }
 
+    public enum SparkType {
+        MAX, FLEX
+    }
+
     /**
      * Enumeration of different control modes for a motor.
      */
@@ -46,10 +50,6 @@ public class MotorProperties {
          * <p>Units: Rotations per second (RPS)</p>
          */
         VELOCITY
-    }
-
-    public enum SparkType {
-        MAX, FLEX
     }
 
     public static final class Slot {

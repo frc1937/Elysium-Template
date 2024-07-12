@@ -45,10 +45,10 @@ public class RealFlywheelsConstants extends FlywheelsConstants {
             i++;
         }
 
-        motor.setupSignalUpdates(new MotorSignal(CLOSED_LOOP_TARGET));
-        motor.setupSignalUpdates(new MotorSignal(VELOCITY));
-        motor.setupSignalUpdates(new MotorSignal(TEMPERATURE));
-        motor.setupSignalUpdates(new MotorSignal(VOLTAGE));
+        motor.setupSignalsUpdates(new MotorSignal(CLOSED_LOOP_TARGET));
+        motor.setupSignalsUpdates(new MotorSignal(VELOCITY));
+        motor.setupSignalsUpdates(new MotorSignal(TEMPERATURE));
+        motor.setupSignalsUpdates(new MotorSignal(VOLTAGE));
     }
 
     @Override
