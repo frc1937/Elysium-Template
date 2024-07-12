@@ -165,7 +165,7 @@ public class GenericTalonFX extends Motor {
     public double getMotorPosition() {
         return getSystemPosition() / talonConfig.Feedback.SensorToMechanismRatio;
     }
-
+//TODO: IMPLEMENT AKIT!!!
     @Override
     public double getSystemPosition() {
         return positionSignal.refresh().getValue();

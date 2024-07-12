@@ -23,7 +23,7 @@ public class GenericTalonSRX extends Motor {
     private String name;
 
     public GenericTalonSRX(String name, int deviceNumber) {
-        super(name);
+        super(name); //TODO: IMPLEMENT AKIT!!!
 
         talonSRX = new WPI_TalonSRX(deviceNumber);
     }

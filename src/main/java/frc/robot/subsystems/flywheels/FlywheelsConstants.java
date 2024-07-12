@@ -32,7 +32,15 @@ public abstract class FlywheelsConstants {
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
             return new SimulatedFlywheelsConstants();
 
-        return new RealFlywheelsConstants();
+        if (CURRENT_MODE == GlobalConstants.Mode.REAL)
+            return new RealFlywheelsConstants();
+
+        return new FlywheelsConstants() {
+            @Override
+            protected Optional<SingleFlywheelIO[]> getFlywheels() {
+                return Optional.empty();
+            }
+        };
     }
 
     protected abstract Optional<SingleFlywheelIO[]> getFlywheels();

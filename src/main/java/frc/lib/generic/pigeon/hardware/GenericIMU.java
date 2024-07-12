@@ -28,21 +28,6 @@ public class GenericIMU extends Pigeon {
     }
 
     @Override
-    public double getPitch() {
-        return pigeon.getPitch();
-    }
-
-    @Override
-    public double getRoll() {
-        return pigeon.getRoll();
-    }
-
-    @Override
-    public double getYaw() {
-        return pigeon.getYaw();
-    }
-
-    @Override
     public void setGyroYaw(double yawDegrees) {
         pigeon.setYaw(yawDegrees);
     }
@@ -52,17 +37,17 @@ public class GenericIMU extends Pigeon {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case YAW -> signalQueueList.put("yaw", SparkOdometryThread.getInstance().registerSignal(this::getYaw));
-            case ROLL -> signalQueueList.put("roll", SparkOdometryThread.getInstance().registerSignal(this::getRoll));
-            case PITCH -> signalQueueList.put("pitch",SparkOdometryThread.getInstance().registerSignal(this::getPitch));
+            case YAW -> signalQueueList.put("yaw", SparkOdometryThread.getInstance().registerSignal(pigeon::getYaw));
+            case ROLL -> signalQueueList.put("roll", SparkOdometryThread.getInstance().registerSignal(pigeon::getRoll));
+            case PITCH -> signalQueueList.put("pitch",SparkOdometryThread.getInstance().registerSignal(pigeon::getPitch));
         }
-    }
+    }//todo: Map out the structure and try to find inconsistencies.
 
     @Override
     protected void refreshInputs(PigeonInputsAutoLogged inputs) {
-        inputs.gyroYawDegrees = getYaw();
-        inputs.gyroRollDegrees = getRoll();
-        inputs.gyroPitchDegrees = getPitch();
+        inputs.gyroYawDegrees = pigeon.getYaw();
+        inputs.gyroRollDegrees = pigeon.getRoll();
+        inputs.gyroPitchDegrees = pigeon.getPitch();
 
         if (signalQueueList.isEmpty()) return;
 

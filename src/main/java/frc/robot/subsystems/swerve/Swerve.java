@@ -105,7 +105,7 @@ public class Swerve extends SubsystemBase {
     }
 
     public Rotation2d getGyroHeading() {
-        final double inputtedHeading = MathUtil.inputModulus(gyroInputs.gyroYawDegrees, -180, 180);
+        final double inputtedHeading = MathUtil.inputModulus(gyro.getYaw(), -180, 180);
         return Rotation2d.fromDegrees(inputtedHeading);
     }
 

@@ -152,7 +152,12 @@ public class Motor implements LoggableHardware {
      *
      * @return the current position of the motor in rotations
      */
-    public double getMotorPosition() { return 0; }
+    public double getMotorPosition() { return inputs.systemPosition / getCurrentConfiguration().gearRatio; }
+    //todo: Refactor class to have all getters just give data from inputs.
+    //todo: THen, these will instead be PRIVATE methods inside of the implementation.
+    // (IF USED MORE THAN ONCe, IF NOT, JSUT DIRECLTY UTILZIE MOTOR.)
+    // that way, we access inputs without ever needing to update the object on our side.
+    // Except for when we need odometry inputs because I won't create getters just for that...
 
     /**
      * Retrieves the current velocity of the motor, with no gearing applied.
@@ -163,47 +168,47 @@ public class Motor implements LoggableHardware {
      *
      * @return the current velocity of the motor, in rotations per second (RPS).
      */
-    public double getMotorVelocity() { return 0; }
+    public double getMotorVelocity() { return inputs.systemVelocity / getCurrentConfiguration().gearRatio; }
 
     /**
      * Get the current running through the motor (STATOR current)
      *
      * @Units In amps
      */
-    public double getCurrent() { return 0; }
+    public double getCurrent() { return inputs.current; }
 
     /**
      * Get the voltage running through the motor
      *
      * @Units In volts
      */
-    public double getVoltage() { return 0; }
+    public double getVoltage() { return inputs.voltage; }
 
     /**
      * Get the current target of the closed-loop PID
      */
-    public double getClosedLoopTarget() { return 0; }
+    public double getClosedLoopTarget() { return inputs.target; }
 
     /**
      * Get the temperature of the motor
      *
      * @Units In celsius
      */
-    public double getTemperature() { return 0; }
+    public double getTemperature() { return inputs.temperature; }
 
     /**
      * Gearing applied
      *
      * @Units In rotations
      */
-    public double getSystemPosition() { return 0; }
+    public double getSystemPosition() { return inputs.systemPosition; }
 
     /**
      * Gearing applied
      *
      * @Units In rotations per second
      */
-    public double getSystemVelocity() { return 0; }
+    public double getSystemVelocity() { return inputs.systemVelocity; }
 
     public void setFollowerOf(String name, int masterPort) { }
 

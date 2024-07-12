@@ -81,8 +81,23 @@ public abstract class SwerveConstants {
         if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
             return new SimulationSwerveConstants();
 
-        return new RealSwerveConstants();
+        if (CURRENT_MODE == GlobalConstants.Mode.REAL) {
+            return new RealSwerveConstants();
+        }
+
+        return new SwerveConstants() {
+            @Override
+            protected Optional<Pigeon> getPigeon() {
+                return Optional.empty();
+            }
+
+            @Override
+            protected Optional<SwerveModuleIO[]> getModulesIO() {
+                return Optional.empty();
+            }
+        };
     }
+
 
     protected abstract Optional<Pigeon> getPigeon();
     protected abstract Optional<SwerveModuleIO[]> getModulesIO();

@@ -123,46 +123,6 @@ public class GenericSpark extends Motor {
     }
 
     @Override
-    public double getMotorPosition() {
-        return encoder.getPosition();
-    }
-
-    @Override
-    public double getMotorVelocity() {
-        return encoder.getVelocity() / 60;
-    }
-
-    @Override
-    public double getCurrent() {
-        return spark.getOutputCurrent();
-    }
-
-    @Override
-    public double getTemperature() {
-        return spark.getMotorTemperature();
-    }
-
-    @Override
-    public double getSystemPosition() {
-        return encoder.getPosition() * conversionFactor;
-    }
-
-    @Override
-    public double getSystemVelocity() {
-        return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
-    }
-
-    @Override
-    public double getClosedLoopTarget() {
-        return closedLoopTarget;
-    }
-
-    @Override
-    public double getVoltage() {
-        return spark.getBusVoltage() * spark.getAppliedOutput();
-    }
-
-    @Override
     public void setFollowerOf(String name, int masterPort) {
         spark.follow(new CANSparkMax(masterPort, CANSparkMax.MotorType.kBrushless));
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
@@ -357,11 +317,11 @@ public class GenericSpark extends Motor {
     }
 
     private double getEffectivePosition() {
-        return positionSupplier == null ? getSystemPosition() : positionSupplier.getAsDouble();
+        return positionSupplier == null ? getSystemPositionPrivate() : positionSupplier.getAsDouble();
     }
 
     private double getEffectiveVelocity() {
-        return velocitySupplier == null ? getSystemVelocity() : velocitySupplier.getAsDouble();
+        return velocitySupplier == null ? getSystemVelocityPrivate() : velocitySupplier.getAsDouble();
     }
 
     /**
@@ -379,27 +339,27 @@ public class GenericSpark extends Motor {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPosition));
-            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocity));
+            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
 
-            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(this::getCurrent));
-            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltage));
+            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
+            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
 
-            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(this::getTemperature));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(this::getClosedLoopTarget));
+            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
+            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
         }
     }
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        inputs.systemPosition = getSystemPosition();
-        inputs.systemVelocity = getSystemVelocity();
+        inputs.systemPosition = getSystemPositionPrivate();
+        inputs.systemVelocity = getSystemVelocityPrivate();
 
-        inputs.voltage = getVoltage();
-        inputs.current = getCurrent();
-        inputs.temperature = getTemperature();
+        inputs.voltage = getVoltagePrivate();
+        inputs.current = spark.getOutputCurrent();
+        inputs.temperature = spark.getMotorTemperature();
 
-        inputs.target = getClosedLoopTarget();
+        inputs.target = closedLoopTarget;
 
         if (signalQueueList.isEmpty()) return;
 
@@ -416,5 +376,17 @@ public class GenericSpark extends Motor {
 
         signalQueueList.forEach((k, v) -> v.clear());
         timestampQueue.clear();
+    }
+
+    private double getVoltagePrivate() {
+        return spark.getBusVoltage() * spark.getAppliedOutput();
+    }
+
+    private double getSystemPositionPrivate() {
+        return encoder.getPosition() * conversionFactor;
+    }
+
+    private double getSystemVelocityPrivate() {
+        return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
     }
 }
