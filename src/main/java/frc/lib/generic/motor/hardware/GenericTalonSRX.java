@@ -7,10 +7,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.*;
 
 import java.util.function.DoubleSupplier;
 
@@ -18,12 +15,9 @@ public class GenericTalonSRX extends Motor {
     private final WPI_TalonSRX talonSRX;
 
     private MotorConfiguration currentConfiguration;
-    private int slotToUse = 0;
-
-    private String name;
 
     public GenericTalonSRX(String name, int deviceNumber) {
-        super(name); //TODO: IMPLEMENT AKIT!!!
+        super(name);
 
         talonSRX = new WPI_TalonSRX(deviceNumber);
     }
@@ -46,12 +40,12 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     public void setExternalPositionSupplier(DoubleSupplier position) {
-        //todo: do
+        throw new UnsupportedOperationException("This will be the next pgishat movil project");
     }
 
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-        //todo: implement
+        throw new UnsupportedOperationException("This will be the next pgishat movil project");
     }
 
     @Override
@@ -79,16 +73,6 @@ public class GenericTalonSRX extends Motor {
     @Override
     public void setFollowerOf(String name, int masterPort) {
         talonSRX.set(ControlMode.Follower, masterPort);
-    }
-
-    @Override
-    public double getCurrent() {
-        return talonSRX.getStatorCurrent();
-    }
-
-    @Override
-    public double getVoltage() {
-        return talonSRX.getBusVoltage() * 12; //todo: check fi correct
     }
 
     @Override
@@ -156,7 +140,6 @@ public class GenericTalonSRX extends Motor {
         talonSRX.configFactoryDefault();
 
         currentConfiguration = configuration;
-        slotToUse = configuration.slotToUse;
 
         configureSlots(configuration);
 
@@ -174,7 +157,6 @@ public class GenericTalonSRX extends Motor {
         return talonSRX.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
     }
 
-
     private void configureSlots(MotorConfiguration configuration) {
         talonSRX.config_kP(0, configuration.slot0.kP());
         talonSRX.config_kI(0, configuration.slot0.kI());
@@ -187,5 +169,14 @@ public class GenericTalonSRX extends Motor {
         talonSRX.config_kP(2, configuration.slot2.kP());
         talonSRX.config_kI(2, configuration.slot2.kI());
         talonSRX.config_kD(2, configuration.slot2.kD());
+    }
+
+    @Override
+    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        inputs.current = talonSRX.getStatorCurrent();
+        inputs.voltage = talonSRX.getMotorOutputVoltage();
+        inputs.temperature = talonSRX.getTemperature();
+
+        //todo: IMPLEMENT AKIT
     }
 }

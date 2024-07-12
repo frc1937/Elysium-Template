@@ -10,16 +10,20 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.*;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
+
+    private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
+    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -39,14 +43,10 @@ public class GenericTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
-    private final String name;
-
     public GenericTalonFX(String name, int deviceId) {
         super(name);
 
         talonFX = new TalonFX(deviceId);
-
-        this.name = name;
 
         talonConfigurator = talonFX.getConfigurator();
 
@@ -154,46 +154,6 @@ public class GenericTalonFX extends Motor {
     @Override
     public int getDeviceID() {
         return talonFX.getDeviceID();
-    }
-
-    @Override
-    public double getMotorVelocity() {
-        return getSystemVelocity() / talonConfig.Feedback.SensorToMechanismRatio;
-    }
-
-    @Override
-    public double getMotorPosition() {
-        return getSystemPosition() / talonConfig.Feedback.SensorToMechanismRatio;
-    }
-//TODO: IMPLEMENT AKIT!!!
-    @Override
-    public double getSystemPosition() {
-        return positionSignal.refresh().getValue();
-    }
-
-    @Override
-    public double getClosedLoopTarget() {
-        return closedLoopTarget.refresh().getValue();
-    }
-
-    @Override
-    public double getSystemVelocity() {
-        return velocitySignal.refresh().getValue();
-    }
-
-    @Override
-    public double getTemperature() {
-        return temperatureSignal.refresh().getValue();
-    }
-
-    @Override
-    public double getCurrent() {
-        return currentSignal.refresh().getValue();
-    }
-
-    @Override
-    public double getVoltage() {
-        return talonFX.getMotorVoltage().refresh().getValue();
     }
 
     @Override
@@ -358,5 +318,68 @@ public class GenericTalonFX extends Motor {
             case TEMPERATURE -> temperatureSignal.setUpdateFrequency(updateFrequencyHz);
             case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(updateFrequencyHz);
         }
+
+        if (!signal.useFasterThread()) return;
+
+        switch (signal.getType()) {
+            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(this::getCurrentPrivate));
+            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(this::getTemperaturePrivate));
+            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
+        }
+    }
+
+    @Override
+    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        BaseStatusSignal.refreshAll(positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget);
+
+        inputs.systemPosition = getSystemPositionPrivate();
+        inputs.systemVelocity = getSystemVelocityPrivate();
+
+        inputs.voltage = getVoltagePrivate();
+        inputs.current = getCurrentPrivate();
+        inputs.temperature = getTemperaturePrivate();
+
+        inputs.target = getClosedLoopTargetPrivate();
+
+        if (signalQueueList.isEmpty()) return;
+
+        inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadCurrent = signalQueueList.get("current").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadTemperature = signalQueueList.get("temperature").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadTarget = signalQueueList.get("target").stream().mapToDouble(Double::doubleValue).toArray();
+
+        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
+
+        signalQueueList.forEach((k, v) -> v.clear());
+        timestampQueue.clear();
+    }
+
+    private double getSystemPositionPrivate() {
+        return positionSignal.refresh().getValue();
+    }
+
+    private double getSystemVelocityPrivate() {
+        return velocitySignal.refresh().getValue();
+    }
+
+    private double getVoltagePrivate() {
+        return voltageSignal.refresh().getValue();
+    }
+
+    private double getClosedLoopTargetPrivate() {
+        return closedLoopTarget.refresh().getValue();
+    }
+
+    private double getTemperaturePrivate() {
+        return temperatureSignal.refresh().getValue();
+    }
+
+    private double getCurrentPrivate() {
+        return currentSignal.refresh().getValue();
     }
 }
