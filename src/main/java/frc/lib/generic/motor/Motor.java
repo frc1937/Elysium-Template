@@ -231,18 +231,10 @@ public interface Motor {
 
     default MotorProperties.Slot getSlot(int slotToUse, MotorConfiguration currentConfiguration) {
         switch (slotToUse) {
-            case 0 -> {
-                return currentConfiguration.slot0;
-            }
-            case 1 -> {
-                return currentConfiguration.slot1;
-            }
-            case 2 -> {
-                return currentConfiguration.slot2;
-            }
+            case 1 -> { return currentConfiguration.slot1; }
+            case 2 -> { return currentConfiguration.slot2; }
+            default -> { return currentConfiguration.slot0; }
         }
-
-        return currentConfiguration.slot0;
     }
 
     default boolean isAtSetpoint() {

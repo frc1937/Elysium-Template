@@ -3,10 +3,7 @@ package frc.lib.generic.motor.hardware;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkRelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -21,10 +18,10 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-public class GenericSpark extends CANSparkBase implements Motor {
+public class GenericSpark implements Motor {
     private static final double useBuiltinFeedforwardNumber = 69420;
 
-    private final MotorProperties.SparkType model;
+    private final CANSparkBase spark;
     private final RelativeEncoder encoder;
 
     private final String name;
@@ -47,14 +44,17 @@ public class GenericSpark extends CANSparkBase implements Motor {
     private double previousTimestamp = Logger.getTimestamp();
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
-        super(deviceId, MotorType.kBrushless, sparkType == MotorProperties.SparkType.MAX ? SparkModel.SparkMax : SparkModel.SparkFlex);
+        if(sparkType == MotorProperties.SparkType.FLEX) {
+            spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
+        } else {
+            spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
+        }
 
-        model = sparkType;
         this.name = name;
 
         optimizeBusUsage();
 
-        encoder = this.getEncoder();
+        encoder = spark.getEncoder();
     }
 
     @Override
@@ -68,18 +68,23 @@ public class GenericSpark extends CANSparkBase implements Motor {
         setGoal(mode, output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> set(output);
+            case PERCENTAGE_OUTPUT -> spark.set(output);
 
             case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
 
-            case VOLTAGE -> setVoltage(output);
-            case CURRENT -> super.getPIDController().setReference(output, ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> spark.setVoltage(output);
+            case CURRENT -> spark.getPIDController().setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse);
         }
     }
 
     @Override
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? IdleMode.kCoast : IdleMode.kBrake);
+        spark.setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? CANSparkBase.IdleMode.kCoast : CANSparkBase.IdleMode.kBrake);
+    }
+
+    @Override
+    public void stopMotor() {
+        spark.stopMotor();
     }
 
     @Override
@@ -89,7 +94,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public int getDeviceID() {
-        return getDeviceId();
+        return spark.getDeviceId();
     }
 
     @Override
@@ -135,12 +140,12 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getCurrent() {
-        return super.getOutputCurrent();
+        return spark.getOutputCurrent();
     }
 
     @Override
     public double getTemperature() {
-        return getMotorTemperature();
+        return spark.getMotorTemperature();
     }
 
     @Override
@@ -160,13 +165,13 @@ public class GenericSpark extends CANSparkBase implements Motor {
 
     @Override
     public double getVoltage() {
-        return super.getBusVoltage() * getAppliedOutput();
+        return spark.getBusVoltage() * spark.getAppliedOutput();
     }
 
     @Override
     public void setFollowerOf(String name, int masterPort) {
-        super.follow(new GenericSpark(name, masterPort, model));
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
+        spark.follow(new GenericSpark(name, masterPort, MotorProperties.SparkType.FLEX).spark); //todo: WTF
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
     }
 
     /**
@@ -177,9 +182,9 @@ public class GenericSpark extends CANSparkBase implements Motor {
         int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus1, ms);
-            case POSITION -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus2, ms);
-            case VOLTAGE -> super.setPeriodicFramePeriod(PeriodicFrame.kStatus3, ms);
+            case VELOCITY, CURRENT -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
+            case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
     }
 
@@ -209,24 +214,24 @@ public class GenericSpark extends CANSparkBase implements Motor {
     public boolean configure(MotorConfiguration configuration) {
         currentConfiguration = configuration;
 
-        super.restoreFactoryDefaults();
+        spark.restoreFactoryDefaults();
 
-        super.setIdleMode(configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? IdleMode.kBrake : IdleMode.kCoast);
-        super.setInverted(configuration.inverted);
+        setIdleMode(configuration.idleMode);
+        spark.setInverted(configuration.inverted);
 
-        super.enableVoltageCompensation(12);
+        spark.enableVoltageCompensation(12);
 
         conversionFactor = (1.0 / configuration.gearRatio);
 
-        if (configuration.statorCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
-        if (configuration.supplyCurrentLimit != -1) super.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
+        if (configuration.statorCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
+        if (configuration.supplyCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
         configureProfile(configuration);
         configurePID(configuration);
 
         configureFeedForward();
 
-        return super.burnFlash() == REVLibError.kOk;
+        return spark.burnFlash() == REVLibError.kOk;
     }
 
     private void configureProfile(MotorConfiguration configuration) {
@@ -287,29 +292,14 @@ public class GenericSpark extends CANSparkBase implements Motor {
      * Only call this ONCE at the beginning.
      */
     private void optimizeBusUsage() {
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus5, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus6, 10000);
-        super.setPeriodicFramePeriod(PeriodicFrame.kStatus7, 10000);
-    }
-
-    @Override
-    public RelativeEncoder getEncoder() {
-        switch (model) {
-            case MAX -> {
-                return getEncoder(SparkRelativeEncoder.Type.kHallSensor, 42);
-            }
-
-            case FLEX -> {
-                return getEncoder(SparkRelativeEncoder.Type.kQuadrature, 7168);
-            }
-        }
-
-        return null;
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 10000);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 10000);
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
@@ -340,7 +330,7 @@ public class GenericSpark extends CANSparkBase implements Motor {
         if (feedforward != useBuiltinFeedforwardNumber)
             feedforwardOutput = feedforward;
 
-        super.setVoltage(feedforwardOutput + feedbackOutput);
+        spark.setVoltage(feedforwardOutput + feedbackOutput);
 
         previousTimestamp = Logger.getTimestamp();
 

@@ -14,24 +14,26 @@ import frc.lib.generic.motor.MotorSignal;
 
 import java.util.function.DoubleSupplier;
 
-public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
+public class GenericTalonSRX implements Motor {
+    private final WPI_TalonSRX talonSRX;
+
     private MotorConfiguration currentConfiguration;
     private int slotToUse = 0;
 
     private String name;
 
     public GenericTalonSRX(String name, int deviceNumber) {
-        super(deviceNumber);
+        talonSRX = new WPI_TalonSRX(deviceNumber);
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
         switch (controlMode) {
-            case POSITION -> super.set(ControlMode.Position, output);
-            case VELOCITY -> super.set(ControlMode.Velocity, output);
-            case PERCENTAGE_OUTPUT -> super.set(ControlMode.PercentOutput, output);
-            case CURRENT -> super.set(ControlMode.Current, output);
-            case VOLTAGE -> super.setVoltage(output);
+            case POSITION -> talonSRX.set(ControlMode.Position, output);
+            case VELOCITY -> talonSRX.set(ControlMode.Velocity, output);
+            case PERCENTAGE_OUTPUT -> talonSRX.set(ControlMode.PercentOutput, output);
+            case CURRENT -> talonSRX.set(ControlMode.Current, output);
+            case VOLTAGE -> talonSRX.setVoltage(output);
         }
     }
 
@@ -62,29 +64,44 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
 
     @Override
     public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        super.config_kP(slotNumber, slot.kP());
-        super.config_kI(slotNumber, slot.kI());
-        super.config_kD(slotNumber, slot.kD());
+        talonSRX.config_kP(slotNumber, slot.kP());
+        talonSRX.config_kI(slotNumber, slot.kI());
+        talonSRX.config_kD(slotNumber, slot.kD());
     }
 
     @Override
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        super.setNeutralMode(idleMode == MotorProperties.IdleMode.COAST ? NeutralMode.Coast : NeutralMode.Brake);
+        talonSRX.setNeutralMode(idleMode == MotorProperties.IdleMode.COAST ? NeutralMode.Coast : NeutralMode.Brake);
+    }
+
+    @Override
+    public void stopMotor() {
+        talonSRX.stopMotor();
     }
 
     @Override
     public void setFollowerOf(String name, int masterPort) {
-        super.set(ControlMode.Follower, masterPort);
+        talonSRX.set(ControlMode.Follower, masterPort);
     }
 
     @Override
     public double getCurrent() {
-        return super.getStatorCurrent();
+        return talonSRX.getStatorCurrent();
     }
 
     @Override
     public double getVoltage() {
-        return super.getBusVoltage() * 12; //todo: check fi correct
+        return talonSRX.getBusVoltage() * 12; //todo: check fi correct
+    }
+
+    @Override
+    public double getClosedLoopTarget() {
+        return talonSRX.getClosedLoopTarget();
+    }
+
+    @Override
+    public double getTemperature() {
+        return talonSRX.getTemperature();
     }
 
     @Override
@@ -110,6 +127,11 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
     @Override
     public void setMotorEncoderPosition(double position) {
         throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+    }
+
+    @Override
+    public int getDeviceID() {
+        return talonSRX.getDeviceID();
     }
 
     @Override
@@ -139,7 +161,7 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
 
     @Override
     public boolean configure(MotorConfiguration configuration) {
-        super.configFactoryDefault();
+        talonSRX.configFactoryDefault();
 
         currentConfiguration = configuration;
         slotToUse = configuration.slotToUse;
@@ -155,23 +177,23 @@ public class GenericTalonSRX extends WPI_TalonSRX implements Motor {
 
         talonSRXConfiguration.peakCurrentLimit = (int) configuration.statorCurrentLimit;
 
-        super.setInverted(configuration.inverted);
+        talonSRX.setInverted(configuration.inverted);
 
-        return super.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
+        return talonSRX.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
     }
 
 
     private void configureSlots(MotorConfiguration configuration) {
-        super.config_kP(0, configuration.slot0.kP());
-        super.config_kI(0, configuration.slot0.kI());
-        super.config_kD(0, configuration.slot0.kD());
+        talonSRX.config_kP(0, configuration.slot0.kP());
+        talonSRX.config_kI(0, configuration.slot0.kI());
+        talonSRX.config_kD(0, configuration.slot0.kD());
 
-        super.config_kP(1, configuration.slot1.kP());
-        super.config_kI(1, configuration.slot1.kI());
-        super.config_kD(1, configuration.slot1.kD());
+        talonSRX.config_kP(1, configuration.slot1.kP());
+        talonSRX.config_kI(1, configuration.slot1.kI());
+        talonSRX.config_kD(1, configuration.slot1.kD());
 
-        super.config_kP(2, configuration.slot2.kP());
-        super.config_kI(2, configuration.slot2.kI());
-        super.config_kD(2, configuration.slot2.kD());
+        talonSRX.config_kP(2, configuration.slot2.kP());
+        talonSRX.config_kI(2, configuration.slot2.kI());
+        talonSRX.config_kD(2, configuration.slot2.kD());
     }
 }

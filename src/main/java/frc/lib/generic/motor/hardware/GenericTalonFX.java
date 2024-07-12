@@ -18,7 +18,9 @@ import frc.lib.generic.motor.MotorSignal;
 import java.util.ArrayList;
 import java.util.function.DoubleSupplier;
 
-public class GenericTalonFX extends TalonFX implements Motor {
+public class GenericTalonFX implements Motor {
+    private final TalonFX talonFX;
+
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
@@ -40,39 +42,39 @@ public class GenericTalonFX extends TalonFX implements Motor {
     private final String name;
 
     public GenericTalonFX(String name, int deviceId) {
-        super(deviceId);
+        talonFX = new TalonFX(deviceId);
 
         this.name = name;
 
-        talonConfigurator = super.getConfigurator();
+        talonConfigurator = talonFX.getConfigurator();
 
-        positionSignal = super.getPosition().clone();
-        velocitySignal = super.getVelocity().clone();
-        voltageSignal = super.getMotorVoltage().clone();
-        currentSignal = super.getStatorCurrent().clone();
-        temperatureSignal = super.getDeviceTemp().clone();
-        closedLoopTarget = super.getClosedLoopReference().clone();
+        positionSignal = talonFX.getPosition().clone();
+        velocitySignal = talonFX.getVelocity().clone();
+        voltageSignal = talonFX.getMotorVoltage().clone();
+        currentSignal = talonFX.getStatorCurrent().clone();
+        temperatureSignal = talonFX.getDeviceTemp().clone();
+        closedLoopTarget = talonFX.getClosedLoopReference().clone();
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> this.setControl(dutyCycleRequest.withOutput(output));
-            case VOLTAGE -> this.setControl(voltageRequest.withOutput(output));
+            case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
+            case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
 
             case POSITION -> {
                 if (shouldUseProfile) {
-                    this.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
+                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
                 } else {
-                    this.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
+                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
                 }
             }
 
             case VELOCITY -> {
                 if (shouldUseProfile) {
-                    this.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse));
+                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse));
                 } else {
-                    this.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
+                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
                 }
             }
 
@@ -89,17 +91,17 @@ public class GenericTalonFX extends TalonFX implements Motor {
         switch (mode) {
             case POSITION -> {
                 if (shouldUseProfile) {
-                    this.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
+                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
                 } else {
-                    this.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
+                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
                 }
             }
 
             case VELOCITY -> {
                 if (shouldUseProfile) {
-                    this.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
+                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
                 } else {
-                    this.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
+                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
                 }
             }
         }
@@ -109,6 +111,11 @@ public class GenericTalonFX extends TalonFX implements Motor {
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         currentConfiguration.idleMode = idleMode;
         configure(currentConfiguration);
+    }
+
+    @Override
+    public void stopMotor() {
+        talonFX.stopMotor();
     }
 
     @Override
@@ -148,6 +155,11 @@ public class GenericTalonFX extends TalonFX implements Motor {
     }
 
     @Override
+    public int getDeviceID() {
+        return talonFX.getDeviceID();
+    }
+
+    @Override
     public double getMotorVelocity() {
         return getSystemVelocity() / talonConfig.Feedback.SensorToMechanismRatio;
     }
@@ -184,12 +196,12 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public double getVoltage() {
-        return getMotorVoltage().refresh().getValue();
+        return talonFX.getMotorVoltage().refresh().getValue();
     }
 
     @Override
     public void setFollowerOf(String name, int masterPort) {
-        setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
+        talonFX.setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
     }
 
     @Override
@@ -239,7 +251,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
     @Override
     public TalonFXSimState getSimulationState() {
-        return this.getSimState();
+        return talonFX.getSimState();
     }
 
     @Override
@@ -270,7 +282,7 @@ public class GenericTalonFX extends TalonFX implements Motor {
 
         slotToUse = configuration.slotToUse;
 
-        optimizeBusUtilization();
+        talonFX.optimizeBusUtilization();
 
         return applyConfig();
     }
