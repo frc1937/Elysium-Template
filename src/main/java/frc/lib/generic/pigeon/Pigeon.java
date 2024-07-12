@@ -3,11 +3,6 @@ package frc.lib.generic.pigeon;
 import frc.lib.generic.advantagekit.LoggableHardware;
 
 public interface Pigeon extends LoggableHardware {
-
-    enum PigeonMode {
-        ROTATION
-    }
-
     void resetConfigurations();
 
     double getYaw();

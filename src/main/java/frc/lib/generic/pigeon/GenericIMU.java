@@ -3,11 +3,12 @@ package frc.lib.generic.pigeon;
 import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import frc.lib.generic.advantagekit.HardwareManager;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.inputs.LoggableInputs;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 
 public class GenericIMU extends WPI_PigeonIMU implements Pigeon {
     private final GenericPigeonInputsAutoLogged inputs = new GenericPigeonInputsAutoLogged();
@@ -52,18 +53,6 @@ public class GenericIMU extends WPI_PigeonIMU implements Pigeon {
     @Override
     public LoggableInputs getInputs() {
         return inputs;
-    }
-
-    @AutoLog
-    public static class GenericPigeonInputs {
-        public double gyroYawDegrees = 0;
-        public double gyroRollDegrees = 0;
-        public double gyroPitchDegrees = 0;
-
-        public double[] odometryUpdatesTimestamp = new double[0];
-        public double[] odometryUpdatesYawDegrees = new double[0];
-        public double[] odometryUpdatesPitchDegrees = new double[0];
-        public double[] odometryUpdatesRollDegrees = new double[0];
     }
 
     private void refreshInputs() {
