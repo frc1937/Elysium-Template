@@ -11,27 +11,35 @@ import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderConfiguration;
 import frc.lib.generic.encoder.EncoderProperties;
 import frc.lib.generic.encoder.EncoderSignal;
+import frc.lib.generic.motor.hardware.MotorUtilities;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Wrapper class for the CAN encoder.
  * Verify its setup is correct via this:
  * <a href="https://store.ctr-electronics.com/content/user-manual/CANCoder%20User">CTRE CANcoder PDF</a>'s%20Guide.pdf
  */
-public class GenericCanCoder extends CANcoder implements Encoder {
+public class GenericCanCoder implements Encoder {
+    private final CANcoder canCoder;
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
+
+    private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
+    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
+
     private final StatusSignal<Double> positionSignal, velocitySignal;
 
-    private final String name;
-
     public GenericCanCoder(String name, int canCoderID) {
-        super(canCoderID);
+        super(name);
 
-        this.name = name;
+        canCoder = new CANcoder(canCoderID);
 
-        positionSignal = super.getPosition().clone();
-        velocitySignal = super.getVelocity().clone();
+        positionSignal = canCoder.getPosition().clone();
+        velocitySignal = canCoder.getVelocity().clone();
     }
 
     @Override
@@ -42,6 +50,8 @@ public class GenericCanCoder extends CANcoder implements Encoder {
             case POSITION -> positionSignal.setUpdateFrequency(updateRateHz);
             case VELOCITY -> velocitySignal.setUpdateFrequency(updateRateHz);
         }
+
+        //todo: Set up AKIT refresh rate in the list or smth
     }
 
     @Override
@@ -83,7 +93,7 @@ public class GenericCanCoder extends CANcoder implements Encoder {
         canCoderConfig.MagnetSensor.AbsoluteSensorRange = encoderConfiguration.sensorRange == EncoderProperties.SensorRange.ZeroToOne
                 ? AbsoluteSensorRangeValue.Unsigned_0To1 : AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
 
-        optimizeBusUtilization();
+        canCoder.optimizeBusUtilization();
 
         return applyConfig();
     }
@@ -93,10 +103,27 @@ public class GenericCanCoder extends CANcoder implements Encoder {
         StatusCode statusCode = null;
 
         while (statusCode != StatusCode.OK && counter > 0) {
-            statusCode = this.getConfigurator().apply(canCoderConfig);
+            statusCode = canCoder.getConfigurator().apply(canCoderConfig);
             counter--;
         }
 
         return statusCode == StatusCode.OK;
+    }
+
+    protected void refreshInputs(EncoderInputsAutoLogged inputs) {
+        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
+
+        inputs.position = getEncoderPosition();
+        inputs.velocity = getEncoderVelocity();
+
+        if (signalQueueList.isEmpty()) return;
+
+        inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+
+        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
+
+        signalQueueList.forEach((k, v) -> v.clear());
+        timestampQueue.clear();
     }
 }
