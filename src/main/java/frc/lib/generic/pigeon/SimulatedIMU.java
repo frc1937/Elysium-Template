@@ -3,19 +3,15 @@ package frc.lib.generic.pigeon;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.advantagekit.HardwareManager;
-import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 import static frc.robot.RobotContainer.SWERVE;
 
 public class SimulatedIMU extends Pigeon {
-    private final PigeonInputsAutoLogged inputs = new PigeonInputsAutoLogged();
-    private final String name;
-
     private double simulatedYawDegrees = 0;
 
     public SimulatedIMU(String name) {
-        this.name = name;
+        super(name);
 
         periodic();
         HardwareManager.addHardware(this);
@@ -36,18 +32,9 @@ public class SimulatedIMU extends Pigeon {
     }
 
     @Override
-    public void periodic() {
-        refreshInputs();
-        Logger.processInputs(name, inputs);
-    }
-
-    @Override
-    public PigeonInputsAutoLogged getInputs() {
-        return inputs;
-    }
-
-    private void refreshInputs() {
-        update(SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
+    protected void refreshInputs(PigeonInputsAutoLogged inputs) {
+        if (SWERVE != null)
+            update(SWERVE.getSelfRelativeVelocity().omegaRadiansPerSecond, ROBOT_PERIODIC_LOOP_TIME);
 
         inputs.gyroYawDegrees = getYaw();
 

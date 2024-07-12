@@ -248,7 +248,7 @@ public class Swerve extends SubsystemBase {
 
     private Pigeon getGyro() {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Pigeon();
+            return new Pigeon("Pigeon");
         }
 
         return constants.getPigeon().get();
