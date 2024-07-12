@@ -7,30 +7,24 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import frc.lib.generic.encoder.Encoder;
-import frc.lib.generic.encoder.EncoderConfiguration;
-import frc.lib.generic.encoder.EncoderProperties;
-import frc.lib.generic.encoder.EncoderSignal;
-import frc.lib.generic.motor.hardware.MotorUtilities;
+import frc.lib.generic.encoder.*;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Wrapper class for the CAN encoder.
  * Verify its setup is correct via this:
  * <a href="https://store.ctr-electronics.com/content/user-manual/CANCoder%20User">CTRE CANcoder PDF</a>'s%20Guide.pdf
  */
-public class GenericCanCoder implements Encoder {
+public class GenericCanCoder extends Encoder {
     private final CANcoder canCoder;
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
+    private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final StatusSignal<Double> positionSignal, velocitySignal;
 
     public GenericCanCoder(String name, int canCoderID) {
@@ -44,14 +38,17 @@ public class GenericCanCoder implements Encoder {
 
     @Override
     public void setSignalUpdateFrequency(EncoderSignal signal) {
-        final double updateRateHz = signal.getUpdateRate();
-
         switch (signal.getType()) {
-            case POSITION -> positionSignal.setUpdateFrequency(updateRateHz);
-            case VELOCITY -> velocitySignal.setUpdateFrequency(updateRateHz);
+            case POSITION -> setupSignal(signal, positionSignal);
+            case VELOCITY -> setupSignal(signal, velocitySignal);
         }
 
-        //todo: Set up AKIT refresh rate in the list or smth
+        if (!signal.useFasterThread()) return;
+
+        switch (signal.getType()) {
+            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+        }
     }
 
     @Override
@@ -60,16 +57,6 @@ public class GenericCanCoder implements Encoder {
             case POSITION -> positionSignal;
             case VELOCITY -> velocitySignal;
         };
-    }
-
-    @Override
-    public double getEncoderPosition() {
-        return positionSignal.refresh().getValue();
-    }
-
-    @Override
-    public double getEncoderVelocity() {
-        return velocitySignal.refresh().getValue();
     }
 
     @Override
@@ -113,8 +100,8 @@ public class GenericCanCoder implements Encoder {
     protected void refreshInputs(EncoderInputsAutoLogged inputs) {
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
-        inputs.position = getEncoderPosition();
-        inputs.velocity = getEncoderVelocity();
+        inputs.position = getEncoderPositionPrivate();
+        inputs.velocity = getEncoderVelocityPrivate();
 
         if (signalQueueList.isEmpty()) return;
 
@@ -125,5 +112,18 @@ public class GenericCanCoder implements Encoder {
 
         signalQueueList.forEach((k, v) -> v.clear());
         timestampQueue.clear();
+    }
+
+    private double getEncoderPositionPrivate() {
+        return positionSignal.refresh().getValue();
+    }
+
+    private double getEncoderVelocityPrivate() {
+        return velocitySignal.refresh().getValue();
+    }
+
+    private void setupSignal(final EncoderSignal signal, final StatusSignal<Double> correspondingSignal) {
+        signalsToUpdateList.add(correspondingSignal);
+        correspondingSignal.setUpdateFrequency(signal.getUpdateRate());
     }
 }

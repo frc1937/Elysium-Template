@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusSignal;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 public class Encoder implements LoggableHardware {
     private final EncoderInputsAutoLogged inputs = new EncoderInputsAutoLogged();
@@ -14,7 +13,6 @@ public class Encoder implements LoggableHardware {
     public Encoder(String name) {
         this.name = name;
     }
-
 
     /** Returns the encoder position, in Rotations*/
     public double getEncoderPosition() {return inputs.position; }
