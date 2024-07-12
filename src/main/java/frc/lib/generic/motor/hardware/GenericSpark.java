@@ -11,6 +11,7 @@ import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.*;
 import frc.lib.math.Conversions;
+import frc.robot.GlobalConstants;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import org.littletonrobotics.junction.Logger;
 
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
+
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class GenericSpark extends Motor {
     private static final double useBuiltinFeedforwardNumber = 69420;
@@ -352,6 +355,8 @@ public class GenericSpark extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+
         inputs.systemPosition = getSystemPositionPrivate();
         inputs.systemVelocity = getSystemVelocityPrivate();
 
@@ -361,19 +366,7 @@ public class GenericSpark extends Motor {
 
         inputs.target = closedLoopTarget;
 
-        if (signalQueueList.isEmpty()) return;
-
-        inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadCurrent = signalQueueList.get("current").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadTemperature = signalQueueList.get("temperature").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadTarget = signalQueueList.get("target").stream().mapToDouble(Double::doubleValue).toArray();
-
-        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
-
-        signalQueueList.forEach((k, v) -> v.clear());
-        timestampQueue.clear();
+        MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
     }
 
     private double getVoltagePrivate() {

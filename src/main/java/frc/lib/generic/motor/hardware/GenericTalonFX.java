@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.motor.*;
+import frc.robot.GlobalConstants;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
+
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
@@ -333,6 +336,8 @@ public class GenericTalonFX extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+
         BaseStatusSignal.refreshAll(positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget);
 
         inputs.systemPosition = getSystemPositionPrivate();
@@ -344,19 +349,7 @@ public class GenericTalonFX extends Motor {
 
         inputs.target = getClosedLoopTargetPrivate();
 
-        if (signalQueueList.isEmpty()) return;
-
-        inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadCurrent = signalQueueList.get("current").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadTemperature = signalQueueList.get("temperature").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadTarget = signalQueueList.get("target").stream().mapToDouble(Double::doubleValue).toArray();
-
-        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
-
-        signalQueueList.forEach((k, v) -> v.clear());
-        timestampQueue.clear();
+        MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
     }
 
     private double getSystemPositionPrivate() {
