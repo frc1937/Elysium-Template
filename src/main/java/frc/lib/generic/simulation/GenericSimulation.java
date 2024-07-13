@@ -1,11 +1,17 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 import frc.lib.generic.motor.hardware.GenericTalonFX;
+import frc.robot.GlobalConstants;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public abstract class GenericSimulation {
     /**
@@ -13,13 +19,15 @@ public abstract class GenericSimulation {
      */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
-    private final Motor motor;
-    private final TalonFXSimState motorSimulationState;
+    private Motor motor;
+    private TalonFXSimState motorSimulationState;
 
     protected GenericSimulation() {
+        if (CURRENT_MODE == GlobalConstants.Mode.REAL) return;
+
         REGISTERED_SIMULATIONS.add(this);
 
-        motor = new GenericTalonFX("YEHUDA", REGISTERED_SIMULATIONS.size() - 1);
+        motor = new GenericTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
         //This is simulation. we don't give a damn fuck! about performance.
         MotorSignal[] signals = new MotorSignal[]{
@@ -65,6 +73,10 @@ public abstract class GenericSimulation {
 
         motorSimulationState.setRawRotorPosition(getPositionRotations());
         motorSimulationState.setRotorVelocity(getVelocityRotationsPerSecond());
+    }
+
+    public double getTarget() {
+        return motor.getClosedLoopTarget();
     }
 
     public abstract double getPositionRotations();

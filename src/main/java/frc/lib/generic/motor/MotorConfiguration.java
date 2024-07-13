@@ -1,5 +1,7 @@
 package frc.lib.generic.motor;
 
+import frc.lib.generic.simulation.SimulationProperties;
+
 /**
  * Generic configurations class with default values
  */
@@ -10,6 +12,8 @@ public class MotorConfiguration {
     public MotorProperties.Slot slot0 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
     public MotorProperties.Slot slot1 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
     public MotorProperties.Slot slot2 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
+
+    public SimulationProperties.Slot slot = new SimulationProperties.Slot(null, null, 0, 0);
 
     public int slotToUse = 0;
 

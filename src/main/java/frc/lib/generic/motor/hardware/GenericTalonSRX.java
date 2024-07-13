@@ -8,6 +8,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.motor.*;
+import frc.lib.generic.simulation.GenericSimulation;
 
 import java.util.function.DoubleSupplier;
 
@@ -15,6 +16,7 @@ public class GenericTalonSRX extends Motor {
     private final WPI_TalonSRX talonSRX;
 
     private MotorConfiguration currentConfiguration;
+    private GenericSimulation simulation;
 
     public GenericTalonSRX(String name, int deviceNumber) {
         super(name);
@@ -154,6 +156,8 @@ public class GenericTalonSRX extends Motor {
 
         talonSRX.setInverted(configuration.inverted);
 
+        simulation = configuration.slot.getSimulationFromType();
+
         return talonSRX.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
     }
 
@@ -173,10 +177,10 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        if (MotorUtilities.handleSimulationInputs(inputs, simulation)) return;
+
         inputs.current = talonSRX.getStatorCurrent();
         inputs.voltage = talonSRX.getMotorOutputVoltage();
         inputs.temperature = talonSRX.getTemperature();
-
-        //todo: IMPLEMENT AKIT
     }
 }

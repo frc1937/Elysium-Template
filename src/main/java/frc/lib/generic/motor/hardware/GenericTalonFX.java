@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.motor.*;
+import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
@@ -44,6 +45,8 @@ public class GenericTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
+    private GenericSimulation simulation;
+
     public GenericTalonFX(String name, int deviceId) {
         super(name);
 
@@ -61,6 +64,11 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
+        if(CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            simulation.setOutput(mode, output);
+            return;
+        }
+
         switch (mode) {
             case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
@@ -88,6 +96,11 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
+        if(CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            simulation.setOutput(mode, output);
+            return;
+        }
+
         if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
             setOutput(mode, output);
 
@@ -118,6 +131,11 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void stopMotor() {
+        if(CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            simulation.stop();
+            return;
+        }
+
         talonFX.stopMotor();
     }
 
@@ -228,6 +246,8 @@ public class GenericTalonFX extends Motor {
 
         talonFX.optimizeBusUtilization();
 
+        simulation = configuration.slot.getSimulationFromType();
+
         return applyConfig();
     }
 
@@ -332,7 +352,7 @@ public class GenericTalonFX extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+        if (MotorUtilities.handleSimulationInputs(inputs, simulation)) return;
 
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
