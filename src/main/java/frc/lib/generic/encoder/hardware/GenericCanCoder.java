@@ -97,6 +97,7 @@ public class GenericCanCoder extends Encoder {
         return statusCode == StatusCode.OK;
     }
 
+    @Override
     protected void refreshInputs(EncoderInputsAutoLogged inputs) {
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 

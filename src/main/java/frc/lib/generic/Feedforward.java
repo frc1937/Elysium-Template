@@ -25,7 +25,6 @@ public class Feedforward {
         this.kG = kG;
 
         this.type = type;
-
     }
 
     /**
@@ -71,11 +70,6 @@ public class Feedforward {
      */
     public double calculate(double velocity) {
         return calculate(0, velocity, 0);
-    }
-
-    private void exitIfNotPresent(Object feedforward) {
-        if (feedforward == null)
-            throw new UnsupportedOperationException("Can't use feedforward with " + type.name() + " type");
     }
 
     private double calculateSimpleMotorFeedforward(double velocity, double acceleration) {
