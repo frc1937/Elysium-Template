@@ -46,8 +46,6 @@ public class GenericSpark extends Motor {
     private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
 
-    private double previousTimestamp = Logger.getTimestamp();
-
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
@@ -246,8 +244,6 @@ public class GenericSpark extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
-
         double feedforwardOutput = 0, feedbackOutput, acceleration = 0;
 
         if (motionProfile == null) {
@@ -257,11 +253,11 @@ public class GenericSpark extends Motor {
             if (controlMode == MotorProperties.ControlMode.VELOCITY) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
             if (controlMode == MotorProperties.ControlMode.POSITION) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
         } else {
-            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, goalState);
+            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
-            acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
+            acceleration = currentSetpoint.velocity - previousSetpoint.velocity / 0.02;
 
-            feedforwardOutput = getFeedforwardOutput(currentSetpoint, acceleration);
+            feedforwardOutput = getFeedforwardOutput(currentSetpoint, 0);
             feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
 
             previousSetpoint = currentSetpoint;
@@ -274,8 +270,6 @@ public class GenericSpark extends Motor {
             feedforwardOutput = feedforward;
 
         spark.setVoltage(feedforwardOutput + feedbackOutput);
-
-        previousTimestamp = Logger.getTimestamp();
 
         Logger.recordOutput("Profiled CURRENT POSITION", getEffectivePosition() * 360);
         Logger.recordOutput("Profiled CURRENT VELOCITY", getEffectiveVelocity() * 360);
