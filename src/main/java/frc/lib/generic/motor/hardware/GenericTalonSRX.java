@@ -78,11 +78,6 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public double getClosedLoopTarget() {
-        return talonSRX.getClosedLoopTarget();
-    }
-
-    @Override
     public double getTemperature() {
         return talonSRX.getTemperature();
     }
@@ -156,7 +151,7 @@ public class GenericTalonSRX extends Motor {
 
         talonSRX.setInverted(configuration.inverted);
 
-        simulation = configuration.slot.getSimulationFromType();
+        simulation = configuration.simSlot.getSimulationFromType();
         simulation.configure(configuration);
 
         return talonSRX.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
@@ -183,5 +178,6 @@ public class GenericTalonSRX extends Motor {
         inputs.current = talonSRX.getStatorCurrent();
         inputs.voltage = talonSRX.getMotorOutputVoltage();
         inputs.temperature = talonSRX.getTemperature();
+        inputs.target = talonSRX.getClosedLoopTarget();
     }
 }

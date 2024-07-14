@@ -185,7 +185,7 @@ public class GenericSpark extends Motor {
 
         configureFeedForward();
 
-        simulation = configuration.slot.getSimulationFromType();
+        simulation = configuration.simSlot.getSimulationFromType();
         simulation.configure(configuration);
 
         return spark.burnFlash() == REVLibError.kOk;
@@ -367,8 +367,8 @@ public class GenericSpark extends Motor {
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
         if (MotorUtilities.handleSimulationInputs(inputs, simulation)) return;
 
-        inputs.systemPosition = getSystemPositionPrivate();
-        inputs.systemVelocity = getSystemVelocityPrivate();
+        inputs.systemPosition = getEffectivePosition();
+        inputs.systemVelocity = getEffectiveVelocity();
 
         inputs.voltage = getVoltagePrivate();
         inputs.current = spark.getOutputCurrent();

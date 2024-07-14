@@ -246,7 +246,7 @@ public class GenericTalonFX extends Motor {
 
         talonFX.optimizeBusUtilization();
 
-        simulation = configuration.slot.getSimulationFromType();
+        simulation = configuration.simSlot.getSimulationFromType();
         simulation.configure(configuration);
 
         return applyConfig();

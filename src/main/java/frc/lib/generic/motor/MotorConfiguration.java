@@ -13,7 +13,7 @@ public class MotorConfiguration {
     public MotorProperties.Slot slot1 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
     public MotorProperties.Slot slot2 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
 
-    public SimulationProperties.Slot slot = new SimulationProperties.Slot(null, null, 0, 0);
+    public SimulationProperties.Slot simSlot = new SimulationProperties.Slot(null, null, 0, 0);
 
     public int slotToUse = 0;
 
