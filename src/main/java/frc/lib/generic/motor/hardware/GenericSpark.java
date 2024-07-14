@@ -2,14 +2,13 @@ package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.ctre.phoenix6.sim.TalonFXSimState;
 import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.*;
+import frc.lib.generic.simulation.GenericSimulation;
 import frc.lib.math.Conversions;
 import frc.robot.GlobalConstants;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
@@ -46,7 +45,7 @@ public class GenericSpark extends Motor {
     private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
 
-    private double previousTimestamp = Logger.getTimestamp();
+    private GenericSimulation simulation;
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
@@ -61,6 +60,9 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+            simulation.setOutput(controlMode, output);
+
         setOutput(controlMode, output, useBuiltinFeedforwardNumber);
     }
 
@@ -87,6 +89,9 @@ public class GenericSpark extends Motor {
     @Override
     public void stopMotor() {
         spark.stopMotor();
+
+        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+            simulation.stop();
     }
 
     @Override
@@ -149,11 +154,6 @@ public class GenericSpark extends Motor {
     }
 
     @Override
-    public TalonFXSimState getSimulationState() {
-        throw new UnsupportedOperationException("Not supported. Use GenericTalonFX");
-    }
-
-    @Override
     public boolean configure(MotorConfiguration configuration) {
         currentConfiguration = configuration;
 
@@ -173,6 +173,11 @@ public class GenericSpark extends Motor {
         configurePID(configuration);
 
         configureFeedForward();
+
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION && configuration.simulationProperties.getSimulationFromType() != null) {
+            simulation = configuration.simulationProperties.getSimulationFromType();
+            simulation.configure(configuration);
+        }
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -246,8 +251,6 @@ public class GenericSpark extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        final double timeDifference = ((Logger.getTimestamp() - previousTimestamp) / 1000000);
-
         double feedforwardOutput = 0, feedbackOutput, acceleration = 0;
 
         if (motionProfile == null) {
@@ -257,9 +260,9 @@ public class GenericSpark extends Motor {
             if (controlMode == MotorProperties.ControlMode.VELOCITY) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
             if (controlMode == MotorProperties.ControlMode.POSITION) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
         } else {
-            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(timeDifference, previousSetpoint, goalState);
+            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
-            acceleration = currentSetpoint.velocity - previousSetpoint.velocity / timeDifference;
+            acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
             feedforwardOutput = getFeedforwardOutput(currentSetpoint, acceleration);
             feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
@@ -274,8 +277,6 @@ public class GenericSpark extends Motor {
             feedforwardOutput = feedforward;
 
         spark.setVoltage(feedforwardOutput + feedbackOutput);
-
-        previousTimestamp = Logger.getTimestamp();
 
         Logger.recordOutput("Profiled CURRENT POSITION", getEffectivePosition() * 360);
         Logger.recordOutput("Profiled CURRENT VELOCITY", getEffectiveVelocity() * 360);
@@ -297,8 +298,6 @@ public class GenericSpark extends Motor {
 
             previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
             goalState = stateFromOutput;
-
-            DriverStation.reportError("[PurpleSpark] goal has changed", false);
         }
     }
 
@@ -355,7 +354,11 @@ public class GenericSpark extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            if (simulation == null) return;
+            MotorUtilities.handleSimulationInputs(inputs, simulation);
+            return;
+        }
 
         inputs.systemPosition = getSystemPositionPrivate();
         inputs.systemVelocity = getSystemVelocityPrivate();

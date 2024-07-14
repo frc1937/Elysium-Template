@@ -1,6 +1,5 @@
 package frc.lib.generic.motor.hardware;
 
-import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -9,24 +8,16 @@ import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.generic.motor.*;
-import frc.lib.generic.simulation.GenericSimulation;
-import frc.robot.GlobalConstants;
-import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
+import com.ctre.phoenix6.sim.TalonFXSimState;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 
-import java.util.*;
-import java.util.function.DoubleSupplier;
-
-import static frc.robot.GlobalConstants.CURRENT_MODE;
-
-public class GenericTalonFX extends Motor {
+public class GenericSimulationTalonFX extends Motor {
     private final TalonFX talonFX;
 
-    private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
-
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
-    private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
@@ -44,9 +35,7 @@ public class GenericTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
-    private GenericSimulation simulation;
-
-    public GenericTalonFX(String name, int deviceId) {
+    public GenericSimulationTalonFX(String name, int deviceId) {
         super(name);
 
         talonFX = new TalonFX(deviceId);
@@ -63,10 +52,6 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation.setOutput(mode, output);
-        }
-
         switch (mode) {
             case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
@@ -93,83 +78,18 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
-            setOutput(mode, output);
-
-        switch (mode) {
-            case POSITION -> {
-                if (shouldUseProfile) {
-                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
-                } else {
-                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse).withFeedForward(feedforward));
-                }
-            }
-
-            case VELOCITY -> {
-                if (shouldUseProfile) {
-                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
-                } else {
-                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse).withFeedForward(feedforward));
-                }
-            }
-        }
+    public double getVoltage() {
+        return voltageSignal.refresh().getValue();
     }
 
     @Override
-    public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        currentConfiguration.idleMode = idleMode;
-        configure(currentConfiguration);
+    public double getClosedLoopTarget() {
+        return closedLoopTarget.refresh().getValue();
     }
 
     @Override
     public void stopMotor() {
         talonFX.stopMotor();
-
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation.stop();
-        }
-    }
-
-    @Override
-    public void setExternalPositionSupplier(DoubleSupplier position) {
-//todo: do
-    }
-
-    @Override
-    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-        //todo: Implement.
-    }
-
-    @Override
-    public MotorConfiguration getCurrentConfiguration() {
-        return currentConfiguration;
-    }
-
-    @Override
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        switch (slotNumber) {
-            case 0 -> currentConfiguration.slot0 = slot;
-            case 1 -> currentConfiguration.slot1 = slot;
-            case 2 -> currentConfiguration.slot2 = slot;
-        }
-
-        configure(currentConfiguration);
-    }
-
-    @Override
-    public void setMotorEncoderPosition(double position) {
-        talonConfigurator.setPosition(position); //TODO: Test on real robot to check if works.
-    }
-
-    @Override
-    public int getDeviceID() {
-        return talonFX.getDeviceID();
-    }
-
-    @Override
-    public void setFollowerOf(String name, int masterPort) {
-        talonFX.setControl(new StrictFollower(masterPort)); //check if this should be called 10 times or once is enough
     }
 
     @Override
@@ -179,27 +99,8 @@ public class GenericTalonFX extends Motor {
         }
     }
 
-    @Override
-    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
-        return switch (signal.getType()) {
-            case VELOCITY -> velocitySignal;
-            case POSITION -> positionSignal;
-            case VOLTAGE -> voltageSignal;
-            case CURRENT -> currentSignal;
-            case TEMPERATURE -> temperatureSignal;
-            case CLOSED_LOOP_TARGET -> closedLoopTarget;
-        };
-    }
-
-    @Override
-    public void refreshStatusSignals(MotorSignal... signals) {
-        ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
-
-        for (MotorSignal signal : signals) {
-            baseStatusSignals.add(getRawStatusSignal(signal));
-        }
-
-        BaseStatusSignal.refreshAll(baseStatusSignals.toArray(new BaseStatusSignal[0]));
+    public TalonFXSimState getSimulationState() {
+        return talonFX.getSimState();
     }
 
     @Override
@@ -231,11 +132,6 @@ public class GenericTalonFX extends Motor {
         slotToUse = configuration.slotToUse;
 
         talonFX.optimizeBusUtilization();
-
-        if (configuration.simulationProperties.getSimulationFromType() != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation = configuration.simulationProperties.getSimulationFromType();
-            simulation.configure(configuration);
-        }
 
         return applyConfig();
     }
@@ -326,67 +222,9 @@ public class GenericTalonFX extends Motor {
             case TEMPERATURE -> setupSignal(signal, temperatureSignal);
             case CLOSED_LOOP_TARGET -> setupSignal(signal, closedLoopTarget);
         }
-
-        if (!signal.useFasterThread()) return;
-
-        switch (signal.getType()) {
-            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
-            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
-            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(this::getCurrentPrivate));
-            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(this::getTemperaturePrivate));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
-        }
-    }
-
-    @Override
-    protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            if (simulation == null) return;
-            MotorUtilities.handleSimulationInputs(inputs, simulation);
-            return;
-        }
-
-        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
-
-        inputs.systemPosition = getSystemPositionPrivate();
-        inputs.systemVelocity = getSystemVelocityPrivate();
-
-        inputs.voltage = getVoltagePrivate();
-        inputs.current = getCurrentPrivate();
-        inputs.temperature = getTemperaturePrivate();
-
-        inputs.target = getClosedLoopTargetPrivate();
-
-        MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
-    }
-
-    private double getSystemPositionPrivate() {
-        return positionSignal.refresh().getValue();
-    }
-
-    private double getSystemVelocityPrivate() {
-        return velocitySignal.refresh().getValue();
-    }
-
-    private double getVoltagePrivate() {
-        return voltageSignal.refresh().getValue();
-    }
-
-    private double getClosedLoopTargetPrivate() {
-        return closedLoopTarget.refresh().getValue();
-    }
-
-    private double getTemperaturePrivate() {
-        return temperatureSignal.refresh().getValue();
-    }
-
-    private double getCurrentPrivate() {
-        return currentSignal.refresh().getValue();
     }
 
     private void setupSignal(final MotorSignal signal, final StatusSignal<Double> correspondingSignal) {
-        signalsToUpdateList.add(correspondingSignal);
         correspondingSignal.setUpdateFrequency(signal.getUpdateRate());
     }
 }

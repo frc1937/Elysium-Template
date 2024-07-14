@@ -2,7 +2,6 @@ package frc.lib.generic.motor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.advantagekit.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import org.littletonrobotics.junction.AutoLog;
@@ -226,8 +225,6 @@ public class Motor implements LoggableHardware {
      * DO NOT USE if not necessary.
      */
     public void refreshStatusSignals(MotorSignal... signals) { }
-
-    public TalonFXSimState getSimulationState() { return null; }
 
     public boolean configure(MotorConfiguration configuration) { return true; }
 

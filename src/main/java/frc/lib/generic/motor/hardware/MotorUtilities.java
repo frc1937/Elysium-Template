@@ -1,6 +1,7 @@
 package frc.lib.generic.motor.hardware;
 
 import frc.lib.generic.motor.MotorInputsAutoLogged;
+import frc.lib.generic.simulation.GenericSimulation;
 
 import java.util.Map;
 import java.util.Queue;
@@ -20,5 +21,22 @@ public class MotorUtilities {
 
         signalQueueList.forEach((k, v) -> v.clear());
         timestampQueue.clear();
+    }
+
+    static void handleSimulationInputs(MotorInputsAutoLogged inputs, GenericSimulation simulation) {
+        inputs.systemPosition = simulation.getPositionRotations();
+        inputs.systemVelocity = simulation.getVelocityRotationsPerSecond();
+        inputs.voltage = simulation.getVoltage();
+        inputs.current = simulation.getCurrent();
+
+        inputs.temperature = 0.0;
+        inputs.target = simulation.getTarget();
+
+        inputs.threadSystemPosition = new double[]{inputs.systemPosition};
+        inputs.threadSystemVelocity = new double[]{inputs.systemVelocity};
+        inputs.threadVoltage = new double[]{inputs.voltage};
+        inputs.threadCurrent = new double[]{inputs.current};
+        inputs.threadTemperature = new double[]{inputs.temperature};
+        inputs.threadTarget = new double[]{inputs.target};
     }
 }

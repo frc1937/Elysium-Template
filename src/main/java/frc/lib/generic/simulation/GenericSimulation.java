@@ -1,8 +1,11 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.motor.*;
-import frc.lib.generic.motor.hardware.GenericTalonFX;
+import edu.wpi.first.wpilibj.RobotController;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.hardware.GenericSimulationTalonFX;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,25 +16,19 @@ public abstract class GenericSimulation {
      */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
-    private final Motor motor;
-    private final TalonFXSimState motorSimulationState;
+    private final GenericSimulationTalonFX motor;
+    private final TalonFXSimState motorSimulatedState;
 
     protected GenericSimulation() {
         REGISTERED_SIMULATIONS.add(this);
 
-        motor = new GenericTalonFX("YEHUDA", REGISTERED_SIMULATIONS.size() - 1);
+        motor = new GenericSimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        //This is simulation. we don't give a damn fuck! about performance.
-        MotorSignal[] signals = new MotorSignal[]{
-                new MotorSignal(MotorSignal.SignalType.POSITION, true), new MotorSignal(MotorSignal.SignalType.VELOCITY, true),
-                new MotorSignal(MotorSignal.SignalType.CURRENT, true), new MotorSignal(MotorSignal.SignalType.VOLTAGE, true),
-                new MotorSignal(MotorSignal.SignalType.TEMPERATURE, true), new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET, true)
-        };
+        motor.setupSignalsUpdates(new MotorSignal(MotorSignal.SignalType.VOLTAGE),
+                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET));
 
-        motor.setupSignalsUpdates(signals);
-
-        motorSimulationState = motor.getSimulationState();
-        motorSimulationState.setSupplyVoltage(12); //Voltage compensation.
+        motorSimulatedState = motor.getSimulationState();
+        motorSimulatedState.setSupplyVoltage(RobotController.getBatteryVoltage()); //Voltage compensation.
     }
 
     /**
@@ -64,11 +61,11 @@ public abstract class GenericSimulation {
     }
 
     private void updateSimulation() {
-        setVoltage(motorSimulationState.getMotorVoltage());
+        setVoltage(motorSimulatedState.getMotorVoltage());
         update();
 
-        motorSimulationState.setRawRotorPosition(getPositionRotations());
-        motorSimulationState.setRotorVelocity(getVelocityRotationsPerSecond());
+        motorSimulatedState.setRawRotorPosition(getPositionRotations());
+        motorSimulatedState.setRotorVelocity(getVelocityRotationsPerSecond());
     }
 
     public abstract double getPositionRotations();
