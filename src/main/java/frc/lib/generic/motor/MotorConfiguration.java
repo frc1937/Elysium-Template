@@ -16,7 +16,7 @@ public class MotorConfiguration {
     public int slotToUse = 0;
 
     public SimulationProperties.Slot simulationProperties = new SimulationProperties.Slot(null, null, 0, 0);
-
+    public MotorProperties.Slot simulationSlot = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
 
     /**
      * If non-zero, this determines how much time to ramp from 0% output to 100% during open-loop modes.

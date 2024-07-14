@@ -92,6 +92,17 @@ public class ArmConstants {
                 true
         );
 
+        motorConfiguration.simulationSlot = new MotorProperties.Slot(
+                100,
+                0,
+                0,
+                0.053988,
+                37,
+                0,
+                0.04366,
+                GravityTypeValue.Arm_Cosine
+        );
+
         ARM_MOTOR.configure(motorConfiguration);
 
         ARM_MOTOR.setupSignalsUpdates(new MotorSignal(POSITION));

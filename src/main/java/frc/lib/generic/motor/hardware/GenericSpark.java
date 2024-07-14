@@ -50,7 +50,8 @@ public class GenericSpark extends Motor {
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
-        if (sparkType == MotorProperties.SparkType.FLEX) spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
+        if (sparkType == MotorProperties.SparkType.FLEX)
+            spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
         else spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
 
         optimizeBusUsage();
@@ -60,8 +61,10 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             simulation.setOutput(controlMode, output);
+            return;
+        }
 
         setOutput(controlMode, output, useBuiltinFeedforwardNumber);
     }
@@ -88,10 +91,12 @@ public class GenericSpark extends Motor {
 
     @Override
     public void stopMotor() {
-        spark.stopMotor();
-
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             simulation.stop();
+            return;
+        }
+
+        spark.stopMotor();
     }
 
     @Override
@@ -174,10 +179,7 @@ public class GenericSpark extends Motor {
 
         configureFeedForward();
 
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION && configuration.simulationProperties.getSimulationFromType() != null) {
-            simulation = configuration.simulationProperties.getSimulationFromType();
-            simulation.configure(configuration);
-        }
+        simulation = MotorUtilities.configureSimulation(simulation, configuration);
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -228,8 +230,10 @@ public class GenericSpark extends Motor {
 
         feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
 
-        if (slotToUse == 1) feedback = new PIDController(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD());
-        if (slotToUse == 2) feedback = new PIDController(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD());
+        if (slotToUse == 1)
+            feedback = new PIDController(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD());
+        if (slotToUse == 2)
+            feedback = new PIDController(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD());
 
         if (configuration.closedLoopContinuousWrap)
             feedback.enableContinuousInput(-0.5, 0.5);
@@ -257,8 +261,10 @@ public class GenericSpark extends Motor {
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             //todo: acceleration
 
-            if (controlMode == MotorProperties.ControlMode.VELOCITY) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
-            if (controlMode == MotorProperties.ControlMode.POSITION) feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
+            if (controlMode == MotorProperties.ControlMode.VELOCITY)
+                feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
+            if (controlMode == MotorProperties.ControlMode.POSITION)
+                feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
         } else {
             final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
@@ -290,8 +296,10 @@ public class GenericSpark extends Motor {
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
         TrapezoidProfile.State stateFromOutput = null;
 
-        if (controlMode == MotorProperties.ControlMode.POSITION) stateFromOutput = new TrapezoidProfile.State(output, 0);
-        if (controlMode == MotorProperties.ControlMode.VELOCITY) stateFromOutput = new TrapezoidProfile.State(0, output);
+        if (controlMode == MotorProperties.ControlMode.POSITION)
+            stateFromOutput = new TrapezoidProfile.State(output, 0);
+        if (controlMode == MotorProperties.ControlMode.VELOCITY)
+            stateFromOutput = new TrapezoidProfile.State(0, output);
 
         if (stateFromOutput != null && goalState == null || !goalState.equals(stateFromOutput)) {
             feedback.reset();
@@ -333,7 +341,8 @@ public class GenericSpark extends Motor {
         int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE ->
+                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
@@ -341,14 +350,20 @@ public class GenericSpark extends Motor {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+            case POSITION ->
+                    signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VELOCITY ->
+                    signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
 
-            case CURRENT -> signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
-            case VOLTAGE -> signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+            case CURRENT ->
+                    signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
+            case VOLTAGE ->
+                    signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
 
-            case TEMPERATURE -> signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
+            case TEMPERATURE ->
+                    signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
+            case CLOSED_LOOP_TARGET ->
+                    signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
         }
     }
 

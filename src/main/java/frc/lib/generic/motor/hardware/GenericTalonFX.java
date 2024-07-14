@@ -232,10 +232,7 @@ public class GenericTalonFX extends Motor {
 
         talonFX.optimizeBusUtilization();
 
-        if (configuration.simulationProperties.getSimulationFromType() != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation = configuration.simulationProperties.getSimulationFromType();
-            simulation.configure(configuration);
-        }
+        simulation = MotorUtilities.configureSimulation(simulation, configuration);
 
         return applyConfig();
     }

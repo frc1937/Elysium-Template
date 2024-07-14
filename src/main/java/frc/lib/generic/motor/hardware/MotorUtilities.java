@@ -1,10 +1,14 @@
 package frc.lib.generic.motor.hardware;
 
+import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorInputsAutoLogged;
 import frc.lib.generic.simulation.GenericSimulation;
+import frc.robot.GlobalConstants;
 
 import java.util.Map;
 import java.util.Queue;
+
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class MotorUtilities {
     static void handleThreadedInputs(MotorInputsAutoLogged inputs, Map<String, Queue<Double>> signalQueueList, Queue<Double> timestampQueue) {
@@ -38,5 +42,19 @@ public class MotorUtilities {
         inputs.threadCurrent = new double[]{inputs.current};
         inputs.threadTemperature = new double[]{inputs.temperature};
         inputs.threadTarget = new double[]{inputs.target};
+    }
+
+    static GenericSimulation configureSimulation(GenericSimulation simulation, MotorConfiguration configuration) {
+        if (configuration.simulationProperties.getSimulationFromType() != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            simulation = configuration.simulationProperties.getSimulationFromType();
+
+            configuration.slot0 = configuration.simulationSlot;
+            configuration.slot1 = configuration.simulationSlot;
+            configuration.slot2 = configuration.simulationSlot;
+
+            simulation.configure(configuration);
+        }
+
+        return simulation;
     }
 }
