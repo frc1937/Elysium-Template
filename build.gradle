@@ -129,3 +129,10 @@ wpi.java.configureTestTasks(test)
 tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add '-XDstringConcat=inline'
 }
+
+tasks.register('checkAkitInstall', JavaExec) {
+    dependsOn "classes"
+    mainClass = "org.littletonrobotics.junction.CheckInstall"
+    classpath = sourceSets.main.runtimeClasspath
+}
+compileJava.finalizedBy checkAkitInstall

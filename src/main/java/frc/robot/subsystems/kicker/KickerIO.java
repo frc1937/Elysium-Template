@@ -22,7 +22,7 @@ public class KickerIO {
     }
 
 
-    protected void refreshInputs(KickerInputsAutoLogged inputs) {
+    protected void refreshInputs(KickerInputs inputs) {
     }
 
     protected void setPercentageOutput(double percentageOutput) {
