@@ -24,8 +24,11 @@ public abstract class GenericSimulation {
 
         motor = new GenericSimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        motor.setupSignalsUpdates(new MotorSignal(MotorSignal.SignalType.VOLTAGE),
-                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET));
+        motor.setupSignalsUpdates(
+                new MotorSignal(MotorSignal.SignalType.VOLTAGE),
+                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET)
+
+        );
 
         motorSimulatedState = motor.getSimulationState();
         motorSimulatedState.setSupplyVoltage(RobotController.getBatteryVoltage()); //Voltage compensation.

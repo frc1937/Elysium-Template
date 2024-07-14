@@ -215,16 +215,12 @@ public class GenericSimulationTalonFX extends Motor {
 
     private void setupSignalUpdates(MotorSignal signal) {
         switch (signal.getType()) {
-            case VELOCITY -> setupSignal(signal, velocitySignal);
-            case POSITION -> setupSignal(signal, positionSignal);
-            case VOLTAGE -> setupSignal(signal, voltageSignal);
-            case CURRENT -> setupSignal(signal, currentSignal);
-            case TEMPERATURE -> setupSignal(signal, temperatureSignal);
-            case CLOSED_LOOP_TARGET -> setupSignal(signal, closedLoopTarget);
+            case VELOCITY -> velocitySignal.setUpdateFrequency(1000);
+            case POSITION -> positionSignal.setUpdateFrequency(1000);
+            case VOLTAGE -> voltageSignal.setUpdateFrequency(1000);
+            case CURRENT -> currentSignal.setUpdateFrequency(1000);
+            case TEMPERATURE -> temperatureSignal.setUpdateFrequency(1000);
+            case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(1000);
         }
-    }
-
-    private void setupSignal(final MotorSignal signal, final StatusSignal<Double> correspondingSignal) {
-        correspondingSignal.setUpdateFrequency(signal.getUpdateRate());
     }
 }

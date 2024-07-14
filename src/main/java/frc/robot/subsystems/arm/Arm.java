@@ -8,8 +8,13 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.util.commands.ExecuteEndCommand;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.arm.ArmConstants.*;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
 
 public class Arm extends SubsystemBase {
     private final SysIdRoutine routine;

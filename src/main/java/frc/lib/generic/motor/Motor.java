@@ -253,8 +253,10 @@ public class Motor implements LoggableHardware {
     }
 
     public boolean isAtSetpoint() {
-        if (getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new RuntimeException("Must set closed loop tolerance!");
+        if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
+            throw new UnsupportedOperationException("NIG"); //todo: Move this to each motor.
+        //todo: Create motorCreator class. Type, AND RETURN BASED ON MODE SO REPLAY WROKS.
+        //TODO; DO THAT FOR EVERY HARDWARE TYPE
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
