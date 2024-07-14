@@ -157,6 +157,7 @@ public class GenericTalonSRX extends Motor {
         talonSRX.setInverted(configuration.inverted);
 
         simulation = configuration.slot.getSimulationFromType();
+        simulation.configure(configuration);
 
         return talonSRX.configAllSettings(talonSRXConfiguration) == ErrorCode.OK;
     }

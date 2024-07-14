@@ -186,6 +186,7 @@ public class GenericSpark extends Motor {
         configureFeedForward();
 
         simulation = configuration.slot.getSimulationFromType();
+        simulation.configure(configuration);
 
         return spark.burnFlash() == REVLibError.kOk;
     }
