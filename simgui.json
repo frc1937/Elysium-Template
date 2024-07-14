@@ -66,30 +66,12 @@
     },
     "transitory": {
       "AdvantageKit": {
-        "Flywheel": {
-          "RightSim": {
-            "open": true
-          },
+        "ARM_MOTOR": {
           "open": true
         },
         "RealOutputs": {
-          "Logger": {
-            "open": true
-          },
-          "Swerve": {
-            "open": true
-          },
           "open": true
         },
-        "Swerve": {
-          "open": true
-        },
-        "open": true
-      },
-      "LiveWindow": {
-        "open": true
-      },
-      "Shuffleboard": {
         "open": true
       },
       "SmartDashboard": {
@@ -97,6 +79,9 @@
           "open": true
         },
         "Mechanism": {
+          "open": true
+        },
+        "Mechanisms": {
           "open": true
         },
         "TunableNumbers": {
@@ -107,7 +92,8 @@
             "open": true
           },
           "open": true
-        }
+        },
+        "open": true
       }
     }
   },

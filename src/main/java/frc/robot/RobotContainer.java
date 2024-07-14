@@ -73,7 +73,10 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()));
+        driveController.getButton(Controller.Inputs.A)
+                .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()).alongWith(
+                        ARM.setTargetPosition(Rotation2d.fromDegrees(50))
+                ));
 
 
         driveController.getButton(Controller.Inputs.B)
