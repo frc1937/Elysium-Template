@@ -1,5 +1,7 @@
 package frc.lib.generic.motor;
 
+import frc.lib.generic.simulation.SimulationProperties;
+
 /**
  * Generic configurations class with default values
  */
@@ -12,6 +14,9 @@ public class MotorConfiguration {
     public MotorProperties.Slot slot2 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
 
     public int slotToUse = 0;
+
+    public SimulationProperties.Slot simulationProperties = new SimulationProperties.Slot(null, null, 0, 0);
+
 
     /**
      * If non-zero, this determines how much time to ramp from 0% output to 100% during open-loop modes.

@@ -59,6 +59,10 @@ public abstract class GenericSimulation {
         return motor.getVoltage();
     }
 
+    public double getTarget() {
+        return motor.getClosedLoopTarget();
+    }
+
     private void updateSimulation() {
         setVoltage(motorSimulationState.getMotorVoltage());
         update();
