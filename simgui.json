@@ -47,6 +47,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Mechanisms/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "bottom": 1476,
         "height": 8.210550308227539,

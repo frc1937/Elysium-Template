@@ -35,7 +35,7 @@ public class ArmConstants {
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
 
-    static final Motor ARM_MOTOR = new GenericSpark("ARM_MOTOR", 1, MotorProperties.SparkType.FLEX);
+    static final Motor ARM_MOTOR = new GenericSpark("ARM_MOTOR",1, MotorProperties.SparkType.FLEX);
     static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder("ARM_ENCODER", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
@@ -87,18 +87,18 @@ public class ArmConstants {
                 150.0,
                 0.2,
                 0.03,
-                Rotation2d.fromDegrees(-20),
-                Rotation2d.fromDegrees(120),
+                Rotation2d.fromDegrees(-180),
+                Rotation2d.fromDegrees(180),
                 true
         );
 
         motorConfiguration.simulationSlot = new MotorProperties.Slot(
-                100,
                 0,
+                0,
+                0,
+                27,
                 0,
                 0.053988,
-                37,
-                0,
                 0.04366,
                 GravityTypeValue.Arm_Cosine
         );

@@ -24,11 +24,11 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 public class GenericSpark extends Motor {
     private static final double useBuiltinFeedforwardNumber = 69420;
 
-    private final CANSparkBase spark;
-    private final RelativeEncoder encoder;
+    private CANSparkBase spark;
+    private RelativeEncoder encoder;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
+    private Queue<Double> timestampQueue;
 
     private double closedLoopTarget;
 
@@ -50,6 +50,10 @@ public class GenericSpark extends Motor {
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
+            return;
+        }
+
         if (sparkType == MotorProperties.SparkType.FLEX)
             spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
         else spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
@@ -57,6 +61,7 @@ public class GenericSpark extends Motor {
         optimizeBusUsage();
 
         encoder = spark.getEncoder();
+        timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
     }
 
     @Override
@@ -101,6 +106,8 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setMotorEncoderPosition(double position) {
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+
         encoder.setPosition(position);
     }
 
@@ -161,6 +168,9 @@ public class GenericSpark extends Motor {
     @Override
     public boolean configure(MotorConfiguration configuration) {
         currentConfiguration = configuration;
+        simulation = MotorUtilities.configureSimulation(simulation, configuration);
+
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return true;
 
         spark.restoreFactoryDefaults();
 
@@ -178,8 +188,6 @@ public class GenericSpark extends Motor {
         configurePID(configuration);
 
         configureFeedForward();
-
-        simulation = MotorUtilities.configureSimulation(simulation, configuration);
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -338,6 +346,8 @@ public class GenericSpark extends Motor {
      * Explanation here: <a href="https://docs.revrobotics.com/brushless/spark-max/control-interfaces">REV DOCS</a>
      */
     private void setupSignalUpdates(MotorSignal signal) {
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) return;
+
         int ms = (int) (1000 / signal.getUpdateRate());
 
         switch (signal.getType()) {
@@ -375,8 +385,8 @@ public class GenericSpark extends Motor {
             return;
         }
 
-        inputs.systemPosition = getSystemPositionPrivate();
-        inputs.systemVelocity = getSystemVelocityPrivate();
+        inputs.systemPosition = getEffectivePosition();
+        inputs.systemVelocity = getEffectiveVelocity();
 
         inputs.voltage = getVoltagePrivate();
         inputs.current = spark.getOutputCurrent();

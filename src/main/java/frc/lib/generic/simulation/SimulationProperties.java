@@ -89,7 +89,9 @@ public class SimulationProperties {
                 case ELEVATOR ->
                         new ElevatorSimulation(gearbox, gearRatio, carriageMassKilograms, drumRadiusMeters, minimumHeightMeters, maximumHeightMeters, simulateGravity);
                 case ARM ->
-                        new SingleJointedArmSimulation(gearbox,gearRatio, armLengthMeters, momentOfInertia, minimumAngle, maximumAngle, simulateGravity);
+                        new SingleJointedArmSimulation(gearbox,gearRatio,
+                                armLengthMeters, momentOfInertia,
+                                minimumAngle, maximumAngle, simulateGravity, true);
             };
         }
     }

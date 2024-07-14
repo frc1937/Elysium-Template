@@ -75,7 +75,7 @@ public class RobotContainer {
 
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()).alongWith(
-                        ARM.setTargetPosition(Rotation2d.fromDegrees(50))
+                        ARM.setTargetPosition(Rotation2d.fromDegrees(70))
                 ));
 
 
