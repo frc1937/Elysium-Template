@@ -3,31 +3,17 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.util.commands.ExecuteEndCommand;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
-import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.arm.ArmConstants.*;
 
-public class Arm extends SubsystemBase {
-    private final SysIdRoutine routine;
-
+public class Arm extends GenericSubsystem {
     public Arm() {
-        SysIdRoutine.Mechanism mechanism = new SysIdRoutine.Mechanism(
-                (voltage) -> setRawVoltage(voltage.in(Volts)),
-                this::sysIdLogArm,
-                this
-        );
-
-        routine = new SysIdRoutine(SYSID_CONFIG, mechanism);
-
+        setName("Arm Subsystem");
         ARM_MOTOR.setMotorEncoderPosition(ABSOLUTE_ARM_ENCODER.getEncoderPosition());
     }
 
@@ -40,14 +26,6 @@ public class Arm extends SubsystemBase {
                 () -> setMotorTargetPosition(targetPosition),
                 ARM_MOTOR::stopMotor,
                 this);
-    }
-
-    public Command sysIdQuastaticTest(SysIdRoutine.Direction direction) {
-        return routine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamicTest(SysIdRoutine.Direction direction) {
-        return routine.dynamic(direction);
     }
 
     @Override
@@ -63,14 +41,21 @@ public class Arm extends SubsystemBase {
         ARM_MOTOR.setIdleMode(idleMode);
     }
 
-    private void sysIdLogArm(SysIdRoutineLog log) {
+    @Override
+    public SysIdRoutine.Config getSysIdConfig() {
+        return SYSID_CONFIG;
+    }
+
+    @Override
+    public void sysIdUpdateLog(SysIdRoutineLog log) {
         log.motor("Arm")
                 .voltage(Volts.of(ARM_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(ARM_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(ARM_MOTOR.getSystemVelocity()));
     }
 
-    private void setRawVoltage(double voltage) {
+    @Override
+    public void sysIdDrive(double voltage) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 

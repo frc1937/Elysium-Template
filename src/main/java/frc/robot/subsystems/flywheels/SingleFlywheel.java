@@ -33,6 +33,22 @@ public class SingleFlywheel {
         motor.setOutput(MotorProperties.ControlMode.VELOCITY, Conversions.mpsToRps(velocityMPS, flywheelDiameter));
     }
 
+    public double getVoltage() {
+        return motor.getVoltage();
+    }
+
+    public double getPosition() {
+        return motor.getSystemPosition();
+    }
+
+    public double getVelocity() {
+        return motor.getSystemVelocity();
+    }
+
+    public void setVoltage(double voltage) {
+        motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
+    }
+
     public void stop() {
         motor.stopMotor();
     }

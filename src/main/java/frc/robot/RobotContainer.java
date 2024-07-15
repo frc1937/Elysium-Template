@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
@@ -104,20 +105,16 @@ public class RobotContainer {
 
     private void configureButtons(ButtonLayout layout) {
         switch (layout) {
-            case CHARACTERIZE_ARM -> {
-                driveController.getButton(Controller.Inputs.A).whileTrue(ARM.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
-                driveController.getButton(Controller.Inputs.B).whileTrue(ARM.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
-                driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
-                driveController.getButton(Controller.Inputs.X).whileTrue(ARM.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
-            }
-
-            case CHARACTERIZE_FLYWHEEL -> {
-//                driveController.getButton(Controller.Inputs.A).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
-//                driveController.getButton(Controller.Inputs.B).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
-//                driveController.getButton(Controller.Inputs.Y).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
-//                driveController.getButton(Controller.Inputs.X).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
-            }
+            case CHARACTERIZE_ARM -> setupCharacterization(ARM);
+            case CHARACTERIZE_FLYWHEEL -> setupCharacterization(FLYWHEELS);
         }
+    }
+
+    private void setupCharacterization(GenericSubsystem subsystem) {
+        driveController.getButton(Controller.Inputs.A).whileTrue(subsystem.getSysIdQuastatic(SysIdRoutine.Direction.kForward));
+        driveController.getButton(Controller.Inputs.B).whileTrue(subsystem.getSysIdQuastatic(SysIdRoutine.Direction.kReverse));
+        driveController.getButton(Controller.Inputs.Y).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kForward));
+        driveController.getButton(Controller.Inputs.X).whileTrue(subsystem.getSysIdDynamic(SysIdRoutine.Direction.kReverse));
     }
 
     public Command getAutonomousCommand() {
