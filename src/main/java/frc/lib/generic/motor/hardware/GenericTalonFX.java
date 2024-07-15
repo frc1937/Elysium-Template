@@ -10,14 +10,10 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.generic.motor.*;
-import frc.lib.generic.simulation.GenericSimulation;
-import frc.robot.GlobalConstants;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.*;
 import java.util.function.DoubleSupplier;
-
-import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
@@ -44,8 +40,6 @@ public class GenericTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
-    private GenericSimulation simulation;
-
     public GenericTalonFX(String name, int deviceId) {
         super(name);
 
@@ -63,10 +57,6 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation.setOutput(mode, output);
-        }
-
         switch (mode) {
             case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
@@ -125,10 +115,6 @@ public class GenericTalonFX extends Motor {
     @Override
     public void stopMotor() {
         talonFX.stopMotor();
-
-        if (simulation != null && CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            simulation.stop();
-        }
     }
 
     @Override
@@ -231,8 +217,6 @@ public class GenericTalonFX extends Motor {
         slotToUse = configuration.slotToUse;
 
         talonFX.optimizeBusUtilization();
-
-        simulation = MotorUtilities.configureSimulation(simulation, configuration);
 
         return applyConfig();
     }
@@ -338,12 +322,6 @@ public class GenericTalonFX extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            if (simulation == null) return;
-            MotorUtilities.handleSimulationInputs(inputs, simulation);
-            return;
-        }
-
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
         inputs.systemPosition = getSystemPositionPrivate();

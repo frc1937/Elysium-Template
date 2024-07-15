@@ -14,7 +14,7 @@ import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.MotorSignal;
 
-public class GenericSimulationTalonFX extends Motor {
+public class SimulationTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
@@ -35,7 +35,7 @@ public class GenericSimulationTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
-    public GenericSimulationTalonFX(String name, int deviceId) {
+    public SimulationTalonFX(String name, int deviceId) {
         super(name);
 
         talonFX = new TalonFX(deviceId);

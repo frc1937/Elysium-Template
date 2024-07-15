@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.MotorSignal;
-import frc.lib.generic.motor.hardware.GenericSimulationTalonFX;
+import frc.lib.generic.motor.hardware.SimulationTalonFX;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +16,13 @@ public abstract class GenericSimulation {
      */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
-    private final GenericSimulationTalonFX motor;
+    private final SimulationTalonFX motor;
     private final TalonFXSimState motorSimulatedState;
 
     protected GenericSimulation() {
         REGISTERED_SIMULATIONS.add(this);
 
-        motor = new GenericSimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
+        motor = new SimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
         motor.setupSignalsUpdates(
                 new MotorSignal(MotorSignal.SignalType.VOLTAGE),
