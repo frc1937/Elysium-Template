@@ -20,11 +20,11 @@ import java.util.function.DoubleSupplier;
 public class GenericSpark extends Motor {
     private static final double useBuiltinFeedforwardNumber = 69420;
 
-    private CANSparkBase spark;
-    private RelativeEncoder encoder;
+    private final CANSparkBase spark;
+    private final RelativeEncoder encoder;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private Queue<Double> timestampQueue;
+    private final Queue<Double> timestampQueue;
 
     private double closedLoopTarget;
 

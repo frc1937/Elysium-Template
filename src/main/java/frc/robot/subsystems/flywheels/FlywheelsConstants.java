@@ -15,6 +15,7 @@ public class FlywheelsConstants {
     private static final MotorProperties.Slot
             LEFT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0),
             RIGHT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0),
+
             SIMULATION_SLOT = new MotorProperties.Slot(12, 0, 0, 0, 0, 0);
 
     static {
@@ -46,10 +47,12 @@ public class FlywheelsConstants {
 
         motor.configure(configuration);
 
-        motor.setupSignalsUpdates(new MotorSignal(CLOSED_LOOP_TARGET));
-        motor.setupSignalsUpdates(new MotorSignal(VELOCITY));
-        motor.setupSignalsUpdates(new MotorSignal(TEMPERATURE));
-        motor.setupSignalsUpdates(new MotorSignal(VOLTAGE));
+        motor.setupSignalsUpdates(
+                new MotorSignal(CLOSED_LOOP_TARGET),
+                new MotorSignal(VELOCITY),
+                new MotorSignal(TEMPERATURE),
+                new MotorSignal(VOLTAGE)
+        );
     }
 
     protected static SingleFlywheel[] flywheels = {
