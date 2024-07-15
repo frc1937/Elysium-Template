@@ -7,14 +7,8 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.generic.encoder.Encoder;
-import frc.lib.generic.encoder.EncoderConfiguration;
-import frc.lib.generic.encoder.EncoderProperties;
-import frc.lib.generic.encoder.EncoderSignal;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.encoder.*;
+import frc.lib.generic.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.simulation.mechanisms.SingleJointedArmMechanism2d;
 
@@ -37,8 +31,8 @@ public class ArmConstants {
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
 
-    static final Motor ARM_MOTOR = new Motor("Arm");//,1, MotorProperties.SparkType.FLEX);
-    static final Encoder ABSOLUTE_ARM_ENCODER = new Encoder("ARM_ENCODER");//, 22);
+    static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",1, MotorProperties.SparkType.FLEX);
+    static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("ARM_ENCODER", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
 

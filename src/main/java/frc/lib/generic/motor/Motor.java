@@ -17,6 +17,8 @@ public class Motor implements LoggableHardware {
     private final MotorInputsAutoLogged inputs = new MotorInputsAutoLogged();
     private final String name;
 
+    private MotorConfiguration configuration;
+
     public Motor(String name) {
         this.name = name;
 
@@ -152,11 +154,6 @@ public class Motor implements LoggableHardware {
      * @return the current position of the motor in rotations
      */
     public double getMotorPosition() { return inputs.systemPosition / getCurrentConfiguration().gearRatio; }
-    //todo: Refactor class to have all getters just give data from inputs.
-    //todo: THen, these will instead be PRIVATE methods inside of the implementation.
-    // (IF USED MORE THAN ONCe, IF NOT, JSUT DIRECLTY UTILZIE MOTOR.)
-    // that way, we access inputs without ever needing to update the object on our side.
-    // Except for when we need odometry inputs because I won't create getters just for that...
 
     /**
      * Retrieves the current velocity of the motor, with no gearing applied.
@@ -226,14 +223,17 @@ public class Motor implements LoggableHardware {
      */
     public void refreshStatusSignals(MotorSignal... signals) { }
 
-    public boolean configure(MotorConfiguration configuration) { return true; }
+    public boolean configure(MotorConfiguration configuration) {
+        this.configuration = configuration;
+        return true;
+    }
 
     /**
      * Gets the currently used configuration used by the motor. If this is not set, it will return null.
      *
      * @return The configuration
      */
-    public MotorConfiguration getCurrentConfiguration() { return null; }
+    public MotorConfiguration getCurrentConfiguration() { return configuration; }
 
     /**
      * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
