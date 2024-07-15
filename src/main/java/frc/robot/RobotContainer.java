@@ -20,7 +20,7 @@ import frc.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.kicker.Kicker;
+import frc.robot.subsystems.old_kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -75,10 +75,9 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()).alongWith(
-                        ARM.setTargetPosition(Rotation2d.fromDegrees(70)),
-                        FLYWHEELS.setTargetTangentialVelocity(45)
-                ));
+                .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d())
+                        .alongWith(shooterCommands.receiveFloorNote())
+                );
 
 
         driveController.getButton(Controller.Inputs.B)
