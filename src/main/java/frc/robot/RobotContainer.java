@@ -75,7 +75,8 @@ public class RobotContainer {
 
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d()).alongWith(
-                        ARM.setTargetPosition(Rotation2d.fromDegrees(70))
+                        ARM.setTargetPosition(Rotation2d.fromDegrees(70)),
+                        FLYWHEELS.setTargetTangentialVelocity(45)
                 ));
 
 
@@ -111,10 +112,10 @@ public class RobotContainer {
             }
 
             case CHARACTERIZE_FLYWHEEL -> {
-                driveController.getButton(Controller.Inputs.A).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
-                driveController.getButton(Controller.Inputs.B).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
-                driveController.getButton(Controller.Inputs.Y).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
-                driveController.getButton(Controller.Inputs.X).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
+//                driveController.getButton(Controller.Inputs.A).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kForward));
+//                driveController.getButton(Controller.Inputs.B).whileTrue(FLYWHEELS.sysIdDynamicTest(SysIdRoutine.Direction.kReverse));
+//                driveController.getButton(Controller.Inputs.Y).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kForward));
+//                driveController.getButton(Controller.Inputs.X).whileTrue(FLYWHEELS.sysIdQuastaticTest(SysIdRoutine.Direction.kReverse));
             }
         }
     }

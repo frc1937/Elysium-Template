@@ -26,6 +26,10 @@ public class Motor implements LoggableHardware {
         HardwareManager.addHardware(this);
     }
 
+    public String getName() {
+        return name;
+    }
+
     /**
      * Supplies an external position for the motor control system. This method allows
      * the feedforward and PID controllers to use an external encoder position value instead
@@ -254,7 +258,7 @@ public class Motor implements LoggableHardware {
 
     public boolean isAtSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new UnsupportedOperationException("NIG"); //todo: Move this to each motor.
+            throw new UnsupportedOperationException("NUH UH"); //todo: Move this to each motor.
         //todo: Create motorCreator class. Type, AND RETURN BASED ON MODE SO REPLAY WROKS.
         //TODO; DO THAT FOR EVERY HARDWARE TYPE
 

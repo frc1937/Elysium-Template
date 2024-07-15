@@ -6,12 +6,11 @@ import frc.robot.GlobalConstants;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class EncoderFactory {
-
     public static Encoder createCanCoder(String name, int port) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Encoder(name);
+        if (CURRENT_MODE == GlobalConstants.Mode.REAL) {
+            return new GenericCanCoder(name, port);
         }
 
-        return new GenericCanCoder(name, port);
+        return new Encoder(name);
     }
 }
