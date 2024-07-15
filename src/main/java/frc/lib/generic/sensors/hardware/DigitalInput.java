@@ -15,5 +15,7 @@ public class DigitalInput extends Sensor {
     @Override
     public void refreshInputs(SensorInputsAutoLogged inputs) {
         inputs.currentValue = digitalInput.get() ? 1 : 0;
+
+        //todo: add support for faster akit inputs
     }
 }
