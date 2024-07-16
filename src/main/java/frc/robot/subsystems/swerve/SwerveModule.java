@@ -23,7 +23,7 @@ public class SwerveModule {
     private final Encoder steerEncoder;
 
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean openLoop = false;
+    private boolean openLoop = true;
 
     public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
         this.steerMotor = steerMotor;

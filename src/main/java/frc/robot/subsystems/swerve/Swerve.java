@@ -16,6 +16,7 @@ import frc.lib.util.commands.InitExecuteCommand;
 import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -57,8 +58,7 @@ public class Swerve extends GenericSubsystem {
 
     public Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new InitExecuteCommand(
-                () -> initializeDrive(false),
-
+                () -> {},//initializeDrive(false),
                 () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
                 this
         );
@@ -68,7 +68,8 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(false),
                 () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
-                (interrupt) -> {},
+                (interrupt) -> {
+                },
                 ROTATION_CONTROLLER::atGoal,
                 this
         );
@@ -78,10 +79,11 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(false),
                 () -> driveWithTarget(0, 0, target, false),
-                (interrupt) -> {},
+                (interrupt) -> {
+                },
                 ROTATION_CONTROLLER::atGoal,
                 this
-        );
+        ).withTimeout(5);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class Swerve extends GenericSubsystem {
     }
 
     private void driveOrientationBased(double xPower, double yPower, double thetaPower, boolean robotCentric) {
-        if(robotCentric)
+        if (robotCentric)
             driveSelfRelative(xPower, yPower, thetaPower);
         else
             driveFieldRelative(xPower, yPower, thetaPower);
@@ -127,7 +129,10 @@ public class Swerve extends GenericSubsystem {
                 targetAngle.getRadians()
         );
 
-        if(robotCentric)
+        Logger.recordOutput("ROTATIONCONTROLLER Current", currentAngle.getRadians());
+        Logger.recordOutput("ROTATIONCONTROLLER Target", ROTATION_CONTROLLER.getSetpoint().position);
+
+        if (robotCentric)
             driveSelfRelative(xPower, yPower, controllerOutput);
         else
             driveFieldRelative(xPower, yPower, controllerOutput);
@@ -163,7 +168,7 @@ public class Swerve extends GenericSubsystem {
         for (SwerveModule currentModule : MODULES)
             currentModule.setOpenLoop(closedLoop);
 
-        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians());
     }
 
     private void updatePoseEstimatorStates() {
