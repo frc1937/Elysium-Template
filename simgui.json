@@ -89,6 +89,9 @@
         "Kicker": {
           "open": true
         },
+        "RL_STEER_MOTOR": {
+          "open": true
+        },
         "RealOutputs": {
           "open": true
         },

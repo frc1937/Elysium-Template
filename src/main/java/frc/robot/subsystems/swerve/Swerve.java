@@ -6,7 +6,6 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -87,8 +86,6 @@ public class Swerve extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        if (Timer.getFPGATimestamp() < 5) return;
-
         ODOMETRY_LOCK.lock();
         updateAllInputs();
         ODOMETRY_LOCK.unlock(); //todo: check without lock.

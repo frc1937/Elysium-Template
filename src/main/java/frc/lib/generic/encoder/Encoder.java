@@ -2,9 +2,12 @@ package frc.lib.generic.encoder;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
+import frc.lib.generic.advantagekit.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
 
 public class Encoder implements LoggableHardware {
     private final EncoderInputsAutoLogged inputs = new EncoderInputsAutoLogged();
@@ -12,7 +15,15 @@ public class Encoder implements LoggableHardware {
 
     public Encoder(String name) {
         this.name = name;
+
+        periodic();
+        HardwareManager.addHardware(this);
     }
+
+    /** This is required for sim to function correctly. In real, this won't do anything. */
+    public void setSimulatedEncoderPositionSource(DoubleSupplier positionSource) {}
+    /** This is required for sim to function correctly. In real, this won't do anything. */
+    public void setSimulatedEncoderVelocitySource(DoubleSupplier velocitySource) {}
 
     /** Returns the encoder position, in Rotations*/
     public double getEncoderPosition() {return inputs.position; }

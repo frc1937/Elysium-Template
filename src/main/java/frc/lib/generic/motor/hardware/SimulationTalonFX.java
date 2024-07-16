@@ -60,6 +60,7 @@ public class SimulationTalonFX extends Motor {
                 if (shouldUseProfile) {
                     talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
                 } else {
+                    System.out.println(currentConfiguration.closedLoopContinuousWrap);
                     talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
                 }
             }
@@ -110,22 +111,14 @@ public class SimulationTalonFX extends Motor {
         talonConfig.MotorOutput.Inverted = configuration.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         talonConfig.MotorOutput.NeutralMode = configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? NeutralModeValue.Brake : NeutralModeValue.Coast;
 
-        //Who the FUCK added this feature. CTRE should fucking fire him bruh
-        talonConfig.Audio.BeepOnBoot = false;
-        talonConfig.Audio.BeepOnConfig = false;
-
         talonConfig.Voltage.PeakForwardVoltage = 12;
         talonConfig.Voltage.PeakReverseVoltage = -12;
-
-        talonConfig.Feedback.SensorToMechanismRatio = configuration.gearRatio;
 
         configureMotionMagic();
 
         setConfig0();
         setConfig1();
         setConfig2();
-
-        applyCurrentLimits();
 
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 

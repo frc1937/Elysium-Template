@@ -1,7 +1,6 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import edu.wpi.first.wpilibj.RobotController;
 import frc.lib.generic.motor.MotorConfiguration;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.MotorSignal;
@@ -24,14 +23,19 @@ public abstract class GenericSimulation {
 
         motor = new SimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        motor.setupSignalsUpdates(
+        //all signals:
+        //        CURRENT, POSITION, VELOCITY, VOLTAGE, TEMPERATURE, CLOSED_LOOP_TARGET
+        MotorSignal[] signals = List.of(new MotorSignal(MotorSignal.SignalType.CURRENT),
+                new MotorSignal(MotorSignal.SignalType.POSITION),
+                new MotorSignal(MotorSignal.SignalType.VELOCITY),
                 new MotorSignal(MotorSignal.SignalType.VOLTAGE),
-                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET)
+                new MotorSignal(MotorSignal.SignalType.TEMPERATURE),
+                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET)).toArray(new MotorSignal[0]);
 
-        );
+        motor.setupSignalsUpdates(signals);
 
         motorSimulatedState = motor.getSimulationState();
-        motorSimulatedState.setSupplyVoltage(RobotController.getBatteryVoltage()); //Voltage compensation.
+        motorSimulatedState.setSupplyVoltage(12); //Voltage compensation.
     }
 
     /**
@@ -43,6 +47,10 @@ public abstract class GenericSimulation {
         }
     }
 
+    public int getDeviceID() {
+        return motor.getDeviceID();
+    }
+
     public void configure(MotorConfiguration configuration) {
         motor.configure(configuration);
     }
@@ -52,6 +60,8 @@ public abstract class GenericSimulation {
     }
 
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        System.out.println("Mode: " + controlMode + " Output: " + output);
+        System.out.println("Mode: " + controlMode + " Target: " + motor.getClosedLoopTarget());
         motor.setOutput(controlMode, output);
     }
 

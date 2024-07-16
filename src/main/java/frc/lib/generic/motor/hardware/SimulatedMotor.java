@@ -50,17 +50,6 @@ public class SimulatedMotor extends Motor {
     }
 
     @Override
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        switch (slotNumber) {
-            case 0 -> currentConfiguration.slot0 = slot;
-            case 1 -> currentConfiguration.slot1 = slot;
-            case 2 -> currentConfiguration.slot2 = slot;
-        }
-
-        configure(currentConfiguration);
-    }
-
-    @Override
     public boolean configure(MotorConfiguration configuration) {
         currentConfiguration = configuration;
 
@@ -73,6 +62,11 @@ public class SimulatedMotor extends Motor {
         simulation.configure(configuration);
 
         return true;
+    }
+
+    @Override
+    public int getDeviceID() {
+        return simulation.getDeviceID();
     }
 
     @Override

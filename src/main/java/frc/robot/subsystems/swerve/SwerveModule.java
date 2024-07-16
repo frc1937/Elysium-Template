@@ -9,7 +9,7 @@ import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorInputsAutoLogged;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
-import frc.lib.math.Optimizations;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
@@ -23,21 +23,21 @@ public class SwerveModule {
     private final Encoder steerEncoder;
 
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean openLoop = true;
+    private boolean openLoop = false;
 
-    public SwerveModule(Motor steerMotor, Motor driveMotor, Encoder steerEncoder) {
+    public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
         this.steerMotor = steerMotor;
         this.driveMotor = driveMotor;
         this.steerEncoder = steerEncoder;
     }
 
     protected void setTargetState(SwerveModuleState state) {
-        this.targetState = Optimizations.optimize(state, getCurrentAngle());
+        this.targetState = state;//Optimizations.optimize(state, getCurrentAngle());
 
-        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
+//        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
 
         setTargetAngle(targetState.angle);
-        setTargetVelocity(optimizedVelocity, openLoop);
+//        setTargetVelocity(state.speedMetersPerSecond, openLoop);
     }
 
     /**
@@ -48,7 +48,6 @@ public class SwerveModule {
      * @return the position of the module at the given odometry update index
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
-//todo: Check that your threading thing ACTUALLY WOrks.
         return new SwerveModulePosition(
                 getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex],
                 Rotation2d.fromRotations(getSteerEncoderInputs().threadPosition[odometryUpdateIndex])
@@ -60,6 +59,7 @@ public class SwerveModule {
     }
 
     protected void setTargetAngle(Rotation2d angle) {
+        Logger.recordOutput("STEER MOTOR TARGET " + driveMotor.getDeviceID(), steerMotor.getClosedLoopTarget());
         steerMotor.setOutput(MotorProperties.ControlMode.POSITION, angle.getRotations());
     }
 
@@ -79,7 +79,7 @@ public class SwerveModule {
     }
 
     protected SwerveModuleState getCurrentState() {
-        return new SwerveModuleState(rotationsToMetres(getDriveMotorInputs().systemPosition, WHEEL_DIAMETER), getCurrentAngle());
+        return new SwerveModuleState(getDriveMotorInputs().systemVelocity, getCurrentAngle());
     }
 
     protected SwerveModuleState getTargetState() {
@@ -87,7 +87,8 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        return Rotation2d.fromRotations(getSteerEncoderInputs().position);
+        //todo: change to encoder
+        return Rotation2d.fromRotations(steerMotor.getSystemPosition());
     }
 
     private EncoderInputsAutoLogged getSteerEncoderInputs() {

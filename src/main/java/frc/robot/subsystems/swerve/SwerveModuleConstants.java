@@ -70,6 +70,8 @@ public class SwerveModuleConstants {
             configureSteerEncoder(STEER_ENCODER[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
             configureDriveMotor(DRIVE_MOTOR[i]);
             configureSteerMotor(STEER_MOTOR[i], STEER_ENCODER[i]);
+
+            setSimulatedEncoderSources(STEER_ENCODER[i], STEER_MOTOR[i]);
         }
     }
 
@@ -90,6 +92,11 @@ public class SwerveModuleConstants {
         steerEncoder.configure(encoderConfiguration);
 
         steerEncoder.setSignalUpdateFrequency(STEER_POSITION_SIGNAL);
+    }
+
+    private static void setSimulatedEncoderSources(Encoder steerEncoder, Motor simulationSource) {
+        steerEncoder.setSimulatedEncoderPositionSource(simulationSource::getSystemPosition);
+        steerEncoder.setSimulatedEncoderVelocitySource(simulationSource::getSystemVelocity);
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
@@ -123,8 +130,8 @@ public class SwerveModuleConstants {
         driveMotorConfiguration.dutyCycleOpenLoopRampPeriod = OPEN_LOOP_RAMP;
         driveMotorConfiguration.dutyCycleClosedLoopRampPeriod = CLOSED_LOOP_RAMP;
 
-        driveMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR, DCMotor.getFalcon500(1), STEER_GEAR_RATIO,0.03);
-        driveMotorConfiguration.simulationSlot = new MotorProperties.Slot(50, 0, 0);
+        driveMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR, DCMotor.getFalcon500(1), DRIVE_GEAR_RATIO,0.003);
+        driveMotorConfiguration.simulationSlot = new MotorProperties.Slot(100, 0, 0, 1, 0, 0);
     }
 
     private static void configureSteerConfiguration() {
@@ -136,8 +143,10 @@ public class SwerveModuleConstants {
 
         steerMotorConfiguration.gearRatio = STEER_GEAR_RATIO;
 
-        steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR, DCMotor.getNEO(1), STEER_GEAR_RATIO,0.03);
-        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(50, 0, 0);
+        steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
+                SimulationProperties.SimulationType.SIMPLE_MOTOR,
+                DCMotor.getFalcon500(1), STEER_GEAR_RATIO / 2,0.003);
+        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(7.2, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.closedLoopContinuousWrap = true;
     }
