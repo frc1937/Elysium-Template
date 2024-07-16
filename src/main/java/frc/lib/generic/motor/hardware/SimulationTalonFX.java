@@ -6,8 +6,6 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
@@ -108,12 +106,6 @@ public class SimulationTalonFX extends Motor {
     public boolean configure(MotorConfiguration configuration) {
         this.currentConfiguration = configuration;
 
-        talonConfig.MotorOutput.Inverted = configuration.inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
-        talonConfig.MotorOutput.NeutralMode = configuration.idleMode.equals(MotorProperties.IdleMode.BRAKE) ? NeutralModeValue.Brake : NeutralModeValue.Coast;
-
-        talonConfig.Voltage.PeakForwardVoltage = 12;
-        talonConfig.Voltage.PeakReverseVoltage = -12;
-
         configureMotionMagic();
 
         setConfig0();
@@ -123,8 +115,6 @@ public class SimulationTalonFX extends Motor {
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 
         slotToUse = configuration.slotToUse;
-
-        talonFX.optimizeBusUtilization();
 
         return applyConfig();
     }
@@ -177,21 +167,6 @@ public class SimulationTalonFX extends Motor {
 
         if (currentConfiguration.slot2.gravityType() != null)
             talonConfig.Slot2.GravityType = currentConfiguration.slot2.gravityType();
-    }
-
-    private void applyCurrentLimits() {
-        talonConfig.OpenLoopRamps.DutyCycleOpenLoopRampPeriod = currentConfiguration.dutyCycleOpenLoopRampPeriod;
-        talonConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = currentConfiguration.dutyCycleClosedLoopRampPeriod;
-
-        if (currentConfiguration.statorCurrentLimit != -1) {
-            talonConfig.CurrentLimits.StatorCurrentLimitEnable = true;
-            talonConfig.CurrentLimits.StatorCurrentLimit = currentConfiguration.statorCurrentLimit;
-        }
-
-        if (currentConfiguration.supplyCurrentLimit != -1) {
-            talonConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
-            talonConfig.CurrentLimits.SupplyCurrentLimit = currentConfiguration.supplyCurrentLimit;
-        }
     }
 
     private boolean applyConfig() {

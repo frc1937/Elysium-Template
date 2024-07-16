@@ -9,7 +9,7 @@ import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorInputsAutoLogged;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
-import org.littletonrobotics.junction.Logger;
+import frc.lib.math.Optimizations;
 
 import java.util.Arrays;
 
@@ -23,7 +23,7 @@ public class SwerveModule {
     private final Encoder steerEncoder;
 
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean openLoop = false;
+    private boolean openLoop = true;
 
     public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
         this.steerMotor = steerMotor;
@@ -32,12 +32,12 @@ public class SwerveModule {
     }
 
     protected void setTargetState(SwerveModuleState state) {
-        this.targetState = state;//Optimizations.optimize(state, getCurrentAngle());
+        this.targetState = Optimizations.optimize(state, getCurrentAngle());
 
 //        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
 
         setTargetAngle(targetState.angle);
-//        setTargetVelocity(state.speedMetersPerSecond, openLoop);
+//        setTargetVelocity(optimizedVelocity, openLoop);
     }
 
     /**
@@ -59,7 +59,6 @@ public class SwerveModule {
     }
 
     protected void setTargetAngle(Rotation2d angle) {
-        Logger.recordOutput("STEER MOTOR TARGET " + driveMotor.getDeviceID(), steerMotor.getClosedLoopTarget());
         steerMotor.setOutput(MotorProperties.ControlMode.POSITION, angle.getRotations());
     }
 
