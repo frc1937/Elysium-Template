@@ -67,7 +67,7 @@ public class Optimizations {
      * @return the reduced target velocity in metres per second
      */
     public static double reduceSkew(double targetVelocityMPS, Rotation2d targetSteerAngle, Rotation2d currentAngle) {
-        final double closedLoopError = targetSteerAngle.getRadians() - currentAngle.getRadians();
+        final double closedLoopError = targetSteerAngle.minus(currentAngle).getRadians();
         final double cosineScalar = Math.abs(Math.cos(closedLoopError));
 
         return targetVelocityMPS * cosineScalar;

@@ -11,6 +11,7 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.generic.pigeon.PigeonFactory;
 import frc.lib.generic.pigeon.PigeonSignal;
+import frc.lib.math.AdvancedSwerveKinematics;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
@@ -28,13 +29,16 @@ public class SwerveConstants {
     public static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
 
     public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
-
-    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+    
+    private static final Translation2d[] moduleLocations = {
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
-
             new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
-            new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0));
+            new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
+    };
+
+    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(moduleLocations);
+    public static final AdvancedSwerveKinematics ADVANCED_KINEMATICS = new AdvancedSwerveKinematics(moduleLocations);
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.2,

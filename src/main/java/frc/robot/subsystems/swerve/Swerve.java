@@ -21,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import static frc.lib.math.AdvancedSwerveKinematics.correctForDynamics;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
@@ -156,7 +157,8 @@ public class Swerve extends GenericSubsystem {
             return;
         }
 
-        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
+        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS
+                .toSwerveModuleStates(correctForDynamics(chassisSpeeds));
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_SPEED_MPS);
 
