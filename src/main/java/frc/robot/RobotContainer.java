@@ -6,6 +6,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,7 +21,7 @@ import frc.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.intake.Intake;
-import frc.robot.subsystems.old_kicker.Kicker;
+import frc.robot.subsystems.kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
@@ -39,6 +40,8 @@ public class RobotContainer {
     public static final Intake INTAKE = new Intake();
     public static final Kicker KICKER = new Kicker();
     public static final Leds LEDS = new Leds();
+
+    public static final BuiltInAccelerometer ROBORIO_ACCELEROMETER = new BuiltInAccelerometer();
 
     private final ShooterCommands shooterCommands = new ShooterCommands();
 

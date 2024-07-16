@@ -86,6 +86,9 @@
         "ARM_MOTOR": {
           "open": true
         },
+        "Kicker": {
+          "open": true
+        },
         "RealOutputs": {
           "open": true
         },

@@ -14,11 +14,14 @@ public class GlobalConstants {
     public static final Lock ODOMETRY_LOCK = new ReentrantLock();
 
     public static final boolean IS_TUNING_MODE = true;
-    public static final Mode CURRENT_MODE = Mode.REPLAY;
+    public static final Mode CURRENT_MODE = Mode.SIMULATION;
 
     public enum Mode {
         REAL, SIMULATION, REPLAY
     }
+
+    public static final double GRAVITY = 9.80665;
+    public static final double MINIMUM_ACCELERATION_FOR_COLLISION = 25; //todo: Tune
 
     public static final double FIELD_LENGTH_METRES = 14.56;
 
