@@ -1,16 +1,16 @@
-package frc.robot.subsystems.swerve.simulation;
+package frc.robot.subsystems.old_swerve.simulation;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.lib.math.Conversions;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.old_swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
-import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class SimulationSwerveModule extends SwerveModuleIO {
     private final SimpleMotorSimulation driveMotor, steerMotor;

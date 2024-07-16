@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.simulation;
+package frc.robot.subsystems.old_swerve.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.motor.MotorConfiguration;
@@ -7,8 +7,8 @@ import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.generic.pigeon.hardware.SimulatedIMU;
 import frc.lib.generic.simulation.SimpleMotorSimulation;
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.SwerveConstants;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.old_swerve.SwerveConstants;
+import frc.robot.subsystems.old_swerve.SwerveModuleIO;
 
 import java.util.Optional;
 
@@ -28,10 +28,10 @@ public class SimulationSwerveConstants extends SwerveConstants {
             REAR_RIGHT_DRIVE_MOTOR = new SimpleMotorSimulation(DRIVE_MOTOR_GEARBOX, DRIVE_GEAR_RATIO, DRIVE_MOMENT_OF_INERTIA);
 
     private static final SimpleMotorSimulation
-            FRONT_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, ANGLE_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            FRONT_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, ANGLE_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            REAR_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, ANGLE_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
-            REAR_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, ANGLE_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
+            FRONT_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            FRONT_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            REAR_LEFT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA),
+            REAR_RIGHT_STEER_MOTOR = new SimpleMotorSimulation(STEER_MOTOR_GEARBOX, STEER_GEAR_RATIO, STEER_MOMENT_OF_INERTIA);
 
     private static final SimpleMotorSimulation[] DRIVE_MOTORS = new SimpleMotorSimulation[]{
             FRONT_LEFT_DRIVE_MOTOR,

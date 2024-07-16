@@ -22,7 +22,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 
 import java.util.NoSuchElementException;
 
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.SWERVE_KINEMATICS;
 
 public class PoseEstimator6328 {
     public record OdometryObservation(

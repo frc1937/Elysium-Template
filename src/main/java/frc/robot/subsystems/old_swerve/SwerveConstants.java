@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.old_swerve;
 
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -11,8 +11,8 @@ import edu.wpi.first.math.util.Units;
 import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.util.LoggedTunableNumber;
 import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.real.RealSwerveConstants;
-import frc.robot.subsystems.swerve.simulation.SimulationSwerveConstants;
+import frc.robot.subsystems.old_swerve.real.RealSwerveConstants;
+import frc.robot.subsystems.old_swerve.simulation.SimulationSwerveConstants;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -23,7 +23,7 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public abstract class SwerveConstants {
     public static final double DRIVE_GEAR_RATIO = (6.75);
-    public static final double ANGLE_GEAR_RATIO = (150.0 / 7.0);
+    public static final double STEER_GEAR_RATIO = (150.0 / 7.0);
 
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 

@@ -7,7 +7,7 @@ import frc.robot.GlobalConstants;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class PigeonFactory {
-    public static Pigeon createPigeon(String name, int port) {
+    public static Pigeon createIMU(String name, int port) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
             return new Pigeon(name);
         }

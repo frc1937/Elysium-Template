@@ -1,26 +1,19 @@
-package frc.robot.subsystems.swerve.real;
+package frc.robot.subsystems.swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import frc.lib.generic.encoder.Encoder;
-import frc.lib.generic.encoder.EncoderConfiguration;
-import frc.lib.generic.encoder.EncoderProperties;
-import frc.lib.generic.encoder.EncoderSignal;
-import frc.lib.generic.encoder.hardware.GenericCanCoder;
+import edu.wpi.first.math.system.plant.DCMotor;
+import frc.lib.generic.encoder.*;
 import frc.lib.generic.motor.*;
-import frc.lib.generic.motor.hardware.GenericSpark;
-import frc.lib.generic.motor.hardware.GenericTalonFX;
-import frc.lib.generic.pigeon.hardware.GenericIMU;
 import frc.lib.generic.pigeon.Pigeon;
+import frc.lib.generic.pigeon.PigeonFactory;
 import frc.lib.generic.pigeon.PigeonSignal;
-import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.SwerveConstants;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
-
-import java.util.Optional;
+import frc.lib.generic.simulation.SimulationProperties;
 
 import static frc.lib.generic.motor.MotorSignal.SignalType.*;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.STEER_GEAR_RATIO;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.DRIVE_GEAR_RATIO;
 
-public class RealSwerveConstants extends SwerveConstants {
+public class SwerveModuleConstants {
     static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
     static final MotorConfiguration driveMotorConfiguration = new MotorConfiguration();
 
@@ -39,29 +32,31 @@ public class RealSwerveConstants extends SwerveConstants {
     static final int DRIVE_STATOR_CURRENT_LIMIT = 50;
 
     static final EncoderSignal STEER_POSITION_SIGNAL = new EncoderSignal(EncoderSignal.SignalType.POSITION, true);
-    static final MotorSignal
-            DRIVE_POSITION_SIGNAL = new MotorSignal(POSITION, true),
-            DRIVE_VELOCITY_SIGNAL = new MotorSignal(VELOCITY, true);
+    static final MotorSignal DRIVE_POSITION_SIGNAL = new MotorSignal(POSITION, true);
 
-    static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(0.053067, 0.0, 0.0,
+    static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
+            0.053067, 0.0, 0.0,
             0.10861,
             0.023132,
             0.27053);
 
-    protected static final Motor FL_STEER_MOTOR = new GenericSpark("FL_STEER_MOTOR", 11, MotorProperties.SparkType.MAX),
-            FR_STEER_MOTOR = new GenericSpark("FR_STEER_MOTOR", 10, MotorProperties.SparkType.MAX),
-            RL_STEER_MOTOR = new GenericSpark("RL_STEER_MOTOR", 6, MotorProperties.SparkType.MAX),
-            RR_STEER_MOTOR = new GenericSpark("RR_STEER_MOTOR", 9, MotorProperties.SparkType.MAX);
+    protected static final Motor
+            FL_STEER_MOTOR = MotorFactory.createSpark("FL_STEER_MOTOR", 11, MotorProperties.SparkType.MAX),
+            FR_STEER_MOTOR = MotorFactory.createSpark("FR_STEER_MOTOR", 10, MotorProperties.SparkType.MAX),
+            RL_STEER_MOTOR = MotorFactory.createSpark("RL_STEER_MOTOR", 6, MotorProperties.SparkType.MAX),
+            RR_STEER_MOTOR = MotorFactory.createSpark("RR_STEER_MOTOR", 9, MotorProperties.SparkType.MAX);
 
-    protected static final Motor FL_DRIVE_MOTOR = new GenericTalonFX("FL_DRIVE_MOTOR", 14),
-            FR_DRIVE_MOTOR = new GenericTalonFX("FR_DRIVE_MOTOR", 13),
-            RL_DRIVE_MOTOR = new GenericTalonFX("RL_DRIVE_MOTOR", 13),
-            RR_DRIVE_MOTOR = new GenericTalonFX("RR_DRIVE_MOTOR", 12);
+    protected static final Motor
+            FL_DRIVE_MOTOR = MotorFactory.createTalonFX("FL_DRIVE_MOTOR", 14),
+            FR_DRIVE_MOTOR = MotorFactory.createTalonFX("FR_DRIVE_MOTOR", 13),
+            RL_DRIVE_MOTOR = MotorFactory.createTalonFX("RL_DRIVE_MOTOR", 13),
+            RR_DRIVE_MOTOR = MotorFactory.createTalonFX("RR_DRIVE_MOTOR", 12);
 
-    protected static final Encoder FL_STEER_ENCODER = new GenericCanCoder("FL_STEER_ENCODER", 18),
-            FR_STEER_ENCODER = new GenericCanCoder("FR_STEER_ENCODER", 20),
-            RL_STEER_ENCODER = new GenericCanCoder("RL_STEER_ENCODER", 19),
-            RR_STEER_ENCODER = new GenericCanCoder("RR_STEER_ENCODER", 21);
+    protected static final Encoder
+            FL_STEER_ENCODER = EncoderFactory.createCanCoder("FL_STEER_ENCODER", 18),
+            FR_STEER_ENCODER = EncoderFactory.createCanCoder("FR_STEER_ENCODER", 20),
+            RL_STEER_ENCODER = EncoderFactory.createCanCoder("RL_STEER_ENCODER", 19),
+            RR_STEER_ENCODER = EncoderFactory.createCanCoder("RR_STEER_ENCODER", 21);
 
     static final double[] STEER_ENCODER_OFFSET = {0.677246, 0.282715, 0.533447, 0.313721};
 
@@ -69,45 +64,31 @@ public class RealSwerveConstants extends SwerveConstants {
     static final Motor[] STEER_MOTOR = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
     static final Motor[] DRIVE_MOTOR = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
 
-    static final Optional<Pigeon> GYRO = ofReplayable(() -> new GenericIMU("GYRO", 30));
+    static final Pigeon GYRO = PigeonFactory.createIMU("GYRO", 30);
 
     static {
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REAL) {
-            configureSteerConfiguration();
-            configureDriveConfiguration();
+        configureSteerConfiguration();
+        configureDriveConfiguration();
 
-            for (int i = 0; i < 4; i++) {
-                configureSteerEncoder(STEER_ENCODER[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
-                configureDriveMotor(DRIVE_MOTOR[i]);
-                configureSteerMotor(STEER_MOTOR[i]);
-            }
-
-            configureGyro();
+        for (int i = 0; i < 4; i++) {
+            configureSteerEncoder(STEER_ENCODER[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
+            configureDriveMotor(DRIVE_MOTOR[i]);
+            configureSteerMotor(STEER_MOTOR[i]);
         }
+
+        configureGyro();
     }
 
-    private static final Optional<SwerveModuleIO[]> MODULES_IO = ofReplayable(() -> new SwerveModuleIO[]{
-            new RealSwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER, "ModuleFL"),
-            new RealSwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER, "ModuleFR"),
-            new RealSwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER, "ModuleRL"),
-            new RealSwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER, "ModuleRR")
-    });
-
-    @Override
-    public Optional<Pigeon> getPigeon() {
-        return GYRO;
-    }
-
-    @Override
-    protected Optional<SwerveModuleIO[]> getModulesIO() {
-        return MODULES_IO;
-    }
+    protected static final SwerveModule[] MODULES = new SwerveModule[]{
+            new SwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER),
+            new SwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER),
+            new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER),
+            new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER)
+    };
 
     private static void configureGyro() {
-        GYRO.ifPresent(gyro -> {
-            gyro.resetConfigurations();
-            gyro.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
-        });
+        GYRO.resetConfigurations();
+        GYRO.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
     }
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {
@@ -123,9 +104,9 @@ public class RealSwerveConstants extends SwerveConstants {
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
-        driveMotor.setupSignalsUpdates(DRIVE_VELOCITY_SIGNAL);
         driveMotor.setupSignalsUpdates(DRIVE_POSITION_SIGNAL);
 
+        driveMotor.setupSignalsUpdates(new MotorSignal(VELOCITY));
         driveMotor.setupSignalsUpdates(new MotorSignal(VOLTAGE));
         driveMotor.setupSignalsUpdates(new MotorSignal(TEMPERATURE));
 
@@ -134,7 +115,6 @@ public class RealSwerveConstants extends SwerveConstants {
 
     private static void configureSteerMotor(Motor steerMotor) {
         steerMotor.setupSignalsUpdates(new MotorSignal(POSITION));
-
         steerMotor.configure(steerMotorConfiguration);
     }
 
@@ -151,6 +131,9 @@ public class RealSwerveConstants extends SwerveConstants {
 
         driveMotorConfiguration.dutyCycleOpenLoopRampPeriod = OPEN_LOOP_RAMP;
         driveMotorConfiguration.dutyCycleClosedLoopRampPeriod = CLOSED_LOOP_RAMP;
+
+        driveMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR, DCMotor.getFalcon500(1), STEER_GEAR_RATIO,0.03);
+        driveMotorConfiguration.simulationSlot = new MotorProperties.Slot(50, 0, 0);
     }
 
     private static void configureSteerConfiguration() {
@@ -160,7 +143,10 @@ public class RealSwerveConstants extends SwerveConstants {
         steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;
         steerMotorConfiguration.idleMode = ANGLE_NEUTRAL_MODE;
 
-        steerMotorConfiguration.gearRatio = ANGLE_GEAR_RATIO;
+        steerMotorConfiguration.gearRatio = STEER_GEAR_RATIO;
+
+        steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(SimulationProperties.SimulationType.SIMPLE_MOTOR, DCMotor.getNEO(1), STEER_GEAR_RATIO,0.03);
+        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(50, 0, 0);
 
         steerMotorConfiguration.closedLoopContinuousWrap = true;
     }

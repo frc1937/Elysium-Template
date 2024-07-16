@@ -1,10 +1,11 @@
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems.old_swerve;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.math.Conversions;
 import frc.lib.math.Optimizations;
+import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 

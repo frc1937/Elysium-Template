@@ -1,4 +1,4 @@
-package frc.robot.subsystems.swerve.real;
+package frc.robot.subsystems.old_swerve.real;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import frc.lib.generic.encoder.Encoder;
@@ -8,7 +8,7 @@ import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.MotorSignal;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
-import frc.robot.subsystems.swerve.SwerveModuleIO;
+import frc.robot.subsystems.old_swerve.SwerveModuleIO;
 import frc.robot.subsystems.swerve.SwerveModuleInputsAutoLogged;
 
 import java.util.Queue;
@@ -18,9 +18,9 @@ import static frc.lib.math.Conversions.degreesToRotations;
 import static frc.lib.math.Conversions.rotationsToDegrees;
 import static frc.lib.math.Conversions.rotationsToMetres;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
-import static frc.robot.subsystems.swerve.real.RealSwerveConstants.*;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.old_swerve.SwerveConstants.WHEEL_DIAMETER;
+import static frc.robot.subsystems.old_swerve.real.RealSwerveConstants.*;
 
 public class RealSwerveModule extends SwerveModuleIO {
     private final Motor driveMotor, steerMotor;
