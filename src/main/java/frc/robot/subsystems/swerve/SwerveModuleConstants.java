@@ -146,7 +146,7 @@ public class SwerveModuleConstants {
         steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
                 DCMotor.getFalcon500(1), STEER_GEAR_RATIO / 2,0.003);
-        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(30, 0, 0, 0, 0, 0);
+        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(70, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.closedLoopContinuousWrap = true;
     }

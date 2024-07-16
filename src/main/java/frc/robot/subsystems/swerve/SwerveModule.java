@@ -23,7 +23,7 @@ public class SwerveModule {
     private final Encoder steerEncoder;
 
     private SwerveModuleState targetState = new SwerveModuleState();
-    private boolean openLoop = true;
+    private boolean openLoop = false;
 
     public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
         this.steerMotor = steerMotor;
@@ -34,10 +34,10 @@ public class SwerveModule {
     protected void setTargetState(SwerveModuleState state) {
         this.targetState = Optimizations.optimize(state, getCurrentAngle());
 
-//        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
+        final double optimizedVelocity = Optimizations.reduceSkew(targetState.speedMetersPerSecond, targetState.angle, getCurrentAngle());
 
         setTargetAngle(targetState.angle);
-//        setTargetVelocity(optimizedVelocity, openLoop);
+        setTargetVelocity(optimizedVelocity, openLoop);
     }
 
     /**
@@ -86,8 +86,7 @@ public class SwerveModule {
     }
 
     private Rotation2d getCurrentAngle() {
-        //todo: change to encoder
-        return Rotation2d.fromRotations(steerMotor.getSystemPosition());
+        return Rotation2d.fromRotations(steerEncoder.getEncoderPosition());
     }
 
     private EncoderInputsAutoLogged getSteerEncoderInputs() {

@@ -23,8 +23,6 @@ public abstract class GenericSimulation {
 
         motor = new SimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        //all signals:
-        //        CURRENT, POSITION, VELOCITY, VOLTAGE, TEMPERATURE, CLOSED_LOOP_TARGET
         MotorSignal[] signals = List.of(new MotorSignal(MotorSignal.SignalType.CURRENT),
                 new MotorSignal(MotorSignal.SignalType.POSITION),
                 new MotorSignal(MotorSignal.SignalType.VELOCITY),
@@ -60,8 +58,6 @@ public abstract class GenericSimulation {
     }
 
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        System.out.println("Mode: " + controlMode + " Output: " + output);
-        System.out.println("Mode: " + controlMode + " Target: " + motor.getClosedLoopTarget());
         motor.setOutput(controlMode, output);
     }
 

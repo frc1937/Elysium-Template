@@ -58,7 +58,6 @@ public class SimulationTalonFX extends Motor {
                 if (shouldUseProfile) {
                     talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
                 } else {
-                    System.out.println(currentConfiguration.closedLoopContinuousWrap);
                     talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
                 }
             }
