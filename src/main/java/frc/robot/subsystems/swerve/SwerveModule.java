@@ -15,8 +15,8 @@ import java.util.Arrays;
 
 import static frc.lib.math.Conversions.rotationsToMetres;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.old_swerve.SwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.old_swerve.SwerveConstants.WHEEL_DIAMETER;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class SwerveModule {
     private final Motor steerMotor, driveMotor;
@@ -48,6 +48,7 @@ public class SwerveModule {
      * @return the position of the module at the given odometry update index
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+//todo: Check that your threading thing ACTUALLY WOrks.
         return new SwerveModulePosition(
                 getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex],
                 Rotation2d.fromRotations(getSteerEncoderInputs().threadPosition[odometryUpdateIndex])

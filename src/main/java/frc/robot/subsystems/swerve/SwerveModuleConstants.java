@@ -4,14 +4,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.encoder.*;
 import frc.lib.generic.motor.*;
-import frc.lib.generic.pigeon.Pigeon;
-import frc.lib.generic.pigeon.PigeonFactory;
-import frc.lib.generic.pigeon.PigeonSignal;
 import frc.lib.generic.simulation.SimulationProperties;
 
 import static frc.lib.generic.motor.MotorSignal.SignalType.*;
-import static frc.robot.subsystems.old_swerve.SwerveConstants.STEER_GEAR_RATIO;
-import static frc.robot.subsystems.old_swerve.SwerveConstants.DRIVE_GEAR_RATIO;
+import static frc.robot.subsystems.swerve.SwerveConstants.DRIVE_GEAR_RATIO;
+import static frc.robot.subsystems.swerve.SwerveConstants.STEER_GEAR_RATIO;
 
 public class SwerveModuleConstants {
     static final MotorConfiguration steerMotorConfiguration = new MotorConfiguration();
@@ -64,7 +61,6 @@ public class SwerveModuleConstants {
     static final Motor[] STEER_MOTOR = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
     static final Motor[] DRIVE_MOTOR = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
 
-    static final Pigeon GYRO = PigeonFactory.createIMU("GYRO", 30);
 
     static {
         configureSteerConfiguration();
@@ -73,10 +69,8 @@ public class SwerveModuleConstants {
         for (int i = 0; i < 4; i++) {
             configureSteerEncoder(STEER_ENCODER[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
             configureDriveMotor(DRIVE_MOTOR[i]);
-            configureSteerMotor(STEER_MOTOR[i]);
+            configureSteerMotor(STEER_MOTOR[i], STEER_ENCODER[i]);
         }
-
-        configureGyro();
     }
 
     protected static final SwerveModule[] MODULES = new SwerveModule[]{
@@ -85,11 +79,6 @@ public class SwerveModuleConstants {
             new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER),
             new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER)
     };
-
-    private static void configureGyro() {
-        GYRO.resetConfigurations();
-        GYRO.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
-    }
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {
         EncoderConfiguration encoderConfiguration = new EncoderConfiguration();
@@ -113,9 +102,11 @@ public class SwerveModuleConstants {
         driveMotor.configure(driveMotorConfiguration);
     }
 
-    private static void configureSteerMotor(Motor steerMotor) {
+    private static void configureSteerMotor(Motor steerMotor, Encoder encoder) {
         steerMotor.setupSignalsUpdates(new MotorSignal(POSITION));
         steerMotor.configure(steerMotorConfiguration);
+
+        steerMotor.setExternalPositionSupplier(encoder::getEncoderPosition);
     }
 
     private static void configureDriveConfiguration() {

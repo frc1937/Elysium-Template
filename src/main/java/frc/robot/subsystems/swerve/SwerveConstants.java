@@ -1,4 +1,4 @@
-package frc.robot.subsystems.old_swerve;
+package frc.robot.subsystems.swerve;
 
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -9,19 +9,13 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import frc.lib.generic.pigeon.Pigeon;
-import frc.lib.util.LoggedTunableNumber;
-import frc.robot.GlobalConstants;
-import frc.robot.subsystems.old_swerve.real.RealSwerveConstants;
-import frc.robot.subsystems.old_swerve.simulation.SimulationSwerveConstants;
-
-import java.util.Optional;
-import java.util.function.Supplier;
+import frc.lib.generic.pigeon.PigeonFactory;
+import frc.lib.generic.pigeon.PigeonSignal;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.GlobalConstants.CURRENT_MODE;
 
-public abstract class SwerveConstants {
+public class SwerveConstants {
     public static final double DRIVE_GEAR_RATIO = (6.75);
     public static final double STEER_GEAR_RATIO = (150.0 / 7.0);
 
@@ -46,17 +40,12 @@ public abstract class SwerveConstants {
             DRIVE_NEUTRAL_DEADBAND = 0.2,
             ROTATION_NEUTRAL_DEADBAND = 0.2;
 
-    static final LoggedTunableNumber
-            ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1),
-            ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI / 2);
-
     /**
      * Units of RADIANS for everything.
      */
-    public static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            ROTATION_KP.get(), 0, 0.015,
-            new TrapezoidProfile.Constraints(ROTATION_MAX_VELOCITY.get(), ROTATION_MAX_ACCELERATION.get())
+    static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
+            1, 0, 0.015,
+            new TrapezoidProfile.Constraints(Math.PI, Math.PI / 2)
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -67,38 +56,20 @@ public abstract class SwerveConstants {
             new ReplanningConfig(true, false)
     );
 
-    public static <T> Optional<T> ofReplayable(Supplier<T> value) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
-            return Optional.empty();
+    static final Pigeon GYRO = PigeonFactory.createIMU("GYRO", 30);
 
-        return Optional.of(value.get());
+    static {
+        configureGyro();
+        configureRotationController();
     }
 
-    static SwerveConstants generateConstants() {
+    private static void configureGyro() {
+        GYRO.resetConfigurations();
+        GYRO.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
+    }
+
+    private static void configureRotationController() {
         ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
         ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
-
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return new SimulationSwerveConstants();
-
-        if (CURRENT_MODE == GlobalConstants.Mode.REAL) {
-            return new RealSwerveConstants();
-        }
-
-        return new SwerveConstants() {
-            @Override
-            protected Optional<Pigeon> getPigeon() {
-                return Optional.empty();
-            }
-
-            @Override
-            protected Optional<SwerveModuleIO[]> getModulesIO() {
-                return Optional.empty();
-            }
-        };
     }
-
-
-    protected abstract Optional<Pigeon> getPigeon();
-    protected abstract Optional<SwerveModuleIO[]> getModulesIO();
 }
