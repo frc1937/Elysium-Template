@@ -269,15 +269,15 @@ public class Motor implements LoggableHardware {
 
     @Override
     public void periodic() {
-        refreshInputs(inputs);
-        Logger.processInputs(name, inputs);
+        synchronized (inputs) {
+            refreshInputs(inputs);
+            Logger.processInputs(name, inputs);
+        }
     }
 
     @Override
     public MotorInputsAutoLogged getInputs() {
-        synchronized (inputs) {
-            return (inputs);
-        }
+        synchronized (inputs) { return inputs; }
     }
 
     @AutoLog

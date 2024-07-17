@@ -28,13 +28,15 @@ public class Pigeon implements LoggableHardware {
 
     @Override
     public void periodic() {
-        refreshInputs(inputs);
-        Logger.processInputs(name, inputs);
+        synchronized (inputs) {
+            refreshInputs(inputs);
+            Logger.processInputs(name, inputs);
+        }
     }
 
     @Override
     public PigeonInputsAutoLogged getInputs() {
-        return inputs;
+        synchronized (inputs) { return inputs; }
     }
     
     protected void refreshInputs(PigeonInputsAutoLogged inputs) {}

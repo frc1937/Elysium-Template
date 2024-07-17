@@ -5,7 +5,11 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -25,9 +29,13 @@ import static frc.lib.math.AdvancedSwerveKinematics.correctForDynamics;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
-import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.swerve.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
+import static frc.robot.subsystems.swerve.SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
+import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
@@ -89,9 +97,7 @@ public class Swerve extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        ODOMETRY_LOCK.lock();
         updateAllInputs();
-        ODOMETRY_LOCK.unlock(); //todo: check without lock.
 
         updatePoseEstimatorStates();
     }
@@ -174,12 +180,14 @@ public class Swerve extends GenericSubsystem {
     }
 
     private void updatePoseEstimatorStates() {
-        final int odometryUpdates = gyroInputs.threadGyroYawDegrees.length;
+        final int odometryUpdates = gyroInputs.timestamps.length;
+
+        System.out.println(gyroInputs.timestamps.length);
 
         final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
-        for (int i = 0; i < odometryUpdates; i++) {
+        for (int i = 0; i < odometryUpdates - 1; i++) {
             swerveWheelPositions[i] = getSwerveWheelPositions(i);
             gyroRotations[i] = Rotation2d.fromDegrees(gyroInputs.threadGyroYawDegrees[i]);
         }
