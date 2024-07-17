@@ -352,6 +352,8 @@ public class GenericSpark extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        if (spark == null) return;
+
         inputs.systemPosition = getEffectivePosition();
         inputs.systemVelocity = getEffectiveVelocity();
 

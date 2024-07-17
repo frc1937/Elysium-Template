@@ -98,6 +98,8 @@ public class GenericCanCoder extends Encoder {
     }
 
     protected void refreshInputs(EncoderInputsAutoLogged inputs) {
+        if (canCoder == null) return;
+
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
         inputs.position = getEncoderPositionPrivate();
@@ -105,8 +107,11 @@ public class GenericCanCoder extends Encoder {
 
         if (signalQueueList.isEmpty()) return;
 
-        inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-        inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+        if (signalQueueList.get("position") != null)
+            inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
+
+        if (signalQueueList.get("velocity") != null)
+            inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
 
         inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
 
