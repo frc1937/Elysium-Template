@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import frc.lib.generic.encoder.*;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 
 import java.util.*;
 
@@ -22,7 +22,7 @@ public class GenericCanCoder extends Encoder {
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
+    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
 
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final StatusSignal<Double> positionSignal, velocitySignal;
@@ -46,8 +46,8 @@ public class GenericCanCoder extends Encoder {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
-            case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
         }
     }
 
@@ -97,10 +97,7 @@ public class GenericCanCoder extends Encoder {
         return statusCode == StatusCode.OK;
     }
 
-    @Override
     protected void refreshInputs(EncoderInputsAutoLogged inputs) {
-        if (canCoder == null) return;
-
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
         inputs.position = getEncoderPositionPrivate();
@@ -108,11 +105,8 @@ public class GenericCanCoder extends Encoder {
 
         if (signalQueueList.isEmpty()) return;
 
-        if (signalQueueList.get("position") != null)
-            inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-
-        if (signalQueueList.get("velocity") != null)
-            inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
 
         inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
 

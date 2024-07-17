@@ -9,7 +9,7 @@ import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.*;
 import frc.lib.math.Conversions;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class GenericSpark extends Motor {
         optimizeBusUsage();
 
         encoder = spark.getEncoder();
-        timestampQueue = OdometryThread.getInstance().getTimestampQueue();
+        timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
     }
 
     @Override
@@ -334,26 +334,24 @@ public class GenericSpark extends Motor {
 
         switch (signal.getType()) {
             case POSITION ->
-                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+                    signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
             case VELOCITY ->
-                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+                    signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
 
             case CURRENT ->
-                    signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
+                    signalQueueList.put("current", SparkOdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
             case VOLTAGE ->
-                    signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+                    signalQueueList.put("voltage", SparkOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
 
             case TEMPERATURE ->
-                    signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
+                    signalQueueList.put("temperature", SparkOdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
             case CLOSED_LOOP_TARGET ->
-                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
+                    signalQueueList.put("target", SparkOdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
         }
     }
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
-        if (spark == null) return;
-
         inputs.systemPosition = getEffectivePosition();
         inputs.systemVelocity = getEffectiveVelocity();
 

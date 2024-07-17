@@ -47,15 +47,13 @@ public class Encoder implements LoggableHardware {
 
     @Override
     public void periodic() {
-        synchronized (inputs) {
-            refreshInputs(inputs);
-            Logger.processInputs(name, inputs);
-        }
+        refreshInputs(inputs);
+        Logger.processInputs(name, inputs);
     }
 
     @Override
     public EncoderInputsAutoLogged getInputs() {
-        synchronized (inputs) { return inputs; }
+        return inputs;
     }
 
     @AutoLog

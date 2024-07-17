@@ -76,10 +76,10 @@ public class SwerveModuleConstants {
     }
 
     protected static final SwerveModule[] MODULES = new SwerveModule[]{
-            new SwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER, "Module 1 FL"),
-            new SwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER, "Module 2 FR"),
-            new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER, "Module 3 RL"),
-            new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER, "Module 4 RR")
+            new SwerveModule(FL_DRIVE_MOTOR, FL_STEER_MOTOR, FL_STEER_ENCODER),
+            new SwerveModule(FR_DRIVE_MOTOR, FR_STEER_MOTOR, FR_STEER_ENCODER),
+            new SwerveModule(RL_DRIVE_MOTOR, RL_STEER_MOTOR, RL_STEER_ENCODER),
+            new SwerveModule(RR_DRIVE_MOTOR, RR_STEER_MOTOR, RR_STEER_ENCODER)
     };
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {
@@ -145,8 +145,8 @@ public class SwerveModuleConstants {
 
         steerMotorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.SIMPLE_MOTOR,
-                DCMotor.getKrakenX60(1), STEER_GEAR_RATIO / 2,0.003);
-        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(150, 0, 0, 0, 0, 0);
+                DCMotor.getFalcon500(1), STEER_GEAR_RATIO / 2,0.003);
+        steerMotorConfiguration.simulationSlot = new MotorProperties.Slot(90, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.closedLoopContinuousWrap = true;
     }

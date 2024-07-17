@@ -64,12 +64,11 @@ public class RobotContainer {
         new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
-        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X) / 5;
+        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X) / 2;
 
         SWERVE.setDefaultCommand(
                 SWERVE.driveOpenLoop(
                         translationSupplier,
-//                        strafeSupplier,
                         () -> 0,
                         strafeSupplier,
 //                        () -> -driveCsontroller.getRawAxis(Controller.Axis.RIGHT_X),
@@ -80,8 +79,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-
-                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(), () -> false)
+                .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d())
                         .alongWith(shooterCommands.receiveFloorNote())
                 );
 

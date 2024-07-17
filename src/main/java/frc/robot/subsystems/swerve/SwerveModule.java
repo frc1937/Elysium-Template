@@ -25,14 +25,10 @@ public class SwerveModule {
     private SwerveModuleState targetState = new SwerveModuleState();
     private boolean openLoop = true;
 
-    private final String name;
-
-    public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder, String name) {
+    public SwerveModule(Motor driveMotor, Motor steerMotor, Encoder steerEncoder) {
         this.steerMotor = steerMotor;
         this.driveMotor = driveMotor;
         this.steerEncoder = steerEncoder;
-
-        this.name = name;
     }
 
     protected void setTargetState(SwerveModuleState state) {
