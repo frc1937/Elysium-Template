@@ -322,6 +322,8 @@ public class GenericTalonFX extends Motor {
 
     @Override
     protected void refreshInputs(MotorInputsAutoLogged inputs) {
+        if (talonFX == null) return;
+
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
         inputs.systemPosition = getSystemPositionPrivate();

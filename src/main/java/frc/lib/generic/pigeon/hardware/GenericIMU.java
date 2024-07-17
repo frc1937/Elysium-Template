@@ -45,6 +45,8 @@ public class GenericIMU extends Pigeon {
 
     @Override
     protected void refreshInputs(PigeonInputsAutoLogged inputs) {
+        if (pigeon == null) return;
+
         inputs.gyroYawDegrees = pigeon.getYaw();
         inputs.gyroRollDegrees = pigeon.getRoll();
         inputs.gyroPitchDegrees = pigeon.getPitch();
