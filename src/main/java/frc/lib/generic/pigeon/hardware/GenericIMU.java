@@ -4,7 +4,7 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.generic.pigeon.PigeonInputsAutoLogged;
 import frc.lib.generic.pigeon.PigeonSignal;
-import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
+import frc.robot.poseestimation.poseestimator.SparkMaxOdometryThread;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ public class GenericIMU extends Pigeon {
     private final WPI_PigeonIMU pigeon;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
+    private final Queue<Double> timestampQueue = SparkMaxOdometryThread.getInstance().getTimestampQueue();
 
     public GenericIMU(String name, int deviceNumber) {
         super(name);
@@ -37,14 +37,14 @@ public class GenericIMU extends Pigeon {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case YAW -> signalQueueList.put("yaw", SparkOdometryThread.getInstance().registerSignal(pigeon::getYaw));
-            case ROLL -> signalQueueList.put("roll", SparkOdometryThread.getInstance().registerSignal(pigeon::getRoll));
-            case PITCH -> signalQueueList.put("pitch",SparkOdometryThread.getInstance().registerSignal(pigeon::getPitch));
+            case YAW -> signalQueueList.put("yaw", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getYaw));
+            case ROLL -> signalQueueList.put("roll", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getRoll));
+            case PITCH -> signalQueueList.put("pitch",SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getPitch));
         }
     }//todo: Map out the structure and try to find inconsistencies.
 
     @Override
-    protected void refreshInputs(PigeonInputsAutoLogged inputs) {
+    protected synchronized void refreshInputs(PigeonInputsAutoLogged inputs) {
         if (pigeon == null) return;
 
         inputs.gyroYawDegrees = pigeon.getYaw();

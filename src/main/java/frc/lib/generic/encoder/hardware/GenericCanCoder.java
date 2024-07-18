@@ -8,7 +8,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import frc.lib.generic.encoder.*;
-import frc.robot.poseestimation.poseestimator.SparkOdometryThread;
+import frc.robot.poseestimation.poseestimator.SparkMaxOdometryThread;
 
 import java.util.*;
 
@@ -22,7 +22,7 @@ public class GenericCanCoder extends Encoder {
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = SparkOdometryThread.getInstance().getTimestampQueue();
+    private final Queue<Double> timestampQueue = SparkMaxOdometryThread.getInstance().getTimestampQueue();
 
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final StatusSignal<Double> positionSignal, velocitySignal;
@@ -46,8 +46,8 @@ public class GenericCanCoder extends Encoder {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", SparkOdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
-            case VELOCITY -> signalQueueList.put("velocity", SparkOdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+            case POSITION -> signalQueueList.put("position", SparkMaxOdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", SparkMaxOdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
         }
     }
 

@@ -34,10 +34,10 @@ public class Pigeon implements LoggableHardware {
 
     @Override
     public PigeonInputsAutoLogged getInputs() {
-        return inputs;
+        synchronized (inputs) { return inputs; }
     }
     
-    protected void refreshInputs(PigeonInputsAutoLogged inputs) {}
+    protected synchronized void refreshInputs(PigeonInputsAutoLogged inputs) {}
 
     @AutoLog
     public static class PigeonInputs {
