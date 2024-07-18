@@ -2,15 +2,23 @@ package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorInputsAutoLogged;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.OdometryThread;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -257,24 +265,13 @@ public class GenericSpark extends Motor {
             feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
 
             previousSetpoint = currentSetpoint;
-
-            Logger.recordOutput("ProfiledPOSITION", currentSetpoint.position * 360);
-            Logger.recordOutput("ProfiledVELOCITY", currentSetpoint.velocity * 360);
         }
 
         if (feedforward != useBuiltinFeedforwardNumber)
             feedforwardOutput = feedforward;
 
         spark.setVoltage(feedforwardOutput + feedbackOutput);
-
-        Logger.recordOutput("Profiled CURRENT POSITION", getEffectivePosition() * 360);
-        Logger.recordOutput("Profiled CURRENT VELOCITY", getEffectiveVelocity() * 360);
-
-        Logger.recordOutput("FeeFF", feedforwardOutput);
-        Logger.recordOutput("FeeFB", feedbackOutput);
-        Logger.recordOutput("FeeVOLT", feedforwardOutput + feedbackOutput);
     }
-
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
         TrapezoidProfile.State stateFromOutput = null;
