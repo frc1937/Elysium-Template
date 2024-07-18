@@ -69,9 +69,9 @@ public class RobotContainer {
         SWERVE.setDefaultCommand(
                 SWERVE.driveOpenLoop(
                         translationSupplier,
-                        () -> 0,
                         strafeSupplier,
-//                        () -> -driveCsontroller.getRawAxis(Controller.Axis.RIGHT_X),
+
+                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X),
                         () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
                 ));
 

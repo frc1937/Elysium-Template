@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.GlobalConstants.FASTER_THREAD_LOCK;
 import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 /**
@@ -35,17 +36,17 @@ public class OdometryThread extends Thread {
     private final List<DoubleSupplier> signals = new ArrayList<>();
     private final List<Queue<Double>> queues = new ArrayList<>();
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
-
-    private static class Holder {
-        private static final OdometryThread INSTANCE = new OdometryThread();
-    }
+    private static OdometryThread instance = null;
 
     public static OdometryThread getInstance() {
-        return Holder.INSTANCE;
+        if (instance == null) {
+            instance = new OdometryThread();
+        }
+        return instance;
     }
 
     private OdometryThread() {
-        final Notifier notifier = new Notifier(this::periodic);
+        Notifier notifier = new Notifier(this::periodic);
         notifier.setName("SparkMaxOdometryThread");
         Timer.delay(1);
         notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
@@ -55,20 +56,27 @@ public class OdometryThread extends Thread {
         return timestamps;
     }
 
-    public synchronized Queue<Double> registerSignal(DoubleSupplier signal) {
+    public Queue<Double> registerSignal(DoubleSupplier signal) {
         Queue<Double> queue = new ArrayBlockingQueue<>(100);
-
-        signals.add(signal);
-        queues.add(queue);
-
+        FASTER_THREAD_LOCK.lock();
+        try {
+            signals.add(signal);
+            queues.add(queue);
+        } finally {
+            FASTER_THREAD_LOCK.unlock();
+        }
         return queue;
     }
 
-    private synchronized void periodic() {
+    private void periodic() {
+        FASTER_THREAD_LOCK.lock();
         timestamps.offer(Logger.getRealTimestamp() / 1.0e6);
-
-        for (int i = 0; i < signals.size(); i++) {
-            queues.get(i).offer(signals.get(i).getAsDouble());
+        try {
+            for (int i = 0; i < signals.size(); i++) {
+                queues.get(i).offer(signals.get(i).getAsDouble());
+            }
+        } finally {
+            FASTER_THREAD_LOCK.unlock();
         }
     }
 }

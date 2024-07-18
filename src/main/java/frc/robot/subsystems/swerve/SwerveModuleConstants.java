@@ -45,9 +45,9 @@ public class SwerveModuleConstants {
 
     protected static final Motor
             FL_DRIVE_MOTOR = MotorFactory.createTalonFX("FL_DRIVE_MOTOR", 14),
-            FR_DRIVE_MOTOR = MotorFactory.createTalonFX("FR_DRIVE_MOTOR", 13),
+            FR_DRIVE_MOTOR = MotorFactory.createTalonFX("FR_DRIVE_MOTOR", 3),
             RL_DRIVE_MOTOR = MotorFactory.createTalonFX("RL_DRIVE_MOTOR", 13),
-            RR_DRIVE_MOTOR = MotorFactory.createTalonFX("RR_DRIVE_MOTOR", 12);
+            RR_DRIVE_MOTOR = MotorFactory.createTalonFX("RR_DRIVE_MOTOR", 2);
 
     protected static final Encoder
             FL_STEER_ENCODER = EncoderFactory.createCanCoder("FL_STEER_ENCODER", 18),
@@ -135,7 +135,7 @@ public class SwerveModuleConstants {
     }
 
     private static void configureSteerConfiguration() {
-        steerMotorConfiguration.slot0 = new MotorProperties.Slot(7, 0, 0, 0, 0, 0);
+        steerMotorConfiguration.slot0 = new MotorProperties.Slot(30, 0, 0, 0, 0, 0);
 
         steerMotorConfiguration.supplyCurrentLimit = ANGLE_CURRENT_LIMIT;
         steerMotorConfiguration.inverted = ANGLE_MOTOR_INVERT;

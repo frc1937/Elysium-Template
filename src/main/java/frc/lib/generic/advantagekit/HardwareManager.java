@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;
+import static frc.robot.GlobalConstants.FASTER_THREAD_LOCK;
 
 //Credit to team 418 for this
 public enum HardwareManager {
@@ -84,7 +85,14 @@ public enum HardwareManager {
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
     public static void update() {
-        hardware.forEach(LoggableHardware::periodic);
+        //Only if hardware should use lock, USE LOCK
+        FASTER_THREAD_LOCK.lock();
+
+        for (LoggableHardware loggableHardware : hardware) {
+            loggableHardware.periodic();
+        }
+        FASTER_THREAD_LOCK.unlock();
+
         periodicRunnable.forEach(Runnable::run);
     }
 
