@@ -64,7 +64,7 @@ public class RobotContainer {
         new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
-        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X) / 2;
+        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
 
         SWERVE.setDefaultCommand(
                 SWERVE.driveOpenLoop(
