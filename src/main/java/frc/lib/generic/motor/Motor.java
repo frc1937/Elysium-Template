@@ -258,9 +258,7 @@ public class Motor implements LoggableHardware {
 
     public boolean isAtSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new UnsupportedOperationException("NUH UH"); //todo: Move this to each motor.
-        //todo: Create motorCreator class. Type, AND RETURN BASED ON MODE SO REPLAY WROKS.
-        //TODO; DO THAT FOR EVERY HARDWARE TYPE
+            throw new UnsupportedOperationException("NUH UH");
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
@@ -275,7 +273,7 @@ public class Motor implements LoggableHardware {
 
     @Override
     public MotorInputsAutoLogged getInputs() {
-        return (inputs); //todo: check how PurpleLib does FASTER updates
+        synchronized (inputs) { return inputs; }
     }
 
     @AutoLog

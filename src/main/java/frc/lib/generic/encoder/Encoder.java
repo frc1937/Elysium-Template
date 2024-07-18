@@ -43,7 +43,7 @@ public class Encoder implements LoggableHardware {
 
     public boolean configure(EncoderConfiguration encoderConfiguration) { return true; }
 
-    protected void refreshInputs(EncoderInputsAutoLogged inputs) { }
+    protected synchronized void refreshInputs(EncoderInputsAutoLogged inputs) { }
 
     @Override
     public void periodic() {
@@ -53,7 +53,7 @@ public class Encoder implements LoggableHardware {
 
     @Override
     public EncoderInputsAutoLogged getInputs() {
-        return inputs;
+        synchronized (inputs) { return inputs; }
     }
 
     @AutoLog

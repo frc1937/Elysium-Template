@@ -38,8 +38,10 @@ public class GenericIMU extends Pigeon {
 
         switch (signal.getType()) {
             case YAW -> signalQueueList.put("yaw", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getYaw));
-            case ROLL -> signalQueueList.put("roll", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getRoll));
-            case PITCH -> signalQueueList.put("pitch",SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getPitch));
+            case ROLL ->
+                    signalQueueList.put("roll", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getRoll));
+            case PITCH ->
+                    signalQueueList.put("pitch", SparkMaxOdometryThread.getInstance().registerSignal(pigeon::getPitch));
         }
     }//todo: Map out the structure and try to find inconsistencies.
 

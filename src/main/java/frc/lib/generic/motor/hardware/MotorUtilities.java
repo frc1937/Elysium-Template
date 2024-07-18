@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Queue;
 
 public class MotorUtilities {
-    static void handleThreadedInputs(MotorInputsAutoLogged inputs, Map<String, Queue<Double>> signalQueueList, Queue<Double> timestampQueue) {
+    static synchronized void handleThreadedInputs(MotorInputsAutoLogged inputs, Map<String, Queue<Double>> signalQueueList, Queue<Double> timestampQueue) {
         if (signalQueueList.isEmpty()) return;
 
         inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
