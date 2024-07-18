@@ -4,14 +4,10 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public class GlobalConstants {
     public static final double ROBOT_PERIODIC_LOOP_TIME = 0.02;
 
     public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
-    public static final Lock ODOMETRY_LOCK = new ReentrantLock();
 
     public static final boolean IS_TUNING_MODE = true;
     public static final Mode CURRENT_MODE = Mode.SIMULATION;

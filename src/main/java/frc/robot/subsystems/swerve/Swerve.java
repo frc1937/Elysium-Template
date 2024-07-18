@@ -25,7 +25,6 @@ import static frc.lib.math.AdvancedSwerveKinematics.correctForDynamics;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
-import static frc.robot.GlobalConstants.ODOMETRY_LOCK;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
@@ -89,9 +88,7 @@ public class Swerve extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        ODOMETRY_LOCK.lock();
-        updateAllInputs();
-        ODOMETRY_LOCK.unlock(); //todo: check without lock.
+        updateGyroInputsSynchronously();
 
         updatePoseEstimatorStates();
     }
@@ -196,7 +193,7 @@ public class Swerve extends GenericSubsystem {
         return new SwerveDriveWheelPositions(swerveModulePositions);
     }
 
-    private void updateAllInputs() {
+    private void updateGyroInputsSynchronously() {
         gyroInputs = GYRO.getInputs();
     }
 

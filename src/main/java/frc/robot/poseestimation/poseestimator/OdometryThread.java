@@ -31,20 +31,20 @@ import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
  * <p>This version is intended for devices like the SparkMax that require polling rather than a
  * blocking thread. A Notifier thread is used to gather samples with consistent timing.
  */
-public class SparkMaxOdometryThread extends Thread {
+public class OdometryThread extends Thread {
     private final List<DoubleSupplier> signals = new ArrayList<>();
     private final List<Queue<Double>> queues = new ArrayList<>();
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
 
     private static class Holder {
-        private static final SparkMaxOdometryThread INSTANCE = new SparkMaxOdometryThread();
+        private static final OdometryThread INSTANCE = new OdometryThread();
     }
 
-    public static SparkMaxOdometryThread getInstance() {
+    public static OdometryThread getInstance() {
         return Holder.INSTANCE;
     }
 
-    private SparkMaxOdometryThread() {
+    private OdometryThread() {
         final Notifier notifier = new Notifier(this::periodic);
         notifier.setName("SparkMaxOdometryThread");
         Timer.delay(1);

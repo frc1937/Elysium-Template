@@ -10,7 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.generic.motor.*;
-import frc.robot.poseestimation.poseestimator.SparkMaxOdometryThread;
+import frc.robot.poseestimation.poseestimator.OdometryThread;
 
 import java.util.*;
 import java.util.function.DoubleSupplier;
@@ -19,7 +19,7 @@ public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = SparkMaxOdometryThread.getInstance().getTimestampQueue();
+    private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
@@ -311,12 +311,12 @@ public class GenericTalonFX extends Motor {
         if (!signal.useFasterThread()) return;
 
         switch (signal.getType()) {
-            case VELOCITY -> signalQueueList.put("velocity", SparkMaxOdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
-            case POSITION -> signalQueueList.put("position", SparkMaxOdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VOLTAGE -> signalQueueList.put("voltage", SparkMaxOdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
-            case CURRENT -> signalQueueList.put("current", SparkMaxOdometryThread.getInstance().registerSignal(this::getCurrentPrivate));
-            case TEMPERATURE -> signalQueueList.put("temperature", SparkMaxOdometryThread.getInstance().registerSignal(this::getTemperaturePrivate));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", SparkMaxOdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+            case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VOLTAGE -> signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+            case CURRENT -> signalQueueList.put("current", OdometryThread.getInstance().registerSignal(this::getCurrentPrivate));
+            case TEMPERATURE -> signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(this::getTemperaturePrivate));
+            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
         }
     }
 
