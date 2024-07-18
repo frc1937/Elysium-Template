@@ -35,6 +35,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.numbers.N5;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.RobotContainer;
 import org.photonvision.PhotonCamera;
 import org.photonvision.estimation.TargetModel;
 import org.photonvision.estimation.VisionEstimation;
@@ -44,8 +45,6 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
-
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 /**
  * The PhotonPoseEstimator class filters or combines readings from all the AprilTags visible at a
@@ -391,6 +390,9 @@ public class PhotonPoseEstimator {
             Optional<Matrix<N5, N1>> distCoeffs,
             PoseStrategy strat) {
         Optional<EstimatedRobotPose> estimatedPose;
+
+        if (strat == null) return Optional.empty();
+
         switch (strat) {
             case LOWEST_AMBIGUITY:
                 estimatedPose = lowestAmbiguityStrategy(cameraResult);
@@ -433,7 +435,7 @@ public class PhotonPoseEstimator {
     private Optional<EstimatedRobotPose> closestToHeadingStrategy(PhotonPipelineResult result) {
         double smallestAngleDifferenceRadians;
         EstimatedRobotPose closestAngleTarget;
-        double currentHeadingRadians = POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians();
+        double currentHeadingRadians = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians();
 
         PhotonTrackedTarget target = result.getBestTarget();
         int targetFiducialId = target.getFiducialId();

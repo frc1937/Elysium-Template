@@ -88,8 +88,7 @@ public class Swerve extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        updateGyroInputsSynchronously();
-
+        updateGyroInputs();
         updatePoseEstimatorStates();
     }
 
@@ -193,7 +192,7 @@ public class Swerve extends GenericSubsystem {
         return new SwerveDriveWheelPositions(swerveModulePositions);
     }
 
-    private void updateGyroInputsSynchronously() {
+    private void updateGyroInputs() {
         gyroInputs = GYRO.getInputs();
     }
 
