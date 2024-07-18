@@ -25,7 +25,7 @@ public class SimulatedCanCoder extends Encoder {
     }
 
     @Override
-    protected synchronized void refreshInputs(EncoderInputsAutoLogged inputs) {
+    protected void refreshInputs(EncoderInputsAutoLogged inputs) {
         if (positionSupplier == null || velocitySupplier == null) {
             return;
         }

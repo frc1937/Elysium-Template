@@ -46,7 +46,7 @@ public class GenericIMU extends Pigeon {
     }//todo: Map out the structure and try to find inconsistencies.
 
     @Override
-    protected synchronized void refreshInputs(PigeonInputsAutoLogged inputs) {
+    protected void refreshInputs(PigeonInputsAutoLogged inputs) {
         if (pigeon == null) return;
 
         inputs.gyroYawDegrees = pigeon.getYaw();

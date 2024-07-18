@@ -98,7 +98,7 @@ public class GenericCanCoder extends Encoder {
     }
 
     @Override
-    protected synchronized void refreshInputs(EncoderInputsAutoLogged inputs) {
+    protected void refreshInputs(EncoderInputsAutoLogged inputs) {
         if (canCoder == null) return;
 
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));

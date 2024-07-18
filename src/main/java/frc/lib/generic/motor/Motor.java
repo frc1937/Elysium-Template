@@ -273,7 +273,7 @@ public class Motor implements LoggableHardware {
 
     @Override
     public MotorInputsAutoLogged getInputs() {
-        synchronized (inputs) { return inputs; }
+        return inputs;
     }
 
     @AutoLog
