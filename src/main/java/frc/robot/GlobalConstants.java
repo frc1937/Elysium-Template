@@ -10,7 +10,7 @@ public class GlobalConstants {
     public static final double ODOMETRY_FREQUENCY_HERTZ = 200.0;
 
     public static final boolean IS_TUNING_MODE = true;
-    public static final Mode CURRENT_MODE = Mode.SIMULATION;
+    public static final Mode CURRENT_MODE = Mode.REAL;
 
     public enum Mode {
         REAL, SIMULATION, REPLAY
