@@ -8,8 +8,9 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import frc.robot.poseestimation.photoncamera.CameraFactory;
+import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
 import frc.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
-import frc.robot.poseestimation.robotposesources.RobotPoseSource;
 import org.photonvision.estimation.TargetModel;
 
 import java.util.HashMap;
@@ -21,7 +22,7 @@ public class PoseEstimatorConstants {
             new Rotation3d(0, Units.degreesToRadians(-36 + 10), 0)
     );
 
-    public static final RobotPoseSource FRONT_CAMERA = new RobotPoseSource("Front1937", ROBOT_TO_FRONT_CAMERA);
+    public static final PhotonCameraIO FRONT_CAMERA = CameraFactory.generateCamera("Front1937", ROBOT_TO_FRONT_CAMERA);
 
     static final Pose2d DEFAULT_POSE = new Pose2d(0, 0, new Rotation2d(0));
 
@@ -37,8 +38,6 @@ public class PoseEstimatorConstants {
     static final double ROTATION_STD_EXPONENT = 0.01;
 
     public static final double MAXIMUM_AMBIGUITY = 0.2;
-
-    public static final Pose2d[] EMPTY_POSE_LIST = new Pose2d[0];
 
     public static final TargetModel TAG_MODEL = TargetModel.kAprilTag36h11;
 

@@ -85,9 +85,8 @@ public enum HardwareManager {
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
     public static void update() {
-        //Only if hardware should use lock, USE LOCK
+        //TODO: Only if hardware should use lock, USE LOCK
         FASTER_THREAD_LOCK.lock();
-
         for (LoggableHardware loggableHardware : hardware) {
             loggableHardware.periodic();
         }

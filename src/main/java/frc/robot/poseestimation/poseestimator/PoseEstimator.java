@@ -12,7 +12,7 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.RobotContainer;
-import frc.robot.poseestimation.robotposesources.RobotPoseSource;
+import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
  */
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
-    private final RobotPoseSource[] robotPoseSources;
+    private final PhotonCameraIO[] robotPoseSources;
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
 
     /**
@@ -35,7 +35,7 @@ public class PoseEstimator implements AutoCloseable {
      *
      * @param robotPoseSources the sources that should update the pose estimator apart from the odometry. This should be cameras etc.
      */
-    public PoseEstimator(RobotPoseSource... robotPoseSources) {
+    public PoseEstimator(PhotonCameraIO... robotPoseSources) {
         this.robotPoseSources = robotPoseSources;
 
         putAprilTagsOnFieldWidget();
@@ -96,7 +96,7 @@ public class PoseEstimator implements AutoCloseable {
 
     private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
         List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
-        for (RobotPoseSource robotPoseSource : robotPoseSources) {
+        for (PhotonCameraIO robotPoseSource : robotPoseSources) {
             final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(robotPoseSource);
             if (visionObservation != null)
                 viableVisionObservations.add(visionObservation);
@@ -104,11 +104,14 @@ public class PoseEstimator implements AutoCloseable {
         return viableVisionObservations;
     }
 
-    private PoseEstimator6328.VisionObservation getVisionObservation(RobotPoseSource robotPoseSource) {
-        robotPoseSource.update();
+    private PoseEstimator6328.VisionObservation getVisionObservation(PhotonCameraIO robotPoseSource) {
+        robotPoseSource.refresh();
+
         if (!robotPoseSource.hasNewResult())
             return null;
+
         final Pose2d robotPose = robotPoseSource.getRobotPose();
+
         if (robotPose == null)
             return null;
 
