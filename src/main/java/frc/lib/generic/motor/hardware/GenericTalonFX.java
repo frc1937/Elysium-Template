@@ -168,18 +168,6 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
-        return switch (signal.getType()) {
-            case VELOCITY -> velocitySignal;
-            case POSITION -> positionSignal;
-            case VOLTAGE -> voltageSignal;
-            case CURRENT -> currentSignal;
-            case TEMPERATURE -> temperatureSignal;
-            case CLOSED_LOOP_TARGET -> closedLoopTarget;
-        };
-    }
-
-    @Override
     public boolean configure(MotorConfiguration configuration) {
         this.currentConfiguration = configuration;
 
