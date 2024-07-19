@@ -1,20 +1,12 @@
 package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.*;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.OdometryThread;
 
@@ -29,7 +21,7 @@ public class GenericSpark extends Motor {
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
 
-    private final boolean[] signalsToLog = new boolean[SIGNALS_TO_LOG_LENGTH];
+    private final boolean[] signalsToLog = LOG_NO_SIGNALS;
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue;
 
@@ -296,17 +288,10 @@ public class GenericSpark extends Motor {
      * Explanation here: <a href="https://docs.revrobotics.com/brushless/spark-max/control-interfaces">REV DOCS</a>
      */
     private void setupSignalUpdates(MotorSignal signal) {
-        int ms = (int) (1000 / signal.getUpdateRate());
-        int indexOffset = signal.useFasterThread() ? 7 : 0;
-//todo: Simplify ugly code.
-        switch (signal.getType()) {
-            case VOLTAGE -> signalsToLog[indexOffset] = true;
-            case CURRENT -> signalsToLog[1 + indexOffset] = true;
-            case TEMPERATURE -> signalsToLog[2 + indexOffset] = true;
-            case CLOSED_LOOP_TARGET -> signalsToLog[3 + indexOffset] = true;
-            case POSITION -> signalsToLog[4 + indexOffset] = true;
-            case VELOCITY -> signalsToLog[5 + indexOffset] = true;
-        }
+        final int ms = (int) (1000 / signal.getUpdateRate());
+        final int indexOffset = signal.useFasterThread() ? 7 : 0;
+
+        signalsToLog[signal.getType().getId() + indexOffset] = true;
 
         switch (signal.getType()) {
             case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
@@ -332,19 +317,16 @@ public class GenericSpark extends Motor {
     protected void refreshInputs(MotorInputs inputs) {
         if (spark == null) return;
 
-        if (signalsToLog[0]) inputs.voltage = getVoltagePrivate();
-        if (signalsToLog[1]) inputs.current = spark.getOutputCurrent();
-        if (signalsToLog[2]) inputs.temperature = spark.getMotorTemperature();
-        if (signalsToLog[3]) inputs.target = closedLoopTarget;
-        if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
-        if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
+        inputs.setSignalsToLog(signalsToLog);
+
+        inputs.voltage = getVoltagePrivate();
+        inputs.current = spark.getOutputCurrent();
+        inputs.temperature = spark.getMotorTemperature();
+        inputs.target = closedLoopTarget;
+        inputs.systemPosition = getEffectivePosition();
+        inputs.systemVelocity = getEffectiveVelocity();
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
-    }
-
-    @Override
-    protected boolean[] getSignalsToLog() {
-        return signalsToLog;
     }
 
     private double getVoltagePrivate() {

@@ -2,7 +2,17 @@ package frc.lib.generic.pigeon;
 
 public class PigeonSignal {
     public enum SignalType {
-        YAW, PITCH, ROLL
+        YAW(0), PITCH(1), ROLL(2);
+
+        final int id;
+
+        SignalType(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
     }
 
     private final SignalType type;

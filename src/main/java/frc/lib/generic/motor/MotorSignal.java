@@ -2,7 +2,17 @@ package frc.lib.generic.motor;
 
 public class MotorSignal {
     public enum SignalType {
-        CURRENT, POSITION, VELOCITY, VOLTAGE, TEMPERATURE, CLOSED_LOOP_TARGET
+        CURRENT(1), POSITION(4), VELOCITY(5), VOLTAGE(0), TEMPERATURE(2), CLOSED_LOOP_TARGET(3);
+
+        final int id;
+
+        SignalType(int id) {
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
     }
 
     private final SignalType type;

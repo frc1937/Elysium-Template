@@ -21,7 +21,7 @@ public class GenericTalonFX extends Motor {
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
-    private final boolean[] signalsToLog = new boolean[SIGNALS_TO_LOG_LENGTH];
+    private final boolean[] signalsToLog = LOG_NO_SIGNALS;
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
 
@@ -79,8 +79,7 @@ public class GenericTalonFX extends Motor {
                 }
             }
 
-            case CURRENT ->
-                    throw new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.");
+            case CURRENT -> throw new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.");
         }
     }
 
@@ -267,6 +266,9 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setupSignalUpdates(MotorSignal signal) {
+        final int indexOffset = signal.useFasterThread() ? 7 : 0;
+        signalsToLog[signal.getType().getId() + indexOffset] = true;
+
         switch (signal.getType()) {
             case VELOCITY -> setupSignal(signal, velocitySignal);
             case POSITION -> setupSignal(signal, positionSignal);
@@ -294,16 +296,16 @@ public class GenericTalonFX extends Motor {
     protected void refreshInputs(MotorInputs inputs) {
         if (talonFX == null) return;
 
-        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
+        inputs.setSignalsToLog(signalsToLog);
 
-        inputs.systemPosition = getSystemPositionPrivate();
-        inputs.systemVelocity = getSystemVelocityPrivate();
+        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
         inputs.voltage = getVoltagePrivate();
         inputs.current = getCurrentPrivate();
         inputs.temperature = getTemperaturePrivate();
-
         inputs.target = getClosedLoopTargetPrivate();
+        inputs.systemPosition = getSystemPositionPrivate();
+        inputs.systemVelocity = getSystemVelocityPrivate();
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
     }

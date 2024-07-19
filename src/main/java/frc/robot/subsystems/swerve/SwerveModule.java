@@ -6,6 +6,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.lib.generic.encoder.Encoder;
 import frc.lib.generic.encoder.EncoderInputsAutoLogged;
 import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorInputs;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.math.Conversions;
 import frc.lib.math.Optimizations;
@@ -92,7 +93,7 @@ public class SwerveModule {
         return steerEncoder.getInputs();
     }
 
-    private Motor.MotorInputs getDriveMotorInputs() {
+    private MotorInputs getDriveMotorInputs() {
         return driveMotor.getInputs();
     }
 

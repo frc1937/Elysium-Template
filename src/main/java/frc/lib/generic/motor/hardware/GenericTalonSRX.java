@@ -5,10 +5,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
+import frc.lib.generic.motor.*;
 
 import java.util.function.DoubleSupplier;
 
@@ -160,6 +157,8 @@ public class GenericTalonSRX extends Motor {
     @Override
     protected void refreshInputs(MotorInputs inputs) {
         if (talonSRX == null) return;
+
+        //todo: AKIT!!!
 
         inputs.current = talonSRX.getStatorCurrent();
         inputs.voltage = talonSRX.getMotorOutputVoltage();

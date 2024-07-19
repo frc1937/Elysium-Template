@@ -6,17 +6,17 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.generic.GenericSubsystem;
-import frc.lib.generic.pigeon.PigeonInputsAutoLogged;
+import frc.lib.generic.pigeon.PigeonInputs;
 import frc.lib.math.Optimizations;
 import frc.lib.util.commands.InitExecuteCommand;
 import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -30,7 +30,7 @@ import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
-    private PigeonInputsAutoLogged gyroInputs = GYRO.getInputs();
+    private PigeonInputs gyroInputs = GYRO.getInputs();
 
     public Swerve() {
         configurePathPlanner();
@@ -88,6 +88,8 @@ public class Swerve extends GenericSubsystem {
 
     @Override
     public void periodic() {
+        if (Timer.getFPGATimestamp() < 1) return;
+
         updateGyroInputs();
         updatePoseEstimatorStates();
     }
@@ -125,9 +127,6 @@ public class Swerve extends GenericSubsystem {
                 currentAngle.getRadians(),
                 targetAngle.getRadians()
         );
-
-        Logger.recordOutput("ROTATIONCONTROLLER Current", currentAngle.getRadians());
-        Logger.recordOutput("ROTATIONCONTROLLER Target", ROTATION_CONTROLLER.getSetpoint().position);
 
         if (robotCentric)
             driveSelfRelative(xPower, yPower, controllerOutput);
@@ -171,6 +170,9 @@ public class Swerve extends GenericSubsystem {
 
     private void updatePoseEstimatorStates() {
         final int odometryUpdates = gyroInputs.threadGyroYawDegrees.length;
+
+        System.out.println(odometryUpdates);
+        if (odometryUpdates == 0) return;
 
         final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];

@@ -1,9 +1,7 @@
 package frc.lib.generic.motor.hardware;
 
 import edu.wpi.first.wpilibj.Timer;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 
@@ -11,8 +9,9 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class SimulatedMotor extends Motor {
     private MotorConfiguration currentConfiguration;
-
     private GenericSimulation simulation;
+
+    private final boolean[] signalsToLog = new boolean[13];
 
     public SimulatedMotor(String name) {
         super(name);
@@ -38,7 +37,7 @@ public class SimulatedMotor extends Motor {
 
     @Override
     public void stopMotor() {
-        if (simulation != null ) {
+        if (simulation != null) {
             simulation.stop();
         }
     }
@@ -69,6 +68,15 @@ public class SimulatedMotor extends Motor {
     }
 
     @Override
+    public void setupSignalsUpdates(MotorSignal... signals) {
+        for (MotorSignal signal : signals) {
+            final int indexOffset = signal.useFasterThread() ? 7 : 0;
+
+            signalsToLog[signal.getType().getId() + indexOffset] = true;
+        }
+    }
+
+    @Override
     protected void refreshInputs(MotorInputs inputs) {
         if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION) {
             throw new RuntimeException("This motor should NEVER be initialized manually! Use the factory methods instead!");
@@ -76,21 +84,22 @@ public class SimulatedMotor extends Motor {
 
         if (simulation == null) return;
 
-        inputs.systemPosition = simulation.getPositionRotations();
-        inputs.systemVelocity = simulation.getVelocityRotationsPerSecond();
+        inputs.setSignalsToLog(signalsToLog);
+
         inputs.voltage = simulation.getVoltage();
         inputs.current = simulation.getCurrent();
-
-        inputs.temperature = 0.0;
+        inputs.temperature = 0;
         inputs.target = simulation.getTarget();
+        inputs.systemPosition = simulation.getPositionRotations();
+        inputs.systemVelocity = simulation.getVelocityRotationsPerSecond();
 
-        inputs.threadSystemPosition = new double[]{inputs.systemPosition};
-        inputs.threadSystemVelocity = new double[]{inputs.systemVelocity};
+        inputs.timestamps = new double[]{Timer.getFPGATimestamp()};
+
         inputs.threadVoltage = new double[]{inputs.voltage};
         inputs.threadCurrent = new double[]{inputs.current};
         inputs.threadTemperature = new double[]{inputs.temperature};
         inputs.threadTarget = new double[]{inputs.target};
-
-        inputs.timestamps = new double[]{Timer.getFPGATimestamp()};
+        inputs.threadSystemPosition = new double[]{inputs.systemPosition};
+        inputs.threadSystemVelocity = new double[]{inputs.systemVelocity};
     }
 }
