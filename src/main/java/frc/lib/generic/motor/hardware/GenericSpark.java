@@ -2,19 +2,13 @@ package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorInputsAutoLogged;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.motor.MotorSignal;
 import frc.lib.math.Conversions;
@@ -26,7 +20,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 public class GenericSpark extends Motor {
-    private static final double useBuiltinFeedforwardNumber = 69420;
+    private static final double USE_BUILTIN_FEEDFORWARD_NUMBER = 69420;
 
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
@@ -64,7 +58,7 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        setOutput(controlMode, output, useBuiltinFeedforwardNumber);
+        setOutput(controlMode, output, USE_BUILTIN_FEEDFORWARD_NUMBER);
     }
 
     @Override
@@ -130,7 +124,7 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setFollowerOf(String name, int masterPort) {
-        spark.follow(new CANSparkMax(masterPort, CANSparkMax.MotorType.kBrushless));
+        spark.follow(new CANSparkMax(masterPort, CANSparkLowLevel.MotorType.kBrushless));
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
     }
 
@@ -267,7 +261,7 @@ public class GenericSpark extends Motor {
             previousSetpoint = currentSetpoint;
         }
 
-        if (feedforward != useBuiltinFeedforwardNumber)
+        if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
             feedforwardOutput = feedforward;
 
         spark.setVoltage(feedforwardOutput + feedbackOutput);
@@ -348,7 +342,7 @@ public class GenericSpark extends Motor {
     }
 
     @Override
-    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+    protected void refreshInputs(MotorInputs inputs) {
         if (spark == null) return;
 
         inputs.systemPosition = getEffectivePosition();
@@ -362,6 +356,10 @@ public class GenericSpark extends Motor {
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
     }
+
+//    protected String[] getSignalsToLog() {
+//        return new String[]{"position", "velocity", "current", "voltage", "temperature", "target"};
+//    }
 
     private double getVoltagePrivate() {
         return spark.getBusVoltage() * spark.getAppliedOutput();

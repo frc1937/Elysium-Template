@@ -1,12 +1,12 @@
 package frc.lib.generic.motor.hardware;
 
-import frc.lib.generic.motor.MotorInputsAutoLogged;
+import frc.lib.generic.motor.Motor;
 
 import java.util.Map;
 import java.util.Queue;
 
 public class MotorUtilities {
-    static void handleThreadedInputs(MotorInputsAutoLogged inputs, Map<String, Queue<Double>> signalQueueList, Queue<Double> timestampQueue) {
+    static void handleThreadedInputs(Motor.MotorInputs inputs, Map<String, Queue<Double>> signalQueueList, Queue<Double> timestampQueue) {
         if (signalQueueList.isEmpty()) return;
 
         if (signalQueueList.get("position") != null)

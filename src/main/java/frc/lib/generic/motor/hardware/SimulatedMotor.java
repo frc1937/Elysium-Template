@@ -3,7 +3,6 @@ package frc.lib.generic.motor.hardware;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.motor.Motor;
 import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorInputsAutoLogged;
 import frc.lib.generic.motor.MotorProperties;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
@@ -70,7 +69,7 @@ public class SimulatedMotor extends Motor {
     }
 
     @Override
-    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+    protected void refreshInputs(MotorInputs inputs) {
         if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION) {
             throw new RuntimeException("This motor should NEVER be initialized manually! Use the factory methods instead!");
         }

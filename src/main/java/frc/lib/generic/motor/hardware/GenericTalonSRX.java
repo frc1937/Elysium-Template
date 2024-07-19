@@ -166,7 +166,7 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    protected void refreshInputs(MotorInputsAutoLogged inputs) {
+    protected void refreshInputs(MotorInputs inputs) {
         if (talonSRX == null) return;
 
         inputs.current = talonSRX.getStatorCurrent();

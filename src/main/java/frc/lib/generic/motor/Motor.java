@@ -4,8 +4,9 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import frc.lib.generic.advantagekit.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
-import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.LogTable;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import java.util.function.DoubleSupplier;
 
@@ -14,7 +15,7 @@ import java.util.function.DoubleSupplier;
  * in addition of better uniformity across the code.
  */
 public class Motor implements LoggableHardware {
-    private final MotorInputsAutoLogged inputs = new MotorInputsAutoLogged();
+    private final MotorInputs inputs = new MotorInputs();
     private final String name;
 
     private MotorConfiguration configuration;
@@ -263,7 +264,7 @@ public class Motor implements LoggableHardware {
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
 
-    protected void refreshInputs(MotorInputsAutoLogged inputs) { }
+    protected void refreshInputs(MotorInputs inputs) { }
 
     @Override
     public void periodic() {
@@ -272,12 +273,33 @@ public class Motor implements LoggableHardware {
     }
 
     @Override
-    public MotorInputsAutoLogged getInputs() {
+    public MotorInputs getInputs() {
         return inputs;
     }
 
-    @AutoLog
-    public static class MotorInputs {
+    /**
+     * Should log certain signals. The order:
+     * 0 - voltage
+     * 1 - current
+     * 2 - temperature
+     * 3 - target
+     * 4 - systemPosition
+     * 5 - systemVelocity
+     * 6 - timestamps
+     * 7 - threadVoltage
+     * 8 - threadCurrent
+     * 9 - threadTemperature
+     * 10 - threadTarget
+     * 11 - threadSystemPosition
+     * 12 - threadSystemVelocity
+     *
+     * @return An array of the signals to log.
+     */
+    protected static boolean[] getSignalsToLog() {
+        return new boolean[13];
+    }
+
+    public static class MotorInputs implements LoggableInputs {
         public double voltage = 0;
         public double current = 0;
         public double temperature = 0;
@@ -292,5 +314,41 @@ public class Motor implements LoggableHardware {
         public double[] threadTarget = new double[0];
         public double[] threadSystemPosition = new double[0];
         public double[] threadSystemVelocity = new double[0];
+
+        private final boolean[] signalsToLog = getSignalsToLog();
+
+        @Override
+        public void toLog(LogTable table) {
+            if (signalsToLog[0]) table.put("Voltage", voltage);
+            if (signalsToLog[1]) table.put("Current", current);
+            if (signalsToLog[2]) table.put("Temperature", temperature);
+            if (signalsToLog[3]) table.put("Target", target);
+            if (signalsToLog[4]) table.put("SystemPosition", systemPosition);
+            if (signalsToLog[5]) table.put("SystemVelocity", systemVelocity);
+            if (signalsToLog[6]) table.put("Timestamps", timestamps);
+            if (signalsToLog[7]) table.put("ThreadVoltage", threadVoltage);
+            if (signalsToLog[8]) table.put("ThreadCurrent", threadCurrent);
+            if (signalsToLog[9]) table.put("ThreadTemperature", threadTemperature);
+            if (signalsToLog[10]) table.put("ThreadTarget", threadTarget);
+            if (signalsToLog[11]) table.put("ThreadSystemPosition", threadSystemPosition);
+            if (signalsToLog[12]) table.put("ThreadSystemVelocity", threadSystemVelocity);
+        }
+
+        @Override
+        public void fromLog(LogTable table) {
+            if (signalsToLog[0]) voltage = table.get("Voltage", voltage);
+            if (signalsToLog[1]) current = table.get("Current", current);
+            if (signalsToLog[2]) temperature = table.get("Temperature", temperature);
+            if (signalsToLog[3]) target = table.get("Target", target);
+            if (signalsToLog[4]) systemPosition = table.get("SystemPosition", systemPosition);
+            if (signalsToLog[5]) systemVelocity = table.get("SystemVelocity", systemVelocity);
+            if (signalsToLog[6]) timestamps = table.get("Timestamps", timestamps);
+            if (signalsToLog[7]) threadVoltage = table.get("ThreadVoltage", threadVoltage);
+            if (signalsToLog[8]) threadCurrent = table.get("ThreadCurrent", threadCurrent);
+            if (signalsToLog[9]) threadTemperature = table.get("ThreadTemperature", threadTemperature);
+            if (signalsToLog[10]) threadTarget = table.get("ThreadTarget", threadTarget);
+            if (signalsToLog[11]) threadSystemPosition = table.get("ThreadSystemPosition", threadSystemPosition);
+            if (signalsToLog[12]) threadSystemVelocity = table.get("ThreadSystemVelocity", threadSystemVelocity);
+        }
     }
 }
