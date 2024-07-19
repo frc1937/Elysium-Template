@@ -180,17 +180,6 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void refreshStatusSignals(MotorSignal... signals) {
-        ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
-
-        for (MotorSignal signal : signals) {
-            baseStatusSignals.add(getRawStatusSignal(signal));
-        }
-
-        BaseStatusSignal.refreshAll(baseStatusSignals.toArray(new BaseStatusSignal[0]));
-    }
-
-    @Override
     public boolean configure(MotorConfiguration configuration) {
         this.currentConfiguration = configuration;
 

@@ -1,7 +1,5 @@
 package frc.lib.generic.motor;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusSignal;
 import frc.lib.generic.advantagekit.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import org.littletonrobotics.junction.LogTable;
@@ -217,18 +215,6 @@ public class Motor implements LoggableHardware {
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
     public void setupSignalsUpdates(MotorSignal... signals) { }
-
-    /**
-     * Get the raw StatusSignal of the motor. DO NOT USE if not necessary.
-     */
-    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) { return null; }
-
-    /**
-     * Refreshes all status signals.
-     * This has the same effect as calling {@link com.ctre.phoenix6.BaseStatusSignal#refreshAll(BaseStatusSignal...)}.
-     * DO NOT USE if not necessary.
-     */
-    public void refreshStatusSignals(MotorSignal... signals) { }
 
     public boolean configure(MotorConfiguration configuration) {
         this.configuration = configuration;

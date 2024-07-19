@@ -1,8 +1,12 @@
 package frc.lib.generic.motor.hardware;
 
-import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -134,16 +138,6 @@ public class GenericSpark extends Motor {
         for (MotorSignal signalType : signals) {
             setupSignalUpdates(signalType);
         }
-    }
-
-    @Override
-    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
-        throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
-    }
-
-    @Override
-    public void refreshStatusSignals(MotorSignal... signals) {
-        throw new UnsupportedOperationException("SparkMaxes don't use status signals. This operation is not supported.");
     }
 
     @Override

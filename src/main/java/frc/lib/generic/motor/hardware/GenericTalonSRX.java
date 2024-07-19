@@ -5,8 +5,10 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
-import com.ctre.phoenix6.StatusSignal;
-import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 
 import java.util.function.DoubleSupplier;
 
@@ -117,16 +119,6 @@ public class GenericTalonSRX extends Motor {
     @Override
     public void setupSignalsUpdates(MotorSignal... signal) {
         throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
-    }
-
-    @Override
-    public StatusSignal<Double> getRawStatusSignal(MotorSignal signal) {
-        throw new UnsupportedOperationException("Talon SRX does NOT use status signals. Use GenericTalonFX instead");
-    }
-
-    @Override
-    public void refreshStatusSignals(MotorSignal... signal) {
-        throw new UnsupportedOperationException("Talon SRX does NOT use status signals. Use GenericTalonFX instead");
     }
 
     @Override
