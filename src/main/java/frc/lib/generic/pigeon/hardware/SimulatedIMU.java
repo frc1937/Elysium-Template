@@ -6,12 +6,13 @@ import frc.lib.generic.pigeon.Pigeon;
 import frc.lib.generic.pigeon.PigeonInputs;
 import frc.lib.generic.pigeon.PigeonSignal;
 
+import static frc.lib.generic.pigeon.PigeonInputs.PIGEON_INPUTS_LENGTH;
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 import static frc.robot.RobotContainer.SWERVE;
 
 public class SimulatedIMU extends Pigeon {
     private double simulatedYawDegrees = 0;
-    private final boolean[] signalsToLog = new boolean[7];
+    private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
 
     public SimulatedIMU(String name) {
         super(name);

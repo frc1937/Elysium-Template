@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 
+import static frc.lib.generic.pigeon.PigeonInputs.PIGEON_INPUTS_LENGTH;
+
 public class GenericIMU extends Pigeon {
     private final WPI_PigeonIMU pigeon;
 
-    private final boolean[] signalsToLog = new boolean[7];
+    private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
@@ -35,10 +37,12 @@ public class GenericIMU extends Pigeon {
 
     @Override
     public void setupSignalUpdates(PigeonSignal signal) {
+        signalsToLog[signal.getType().getId()] = true;
+
         if (!signal.useFasterThread()) return;
 
-        final int indexOffset = signal.useFasterThread() ? 3 : 0;
-        signalsToLog[signal.getType().getId() + indexOffset] = true;
+        signalsToLog[3] = true;
+        signalsToLog[signal.getType().getId() + 4] = true;
 
         switch (signal.getType()) {
             case YAW -> signalQueueList.put("yaw", OdometryThread.getInstance().registerSignal(pigeon::getYaw));

@@ -11,9 +11,6 @@ import java.util.function.DoubleSupplier;
  * in addition of better uniformity across the code.
  */
 public class Motor implements LoggableHardware {
-    protected static final int SIGNALS_TO_LOG_LENGTH = 13;
-    protected static final boolean[] LOG_NO_SIGNALS = new boolean[]{false, false, false, false, false, false, false, false, false, false, false, false, false};
-
     private final MotorInputs inputs = new MotorInputs();
     private final String name;
 
@@ -273,21 +270,4 @@ public class Motor implements LoggableHardware {
     public MotorInputs getInputs() {
         return inputs;
     }
-
-    /**
-     * Should log certain signals. The order:
-     * 0 - voltage
-     * 1 - current
-     * 2 - temperature
-     * 3 - target
-     * 4 - systemPosition
-     * 5 - systemVelocity
-     * 6 - timestamps
-     * 7 - threadVoltage
-     * 8 - threadCurrent
-     * 9 - threadTemperature
-     * 10 - threadTarget
-     * 11 - threadSystemPosition
-     * 12 - threadSystemVelocity
-     */
 }

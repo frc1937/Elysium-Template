@@ -15,13 +15,15 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
+import static frc.lib.generic.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
+
 public class GenericSpark extends Motor {
     private static final double USE_BUILTIN_FEEDFORWARD_NUMBER = 69420;
 
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
 
-    private final boolean[] signalsToLog = LOG_NO_SIGNALS;
+    private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue;
 
@@ -44,8 +46,8 @@ public class GenericSpark extends Motor {
         super(name);
 
         if (sparkType == MotorProperties.SparkType.FLEX)
-            spark = new CANSparkFlex(deviceId, CANSparkFlex.MotorType.kBrushless);
-        else spark = new CANSparkMax(deviceId, CANSparkMax.MotorType.kBrushless);
+            spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
+        else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
 
         optimizeBusUsage();
 

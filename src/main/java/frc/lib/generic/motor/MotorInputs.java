@@ -3,9 +3,9 @@ package frc.lib.generic.motor;
 import frc.lib.generic.advantagekit.ChoosableLoggedInputs;
 import org.littletonrobotics.junction.LogTable;
 
-import static frc.lib.generic.motor.Motor.LOG_NO_SIGNALS;
-
 public class MotorInputs implements ChoosableLoggedInputs {
+    public static final int MOTOR_INPUTS_LENGTH = 13;
+
     public double voltage = 0;
     public double current = 0;
     public double temperature = 0;
@@ -21,7 +21,7 @@ public class MotorInputs implements ChoosableLoggedInputs {
     public double[] threadSystemPosition = new double[0];
     public double[] threadSystemVelocity = new double[0];
 
-    private boolean[] signalsToLog = LOG_NO_SIGNALS;
+    private boolean[] signalsToLog;
 
     @Override
     public void setSignalsToLog(boolean[] signalsToLog) {
@@ -47,30 +47,18 @@ public class MotorInputs implements ChoosableLoggedInputs {
 
     @Override
     public void fromLog(LogTable table) {
-//        if (signalsToLog[0])
-            voltage = table.get("Voltage", voltage);
-//        if (signalsToLog[1])
-            current = table.get("Current", current);
-//        if (signalsToLog[2])
-            temperature = table.get("Temperature", temperature);
-//        if (signalsToLog[3])
-            target = table.get("Target", target);
-//        if (signalsToLog[4])
-            systemPosition = table.get("SystemPosition", systemPosition);
-//        if (signalsToLog[5])
-            systemVelocity = table.get("SystemVelocity", systemVelocity);
-//        if (signalsToLog[6])
-            timestamps = table.get("Timestamps", timestamps);
-//        if (signalsToLog[7])
-            threadVoltage = table.get("ThreadVoltage", threadVoltage);
-//        if (signalsToLog[8])
-            threadCurrent = table.get("ThreadCurrent", threadCurrent);
-//        if (signalsToLog[9])
-            threadTemperature = table.get("ThreadTemperature", threadTemperature);
-//        if (signalsToLog[10])
-            threadTarget = table.get("ThreadTarget", threadTarget);
-//        if (signalsToLog[11])
-            threadSystemPosition = table.get("ThreadSystemPosition", threadSystemPosition);
-        if (signalsToLog[12]) threadSystemVelocity = table.get("ThreadSystemVelocity", threadSystemVelocity);
+        voltage = table.get("Voltage", voltage);
+        current = table.get("Current", current);
+        temperature = table.get("Temperature", temperature);
+        target = table.get("Target", target);
+        systemPosition = table.get("SystemPosition", systemPosition);
+        systemVelocity = table.get("SystemVelocity", systemVelocity);
+        timestamps = table.get("Timestamps", timestamps);
+        threadVoltage = table.get("ThreadVoltage", threadVoltage);
+        threadCurrent = table.get("ThreadCurrent", threadCurrent);
+        threadTemperature = table.get("ThreadTemperature", threadTemperature);
+        threadTarget = table.get("ThreadTarget", threadTarget);
+        threadSystemPosition = table.get("ThreadSystemPosition", threadSystemPosition);
+        threadSystemVelocity = table.get("ThreadSystemVelocity", threadSystemVelocity);
     }
 }

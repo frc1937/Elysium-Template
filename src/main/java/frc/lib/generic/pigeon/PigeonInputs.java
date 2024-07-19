@@ -4,6 +4,8 @@ import frc.lib.generic.advantagekit.ChoosableLoggedInputs;
 import org.littletonrobotics.junction.LogTable;
 
 public class PigeonInputs implements ChoosableLoggedInputs {
+    public static final int PIGEON_INPUTS_LENGTH = 7;
+
     public double gyroYawDegrees = 0;
     public double gyroRollDegrees = 0;
     public double gyroPitchDegrees = 0;
@@ -36,19 +38,12 @@ public class PigeonInputs implements ChoosableLoggedInputs {
 
     @Override
     public void fromLog(LogTable table) {
-//        if (signalsToLog[0])
-            gyroYawDegrees = table.get("GyroYawDegrees", gyroYawDegrees);
-//        if (signalsToLog[1])
-            gyroRollDegrees = table.get("GyroRollDegrees", gyroRollDegrees);
-//        if (signalsToLog[2])
-            gyroPitchDegrees = table.get("GyroPitchDegrees", gyroPitchDegrees);
-//        if (signalsToLog[3])
-            timestamps = table.get("Timestamps", timestamps);
-//        if (signalsToLog[4])
-            threadGyroYawDegrees = table.get("ThreadGyroYawDegrees", threadGyroYawDegrees);
-//        if (signalsToLog[5])
-            threadGyroPitchDegrees = table.get("ThreadGyroPitchDegrees", threadGyroPitchDegrees);
-//        if (signalsToLog[6])
-            threadGyroRollDegrees = table.get("ThreadGyroRollDegrees", threadGyroRollDegrees);
+        gyroYawDegrees = table.get("GyroYawDegrees", gyroYawDegrees);
+        gyroRollDegrees = table.get("GyroRollDegrees", gyroRollDegrees);
+        gyroPitchDegrees = table.get("GyroPitchDegrees", gyroPitchDegrees);
+        timestamps = table.get("Timestamps", timestamps);
+        threadGyroYawDegrees = table.get("ThreadGyroYawDegrees", threadGyroYawDegrees);
+        threadGyroPitchDegrees = table.get("ThreadGyroPitchDegrees", threadGyroPitchDegrees);
+        threadGyroRollDegrees = table.get("ThreadGyroRollDegrees", threadGyroRollDegrees);
     }
 }

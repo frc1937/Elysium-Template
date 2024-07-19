@@ -5,13 +5,14 @@ import frc.lib.generic.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 
+import static frc.lib.generic.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class SimulatedMotor extends Motor {
     private MotorConfiguration currentConfiguration;
     private GenericSimulation simulation;
 
-    private final boolean[] signalsToLog = new boolean[13];
+    private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
 
     public SimulatedMotor(String name) {
         super(name);
@@ -70,9 +71,10 @@ public class SimulatedMotor extends Motor {
     @Override
     public void setupSignalsUpdates(MotorSignal... signals) {
         for (MotorSignal signal : signals) {
-            final int indexOffset = signal.useFasterThread() ? 7 : 0;
+            if (signal.useFasterThread()) signalsToLog[6] = true;
 
-            signalsToLog[signal.getType().getId() + indexOffset] = true;
+            signalsToLog[signal.getType().getId()] = true;
+            signalsToLog[signal.getType().getId() + 7] = true;
         }
     }
 

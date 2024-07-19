@@ -10,38 +10,29 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class MotorFactory {
     public static Motor createSpark(String name, int port, MotorProperties.SparkType type) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Motor(name);
-        }
-
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            return new SimulatedMotor(name);
-        }
-
+        Motor motor = createSimOrReplayMotor(name);
+        if (motor != null) return motor;
         return new GenericSpark(name, port, type);
     }
 
     public static Motor createTalonFX(String name, int port) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Motor(name);
-        }
-
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            return new SimulatedMotor(name);
-        }
-
+        Motor motor = createSimOrReplayMotor(name);
+        if (motor != null) return motor;
         return new GenericTalonFX(name, port);
     }
 
     public static Motor createTalonSRX(String name, int port) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new Motor(name);
-        }
-
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-            return new SimulatedMotor(name);
-        }
-
+        Motor motor = createSimOrReplayMotor(name);
+        if (motor != null) return motor;
         return new GenericTalonSRX(name, port);
+    }
+
+    private static Motor createSimOrReplayMotor(String name) {
+        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
+            return new Motor(name);
+        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
+            return new SimulatedMotor(name);
+
+        return null;
     }
 }

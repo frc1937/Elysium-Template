@@ -21,7 +21,7 @@ public class GenericTalonFX extends Motor {
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
-    private final boolean[] signalsToLog = LOG_NO_SIGNALS;
+    private final boolean[] signalsToLog = new boolean[MotorInputs.MOTOR_INPUTS_LENGTH];
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
 
