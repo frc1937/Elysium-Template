@@ -57,7 +57,17 @@ public class Motor implements LoggableHardware {
      * @param slot       The new slot values
      * @param slotNumber The slot number to modify
      */
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) { }
+    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
+        if (getCurrentConfiguration() == null) return;
+
+        switch (slotNumber) {
+            case 0 -> getCurrentConfiguration().slot0 = slot;
+            case 1 -> getCurrentConfiguration().slot1 = slot;
+            case 2 -> getCurrentConfiguration().slot2 = slot;
+        }
+
+        configure(getCurrentConfiguration());
+    }
 
     /**
      * Sets the output of the motor based on the specified control mode and desired output value.

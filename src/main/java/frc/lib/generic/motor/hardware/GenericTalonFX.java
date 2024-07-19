@@ -135,17 +135,6 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        switch (slotNumber) {
-            case 0 -> currentConfiguration.slot0 = slot;
-            case 1 -> currentConfiguration.slot1 = slot;
-            case 2 -> currentConfiguration.slot2 = slot;
-        }
-
-        configure(currentConfiguration);
-    }
-
-    @Override
     public void setMotorEncoderPosition(double position) {
         talonConfigurator.setPosition(position); //TODO: Test on real robot to check if works.
     }
