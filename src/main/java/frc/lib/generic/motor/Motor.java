@@ -15,6 +15,8 @@ import java.util.function.DoubleSupplier;
  * in addition of better uniformity across the code.
  */
 public class Motor implements LoggableHardware {
+    protected static final int SIGNALS_TO_LOG_LENGTH = 13;
+
     private final MotorInputs inputs = new MotorInputs();
     private final String name;
 
@@ -295,11 +297,11 @@ public class Motor implements LoggableHardware {
      *
      * @return An array of the signals to log.
      */
-    protected static boolean[] getSignalsToLog() {
-        return new boolean[13];
+    protected boolean[] getSignalsToLog() {
+        return new boolean[SIGNALS_TO_LOG_LENGTH];
     }
 
-    public static class MotorInputs implements LoggableInputs {
+    public class MotorInputs implements LoggableInputs {
         public double voltage = 0;
         public double current = 0;
         public double temperature = 0;

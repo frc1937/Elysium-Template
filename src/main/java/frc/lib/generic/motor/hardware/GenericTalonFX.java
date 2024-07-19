@@ -21,8 +21,10 @@ public class GenericTalonFX extends Motor {
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
     private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
+    private final boolean[] signalsToLog = new boolean[SIGNALS_TO_LOG_LENGTH];
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
+
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
@@ -319,6 +321,8 @@ public class GenericTalonFX extends Motor {
             case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
         }
     }
+
+
 
     @Override
     protected void refreshInputs(MotorInputs inputs) {
