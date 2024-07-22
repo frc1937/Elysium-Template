@@ -30,6 +30,11 @@ public class MotorInputs implements ChoosableLoggedInputs {
 
     @Override
     public void toLog(LogTable table) {
+        if (signalsToLog == null) {
+            System.out.println("signals to log do be null");
+            return;
+        }
+
         if (signalsToLog[0]) table.put("Voltage", voltage);
         if (signalsToLog[1]) table.put("Current", current);
         if (signalsToLog[2]) table.put("Temperature", temperature);
