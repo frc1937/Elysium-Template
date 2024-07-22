@@ -28,7 +28,7 @@ public class Camera extends PhotonCameraIO {
     public Camera(String cameraName, Transform3d robotCenterToCamera) {
         super(cameraName, robotCenterToCamera);
 
-        photonCamera = new PhotonCamera(cameraName);
+        photonCamera = new PhotonCamera("Front1937");
 
         photonPoseEstimator = new PhotonPoseEstimator(
                 APRIL_TAG_FIELD_LAYOUT,
@@ -37,8 +37,10 @@ public class Camera extends PhotonCameraIO {
                 robotCenterToCamera
         );
 
-        photonPoseEstimator.setTagModel(TAG_MODEL);
+        photonPoseEstimator.setPrimaryStrategy(PRIMARY_POSE_STRATEGY);
         photonPoseEstimator.setMultiTagFallbackStrategy(SECONDARY_POSE_STRATEGY);
+
+        photonPoseEstimator.setTagModel(TAG_MODEL);
     }
 
     private void logVisibleTags(boolean hasResult, Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
@@ -86,7 +88,12 @@ public class Camera extends PhotonCameraIO {
     @Override
     protected void refreshInputs(CameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
-        final Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(latestResult);
+
+        System.out.println("LATEST RESULT " + latestResult);
+
+        final Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update();
+
+        System.out.println("--------------\n PHOTON POSE ESTIMATOR RESULT " + photonPoseEstimator.update() + "\n------------------------");
 
         inputs.hasResult = hasResult(optionalEstimatedRobotPose);
 
