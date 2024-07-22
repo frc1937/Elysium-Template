@@ -1,6 +1,7 @@
-package frc.lib.generic.advantagekit;
+package frc.lib.generic;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.LogFileUtil;
@@ -14,8 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static frc.robot.GlobalConstants.CURRENT_MODE;
-import static frc.robot.GlobalConstants.FASTER_THREAD_LOCK;
+import static frc.robot.GlobalConstants.*;
 
 //Credit to team 418 for this
 public enum HardwareManager {
@@ -36,14 +36,12 @@ public enum HardwareManager {
      * @param robot Robot object
      */
     public static void initialize(LoggedRobot robot) {
-        boolean shouldWriteLogs = true; //for when the roborio doesn't have enough space...
-
         String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
 
         if (CURRENT_MODE == GlobalConstants.Mode.REAL || CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
             Logger.addDataReceiver(new NT4Publisher());
 
-            if (shouldWriteLogs)
+            if (SHOULD_WRITE_LOGS)
                 Logger.addDataReceiver(new WPILOGWriter(logPath));
         } else {
             robot.setUseTiming(true);

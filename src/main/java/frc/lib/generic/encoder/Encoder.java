@@ -2,7 +2,7 @@ package frc.lib.generic.encoder;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import frc.lib.generic.advantagekit.HardwareManager;
+import frc.lib.generic.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
