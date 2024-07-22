@@ -1,12 +1,21 @@
 package frc.lib.generic.motor.hardware;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.Properties;
-import frc.lib.generic.motor.*;
+import frc.lib.generic.motor.Motor;
+import frc.lib.generic.motor.MotorConfiguration;
+import frc.lib.generic.motor.MotorInputs;
+import frc.lib.generic.motor.MotorProperties;
+import frc.lib.generic.motor.MotorSignal;
 import frc.lib.math.Conversions;
 import frc.robot.poseestimation.poseestimator.OdometryThread;
 
@@ -45,11 +54,8 @@ public class GenericSpark extends Motor {
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
-        if (sparkType == MotorProperties.SparkType.FLEX)
-            spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
+        if (sparkType == MotorProperties.SparkType.FLEX) spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
         else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
-
-        optimizeBusUsage();
 
         encoder = spark.getEncoder();
         timestampQueue = OdometryThread.getInstance().getTimestampQueue();
@@ -143,6 +149,8 @@ public class GenericSpark extends Motor {
         configurePID(configuration);
 
         configureFeedForward();
+
+        optimizeBusUsage();
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -296,7 +304,8 @@ public class GenericSpark extends Motor {
         signalsToLog[signal.getType().getId() + indexOffset] = true;
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE ->
+                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
@@ -306,12 +315,18 @@ public class GenericSpark extends Motor {
         signalsToLog[6] = true;
 
         switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
-            case CURRENT -> signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
-            case VOLTAGE -> signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
-            case TEMPERATURE -> signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
+            case POSITION ->
+                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VELOCITY ->
+                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+            case CURRENT ->
+                    signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
+            case VOLTAGE ->
+                    signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+            case TEMPERATURE ->
+                    signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
+            case CLOSED_LOOP_TARGET ->
+                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
         }
     }
 
@@ -321,12 +336,12 @@ public class GenericSpark extends Motor {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        inputs.voltage = getVoltagePrivate();
-        inputs.current = spark.getOutputCurrent();
-        inputs.temperature = spark.getMotorTemperature();
-        inputs.target = closedLoopTarget;
-        inputs.systemPosition = getEffectivePosition();
-        inputs.systemVelocity = getEffectiveVelocity();
+        if (signalsToLog[0]) inputs.voltage = getVoltagePrivate();
+        if (signalsToLog[1]) inputs.current = spark.getOutputCurrent();
+        if (signalsToLog[2]) inputs.temperature = spark.getMotorTemperature();
+        if (signalsToLog[3]) inputs.target = closedLoopTarget;
+        if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
+        if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
     }
