@@ -14,7 +14,12 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.APRIL_TAG_FIELD_LAYOUT;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.MAXIMUM_AMBIGUITY;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.PRIMARY_POSE_STRATEGY;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.SECONDARY_POSE_STRATEGY;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_ID_TO_POSE;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_MODEL;
 
 public class Camera extends PhotonCameraIO {
     private final PhotonCamera photonCamera;

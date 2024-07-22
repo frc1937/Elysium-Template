@@ -36,7 +36,7 @@ public enum HardwareManager {
      * @param robot Robot object
      */
     public static void initialize(LoggedRobot robot) {
-        boolean shouldWriteLogs = false; //for when the roborio doesn't have enough space...
+        boolean shouldWriteLogs = true; //for when the roborio doesn't have enough space...
 
         String logPath = Filesystem.getDeployDirectory().getPath() + "/logs/";
 
