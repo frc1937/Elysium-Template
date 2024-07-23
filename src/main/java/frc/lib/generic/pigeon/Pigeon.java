@@ -29,7 +29,7 @@ public class Pigeon implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs(name, inputs);
+        Logger.processInputs("Pigeons/" + name, inputs);
     }
 
     @Override

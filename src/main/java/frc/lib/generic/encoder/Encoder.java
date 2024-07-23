@@ -48,7 +48,7 @@ public class Encoder implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs(name, inputs);
+        Logger.processInputs("Encoders/" + name, inputs);
     }
 
     @Override

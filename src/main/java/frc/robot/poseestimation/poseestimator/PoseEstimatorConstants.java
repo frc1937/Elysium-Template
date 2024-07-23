@@ -5,12 +5,16 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import frc.robot.poseestimation.photoncamera.CameraFactory;
 import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
-import frc.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.estimation.TargetModel;
 
 import java.util.HashMap;
@@ -43,7 +47,7 @@ public class PoseEstimatorConstants {
 
     public static final PhotonPoseEstimator.PoseStrategy
             PRIMARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.CLOSEST_TO_HEADING;
+            SECONDARY_POSE_STRATEGY = PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY;
 
     public static final AprilTagFieldLayout APRIL_TAG_FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
     public static final Map<Integer, Pose3d> TAG_ID_TO_POSE = new HashMap<>();

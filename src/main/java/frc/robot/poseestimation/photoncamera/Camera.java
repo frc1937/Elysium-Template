@@ -1,46 +1,42 @@
 package frc.robot.poseestimation.photoncamera;
 
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import frc.robot.poseestimation.photonposeestimator.EstimatedRobotPose;
-import frc.robot.poseestimation.photonposeestimator.PhotonPoseEstimator;
 import org.littletonrobotics.junction.Logger;
+import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import java.util.List;
 import java.util.Optional;
 
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.APRIL_TAG_FIELD_LAYOUT;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.MAXIMUM_AMBIGUITY;
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.PRIMARY_POSE_STRATEGY;
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.SECONDARY_POSE_STRATEGY;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_ID_TO_POSE;
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_MODEL;
 
 public class Camera extends PhotonCameraIO {
     private final PhotonCamera photonCamera;
-    private final PhotonPoseEstimator photonPoseEstimator;
+    private final org.photonvision.PhotonPoseEstimator photonPoseEstimator;
 
     public Camera(String cameraName, Transform3d robotCenterToCamera) {
         super(cameraName, robotCenterToCamera);
 
         photonCamera = new PhotonCamera("Front1937");
 
-        photonPoseEstimator = new PhotonPoseEstimator(
-                APRIL_TAG_FIELD_LAYOUT,
-                PRIMARY_POSE_STRATEGY,
+        photonPoseEstimator = new org.photonvision.PhotonPoseEstimator(
+                AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
+                org.photonvision.PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                 photonCamera,
                 robotCenterToCamera
         );
 
-        photonPoseEstimator.setPrimaryStrategy(PRIMARY_POSE_STRATEGY);
-        photonPoseEstimator.setMultiTagFallbackStrategy(SECONDARY_POSE_STRATEGY);
-
-        photonPoseEstimator.setTagModel(TAG_MODEL);
+        photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
+        photonPoseEstimator.setMultiTagFallbackStrategy(org.photonvision.PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
     }
 
     private void logVisibleTags(boolean hasResult, Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
@@ -88,12 +84,7 @@ public class Camera extends PhotonCameraIO {
     @Override
     protected void refreshInputs(CameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
-
-        System.out.println("LATEST RESULT " + latestResult);
-
         final Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update();
-
-        System.out.println("--------------\n PHOTON POSE ESTIMATOR RESULT " + photonPoseEstimator.update() + "\n------------------------");
 
         inputs.hasResult = hasResult(optionalEstimatedRobotPose);
 

@@ -263,7 +263,7 @@ public class Motor implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs(name, inputs);
+        Logger.processInputs("Motors/" + name, inputs);
     }
 
     @Override

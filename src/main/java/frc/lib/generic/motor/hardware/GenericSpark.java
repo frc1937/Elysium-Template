@@ -299,9 +299,8 @@ public class GenericSpark extends Motor {
      */
     private void setupSignalUpdates(MotorSignal signal) {
         final int ms = (int) (1000 / signal.getUpdateRate());
-        final int indexOffset = signal.useFasterThread() ? 7 : 0;
 
-        signalsToLog[signal.getType().getId() + indexOffset] = true;
+        signalsToLog[signal.getType().getId()] = true;
 
         switch (signal.getType()) {
             case VELOCITY, CURRENT, TEMPERATURE ->
@@ -313,6 +312,7 @@ public class GenericSpark extends Motor {
         if (!signal.useFasterThread()) return;
 
         signalsToLog[6] = true;
+        signalsToLog[signal.getType().getId() + 7] = true;
 
         switch (signal.getType()) {
             case POSITION ->

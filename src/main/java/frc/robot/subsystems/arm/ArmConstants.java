@@ -32,7 +32,7 @@ public class ArmConstants {
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
 
     static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",1, MotorProperties.SparkType.FLEX);
-    static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("ARM_ENCODER", 22);
+    static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("Arm Encoder", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
 
