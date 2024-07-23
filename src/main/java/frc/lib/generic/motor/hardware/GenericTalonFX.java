@@ -280,6 +280,8 @@ public class GenericTalonFX extends Motor {
 
         if (!signal.useFasterThread()) return;
 
+        signalsToLog[6] = true;
+
         switch (signal.getType()) {
             case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
             case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));

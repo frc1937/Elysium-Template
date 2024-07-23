@@ -43,7 +43,7 @@ public class PhotonCameraIO {
 
     public void refresh() {
         refreshInputs(inputs);
-        Logger.processInputs("Camera/" + name, inputs);
+        Logger.processInputs("Cameras/" + name, inputs);
     }
 
     private boolean isNewTimestamp() {

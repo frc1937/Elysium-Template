@@ -4,13 +4,12 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import frc.lib.generic.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
-import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
 public class Encoder implements LoggableHardware {
-    private final EncoderInputsAutoLogged inputs = new EncoderInputsAutoLogged();
+    private final EncoderInputs inputs = new EncoderInputs();
     private final String name;
 
     public Encoder(String name) {
@@ -43,7 +42,7 @@ public class Encoder implements LoggableHardware {
 
     public boolean configure(EncoderConfiguration encoderConfiguration) { return true; }
 
-    protected void refreshInputs(EncoderInputsAutoLogged inputs) { }
+    protected void refreshInputs(EncoderInputs inputs) { }
 
     @Override
     public void periodic() {
@@ -52,17 +51,7 @@ public class Encoder implements LoggableHardware {
     }
 
     @Override
-    public EncoderInputsAutoLogged getInputs() {
+    public EncoderInputs getInputs() {
         return inputs;
-    }
-
-    @AutoLog
-    public static class EncoderInputs {
-        public double position = 0;
-        public double velocity = 0;
-
-        public double[] timestamps = new double[0];
-        public double[] threadPosition = new double[0];
-        public double[] threadVelocity = new double[0];
     }
 }

@@ -2,14 +2,14 @@ package frc.lib.generic.encoder.hardware;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.encoder.Encoder;
-import frc.lib.generic.encoder.EncoderInputsAutoLogged;
+import frc.lib.generic.encoder.EncoderInputs;
 
 import java.util.function.DoubleSupplier;
 
 public class SimulatedCanCoder extends Encoder {
     private DoubleSupplier positionSupplier = () -> 0;
     private DoubleSupplier velocitySupplier = () -> 0;
-
+//todo: IMPLEMENT signalsToLog in here TOO.
     public SimulatedCanCoder(String name) {
         super(name);
     }
@@ -25,7 +25,7 @@ public class SimulatedCanCoder extends Encoder {
     }
 
     @Override
-    protected void refreshInputs(EncoderInputsAutoLogged inputs) {
+    protected void refreshInputs(EncoderInputs inputs) {
         if (positionSupplier == null || velocitySupplier == null) {
             return;
         }

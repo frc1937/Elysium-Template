@@ -7,10 +7,18 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import frc.lib.generic.encoder.*;
+import frc.lib.generic.encoder.Encoder;
+import frc.lib.generic.encoder.EncoderConfiguration;
+import frc.lib.generic.encoder.EncoderInputs;
+import frc.lib.generic.encoder.EncoderProperties;
+import frc.lib.generic.encoder.EncoderSignal;
 import frc.robot.poseestimation.poseestimator.OdometryThread;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -18,6 +26,8 @@ import java.util.*;
  * <a href="https://store.ctr-electronics.com/content/user-manual/CANCoder%20User">CTRE CANcoder PDF</a>'s%20Guide.pdf
  */
 public class GenericCanCoder extends Encoder {
+    private final boolean[] signalsToLog = new boolean[EncoderInputs.ENCODER_INPUTS_LENGTH];
+
     private final CANcoder canCoder;
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
@@ -38,12 +48,17 @@ public class GenericCanCoder extends Encoder {
 
     @Override
     public void setSignalUpdateFrequency(EncoderSignal signal) {
+        signalsToLog[signal.getType().getId()] = true;
+
         switch (signal.getType()) {
             case POSITION -> setupSignal(signal, positionSignal);
             case VELOCITY -> setupSignal(signal, velocitySignal);
         }
 
         if (!signal.useFasterThread()) return;
+
+        signalsToLog[2] = true;
+        signalsToLog[signal.getType().getId() + 3] = true;
 
         switch (signal.getType()) {
             case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
@@ -98,8 +113,10 @@ public class GenericCanCoder extends Encoder {
     }
 
     @Override
-    protected void refreshInputs(EncoderInputsAutoLogged inputs) {
+    protected void refreshInputs(EncoderInputs inputs) {
         if (canCoder == null) return;
+
+        inputs.setSignalsToLog(signalsToLog);
 
         BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
 
