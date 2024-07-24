@@ -4,7 +4,7 @@ import com.ctre.phoenix.sensors.WPI_PigeonIMU;
 import frc.lib.generic.hardware.pigeon.Pigeon;
 import frc.lib.generic.hardware.pigeon.PigeonInputs;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.lib.generic.OdometryThread;
 
 import java.util.HashMap;
 import java.util.Map;

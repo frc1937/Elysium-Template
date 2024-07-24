@@ -10,7 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.generic.hardware.motor.*;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.lib.generic.OdometryThread;
 
 import java.util.*;
 import java.util.function.DoubleSupplier;

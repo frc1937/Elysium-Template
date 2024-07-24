@@ -12,7 +12,7 @@ import frc.lib.generic.hardware.encoder.EncoderConfiguration;
 import frc.lib.generic.hardware.encoder.EncoderInputs;
 import frc.lib.generic.hardware.encoder.EncoderProperties;
 import frc.lib.generic.hardware.encoder.EncoderSignal;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.lib.generic.OdometryThread;
 
 import java.util.ArrayList;
 import java.util.HashMap;

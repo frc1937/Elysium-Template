@@ -17,7 +17,7 @@ import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.math.Conversions;
-import frc.robot.poseestimation.poseestimator.OdometryThread;
+import frc.lib.generic.OdometryThread;
 
 import java.util.HashMap;
 import java.util.Map;

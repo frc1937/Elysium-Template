@@ -25,6 +25,8 @@ public class PigeonInputs implements ChoosableLoggedInputs {
 
     @Override
     public void toLog(LogTable table) {
+        if (signalsToLog == null) return;
+
         if (signalsToLog[0]) table.put("GyroYawDegrees", gyroYawDegrees);
         if (signalsToLog[1]) table.put("GyroRollDegrees", gyroRollDegrees);
         if (signalsToLog[2]) table.put("GyroPitchDegrees", gyroPitchDegrees);

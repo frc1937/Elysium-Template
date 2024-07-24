@@ -22,10 +22,7 @@ public class EncoderInputs implements ChoosableLoggedInputs {
 
     @Override
     public void toLog(LogTable table) {
-        if (signalsToLog == null) {
-            System.out.println("ENCODER Signals to log do be null! Nudge Wihy to fix this..");
-            return;
-        }
+        if (signalsToLog == null) return;
 
         if (signalsToLog[0]) table.put("Position", position);
         if (signalsToLog[1]) table.put("Velocity", velocity);
