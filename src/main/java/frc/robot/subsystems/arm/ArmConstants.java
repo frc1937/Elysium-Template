@@ -48,8 +48,10 @@ public class ArmConstants {
 
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new EncoderSignal(EncoderSignal.SignalType.POSITION));
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new EncoderSignal(EncoderSignal.SignalType.VELOCITY));
+        ABSOLUTE_ARM_ENCODER.setSignalsUpdateFrequency(
+                new EncoderSignal(EncoderSignal.SignalType.POSITION),
+                new EncoderSignal(EncoderSignal.SignalType.VELOCITY)
+        );
 
         ABSOLUTE_ARM_ENCODER.setSimulatedEncoderPositionSource(ARM_MOTOR::getSystemPosition);
         ABSOLUTE_ARM_ENCODER.setSimulatedEncoderVelocitySource(ARM_MOTOR::getSystemVelocity);

@@ -1,6 +1,5 @@
 package frc.lib.generic.hardware.motor.hardware;
 
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
@@ -71,10 +70,10 @@ public class SimulatedMotor extends Motor {
     @Override
     public void setupSignalsUpdates(MotorSignal... signals) {
         for (MotorSignal signal : signals) {
-            if (signal.useFasterThread()) signalsToLog[6] = true;
+            if (signal.useFasterThread())
+                signalsToLog[signal.getType().getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
             signalsToLog[signal.getType().getId()] = true;
-            signalsToLog[signal.getType().getId() + 7] = true;
         }
     }
 
@@ -94,8 +93,6 @@ public class SimulatedMotor extends Motor {
         inputs.target = simulation.getTarget();
         inputs.systemPosition = simulation.getPositionRotations();
         inputs.systemVelocity = simulation.getVelocityRotationsPerSecond();
-
-        inputs.timestamps = new double[]{Timer.getFPGATimestamp()};
 
         inputs.threadVoltage = new double[]{inputs.voltage};
         inputs.threadCurrent = new double[]{inputs.current};

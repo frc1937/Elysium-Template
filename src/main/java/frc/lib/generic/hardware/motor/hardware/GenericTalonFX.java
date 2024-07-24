@@ -19,7 +19,6 @@ public class GenericTalonFX extends Motor {
     private final TalonFX talonFX;
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
     private final boolean[] signalsToLog = new boolean[MotorInputs.MOTOR_INPUTS_LENGTH];
     private final StatusSignal<Double> positionSignal, velocitySignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
@@ -266,8 +265,7 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setupSignalUpdates(MotorSignal signal) {
-        final int indexOffset = signal.useFasterThread() ? 7 : 0;
-        signalsToLog[signal.getType().getId() + indexOffset] = true;
+        signalsToLog[signal.getType().getId()] = true;
 
         switch (signal.getType()) {
             case VELOCITY -> setupSignal(signal, velocitySignal);
@@ -280,7 +278,7 @@ public class GenericTalonFX extends Motor {
 
         if (!signal.useFasterThread()) return;
 
-        signalsToLog[6] = true;
+        signalsToLog[signal.getType().getId() + MotorInputs.MOTOR_INPUTS_LENGTH / 2] = true;
 
         switch (signal.getType()) {
             case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
@@ -309,7 +307,7 @@ public class GenericTalonFX extends Motor {
         inputs.systemPosition = getSystemPositionPrivate();
         inputs.systemVelocity = getSystemVelocityPrivate();
 
-        MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
+        MotorUtilities.handleThreadedInputs(inputs, signalQueueList);
     }
 
     private double getSystemPositionPrivate() {

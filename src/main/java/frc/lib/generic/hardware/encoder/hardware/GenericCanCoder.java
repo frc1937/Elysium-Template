@@ -7,18 +7,12 @@ import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
-import frc.lib.generic.hardware.encoder.Encoder;
-import frc.lib.generic.hardware.encoder.EncoderConfiguration;
-import frc.lib.generic.hardware.encoder.EncoderInputs;
-import frc.lib.generic.hardware.encoder.EncoderProperties;
-import frc.lib.generic.hardware.encoder.EncoderSignal;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.encoder.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
+
+import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -26,13 +20,12 @@ import java.util.Queue;
  * <a href="https://store.ctr-electronics.com/content/user-manual/CANCoder%20User">CTRE CANcoder PDF</a>'s%20Guide.pdf
  */
 public class GenericCanCoder extends Encoder {
-    private final boolean[] signalsToLog = new boolean[EncoderInputs.ENCODER_INPUTS_LENGTH];
+    private final boolean[] signalsToLog = new boolean[ENCODER_INPUTS_LENGTH];
 
     private final CANcoder canCoder;
     private final CANcoderConfiguration canCoderConfig = new CANcoderConfiguration();
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final StatusSignal<Double> positionSignal, velocitySignal;
@@ -47,22 +40,23 @@ public class GenericCanCoder extends Encoder {
     }
 
     @Override
-    public void setSignalUpdateFrequency(EncoderSignal signal) {
-        signalsToLog[signal.getType().getId()] = true;
+    public void setSignalsUpdateFrequency(EncoderSignal... signals) {
+        for (EncoderSignal signal : signals) {
+            signalsToLog[signal.getType().getId()] = true;
 
-        switch (signal.getType()) {
-            case POSITION -> setupSignal(signal, positionSignal);
-            case VELOCITY -> setupSignal(signal, velocitySignal);
-        }
+            switch (signal.getType()) {
+                case POSITION -> setupSignal(signal, positionSignal);
+                case VELOCITY -> setupSignal(signal, velocitySignal);
+            }
 
-        if (!signal.useFasterThread()) return;
+            if (!signal.useFasterThread()) return;
 
-        signalsToLog[2] = true;
-        signalsToLog[signal.getType().getId() + 3] = true;
+            signalsToLog[signal.getType().getId() + ENCODER_INPUTS_LENGTH / 2] = true;
 
-        switch (signal.getType()) {
-            case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
-            case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+            switch (signal.getType()) {
+                case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
+                case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+            }
         }
     }
 
@@ -130,10 +124,7 @@ public class GenericCanCoder extends Encoder {
         if (signalQueueList.get("velocity") != null)
             inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
 
-        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
-
         signalQueueList.forEach((k, v) -> v.clear());
-        timestampQueue.clear();
     }
 
     private double getEncoderPositionPrivate() {

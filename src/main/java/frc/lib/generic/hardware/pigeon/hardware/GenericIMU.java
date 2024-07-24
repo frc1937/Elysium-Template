@@ -17,7 +17,6 @@ public class GenericIMU extends Pigeon {
 
     private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue = OdometryThread.getInstance().getTimestampQueue();
 
     public GenericIMU(String name, int deviceNumber) {
         super(name);
@@ -41,8 +40,7 @@ public class GenericIMU extends Pigeon {
 
         if (!signal.useFasterThread()) return;
 
-        signalsToLog[3] = true;
-        signalsToLog[signal.getType().getId() + 4] = true;
+        signalsToLog[signal.getType().getId() + PIGEON_INPUTS_LENGTH / 2] = true;
 
         switch (signal.getType()) {
             case YAW -> signalQueueList.put("yaw", OdometryThread.getInstance().registerSignal(pigeon::getYaw));
@@ -63,8 +61,6 @@ public class GenericIMU extends Pigeon {
 
         if (signalQueueList.isEmpty()) return;
 
-        inputs.timestamps = timestampQueue.stream().mapToDouble(Double::doubleValue).toArray();
-
         if (signalQueueList.get("yaw") != null)
             inputs.threadGyroYawDegrees = signalQueueList.get("yaw").stream().mapToDouble(Double::doubleValue).toArray();
         if (signalQueueList.get("pitch") != null)
@@ -72,7 +68,6 @@ public class GenericIMU extends Pigeon {
         if (signalQueueList.get("roll") != null)
             inputs.threadGyroRollDegrees = signalQueueList.get("roll").stream().mapToDouble(Double::doubleValue).toArray();
 
-        timestampQueue.clear();
         signalQueueList.forEach((k, v) -> v.clear());
     }
 }

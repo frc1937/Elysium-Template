@@ -30,8 +30,6 @@ public class Sensor implements LoggableHardware {
     @AutoLog
     public static class SensorInputs {
         public int currentValue = 0;
-
         public int[] threadCurrentValue = new int[0];
-        public double[] timestamp = new double[0];
     }
 }

@@ -56,10 +56,6 @@ public class OdometryThread extends Thread {
         notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
     }
 
-    public Queue<Double> getTimestampQueue() {
-        return timestamps;
-    }
-
     public Queue<Double> registerSignal(DoubleSupplier signal) {
         Queue<Double> queue = new ArrayBlockingQueue<>(100);
         FASTER_THREAD_LOCK.lock();

@@ -29,7 +29,7 @@ public class Encoder implements LoggableHardware {
     public double getEncoderVelocity() {return inputs.velocity; }
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    public void setSignalUpdateFrequency(EncoderSignal signal) {}
+    public void setSignalsUpdateFrequency(EncoderSignal... signals) {}
 
     public StatusSignal<Double> getRawStatusSignal(EncoderSignal signal) { return null; }
 

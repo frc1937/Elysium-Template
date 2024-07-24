@@ -34,7 +34,6 @@ public class GenericSpark extends Motor {
 
     private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
-    private final Queue<Double> timestampQueue;
 
     private double closedLoopTarget;
 
@@ -58,7 +57,6 @@ public class GenericSpark extends Motor {
         else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
 
         encoder = spark.getEncoder();
-        timestampQueue = OdometryThread.getInstance().getTimestampQueue();
     }
 
     @Override
@@ -303,16 +301,14 @@ public class GenericSpark extends Motor {
         signalsToLog[signal.getType().getId()] = true;
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT, TEMPERATURE ->
-                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
 
         if (!signal.useFasterThread()) return;
 
-        signalsToLog[6] = true;
-        signalsToLog[signal.getType().getId() + 7] = true;
+        signalsToLog[signal.getType().getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
         switch (signal.getType()) {
             case POSITION ->
@@ -343,7 +339,7 @@ public class GenericSpark extends Motor {
         if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
         if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
 
-        MotorUtilities.handleThreadedInputs(inputs, signalQueueList, timestampQueue);
+        MotorUtilities.handleThreadedInputs(inputs, signalQueueList);
     }
 
     private double getVoltagePrivate() {

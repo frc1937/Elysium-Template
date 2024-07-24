@@ -91,7 +91,7 @@ public class SwerveModuleConstants {
 
         steerEncoder.configure(encoderConfiguration);
 
-        steerEncoder.setSignalUpdateFrequency(STEER_POSITION_SIGNAL);
+        steerEncoder.setSignalsUpdateFrequency(STEER_POSITION_SIGNAL);
     }
 
     private static void setSimulatedEncoderSources(Encoder steerEncoder, Motor simulationSource) {
