@@ -64,7 +64,7 @@ public class Swerve extends GenericSubsystem {
 
     public Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new InitExecuteCommand(
-                () -> {},//initializeDrive(false),
+                () -> initializeDrive(true),
                 () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
                 this
         );
@@ -72,7 +72,7 @@ public class Swerve extends GenericSubsystem {
 
     public Command driveWhilstRotatingToTarget(DoubleSupplier x, DoubleSupplier y, Pose2d target, BooleanSupplier robotCentric) {
         return new FunctionalCommand(
-                () -> initializeDrive(false),
+                () -> initializeDrive(true),
                 () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
                 (interrupt) -> {
                 },
@@ -83,7 +83,7 @@ public class Swerve extends GenericSubsystem {
 
     public Command rotateToTarget(Pose2d target) {
         return new FunctionalCommand(
-                () -> initializeDrive(false),
+                () -> initializeDrive(true),
                 () -> driveWithTarget(0, 0, target, false),
                 (interrupt) -> {
                 },
@@ -166,9 +166,9 @@ public class Swerve extends GenericSubsystem {
             MODULES[i].setTargetState(swerveModuleStates[i]);
     }
 
-    private void initializeDrive(boolean closedLoop) {
+    private void initializeDrive(boolean openLoop) {
         for (SwerveModule currentModule : MODULES)
-            currentModule.setOpenLoop(closedLoop);
+            currentModule.setOpenLoop(openLoop);
 
         ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians());
     }
