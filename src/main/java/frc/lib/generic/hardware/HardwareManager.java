@@ -1,6 +1,7 @@
 package frc.lib.generic.hardware;
 
 import edu.wpi.first.wpilibj.Filesystem;
+import frc.lib.generic.OdometryThread;
 import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
@@ -85,9 +86,13 @@ public enum HardwareManager {
     public static void update() {
         //TODO: Only if hardware should use lock, USE LOCK
         FASTER_THREAD_LOCK.lock();
+        OdometryThread.getInstance().updateLatestTimestamps();
+
         for (LoggableHardware loggableHardware : hardware) {
             loggableHardware.periodic();
         }
+
+
         FASTER_THREAD_LOCK.unlock();
 
         periodicRunnable.forEach(Runnable::run);
