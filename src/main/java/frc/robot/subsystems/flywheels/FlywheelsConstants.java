@@ -13,8 +13,8 @@ public class FlywheelsConstants {
     private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("Right Flywheel", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
-            LEFT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0),
-            RIGHT_SLOT = new MotorProperties.Slot(0.0001, 0, 0, 0, 0, 0),
+            LEFT_SLOT = new MotorProperties.Slot( 0, 0, 0, 0.10904, 0.025022, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0, 0.10457, 0.037788, 0.05658),
 
             SIMULATION_SLOT = new MotorProperties.Slot(12, 0, 0, 0, 0, 0);
 
@@ -43,7 +43,7 @@ public class FlywheelsConstants {
                 0.017
         );
 
-        configuration.simulationSlot = SIMULATION_SLOT;
+    configuration.simulationSlot = SIMULATION_SLOT;
 
         motor.configure(configuration);
 

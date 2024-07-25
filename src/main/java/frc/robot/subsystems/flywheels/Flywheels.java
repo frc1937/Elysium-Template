@@ -37,7 +37,7 @@ public class Flywheels extends GenericSubsystem {
 
     @Override
     public void sysIdDrive(double voltage) {
-        flywheels[0].setVoltage(voltage);
+        flywheels[flywheelIndexToLog].setVoltage(voltage);
     }
 
     @Override
@@ -50,7 +50,11 @@ public class Flywheels extends GenericSubsystem {
 
     @Override
     public SysIdRoutine.Config getSysIdConfig() {
-        return super.getSysIdConfig();
+        return new SysIdRoutine.Config(
+                Volts.per(Second).of(0.5),
+                Volts.of(2),
+                Second.of(9)
+        );
     }
 
     public boolean hasReachedTarget() {
