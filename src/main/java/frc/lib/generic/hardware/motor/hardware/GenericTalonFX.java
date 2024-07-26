@@ -118,12 +118,12 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void setExternalPositionSupplier(DoubleSupplier position) {
+    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) {
         new UnsupportedOperationException("Setting external position source is not supported in TalonFX.\n Periodically call #setMotorEncoderPosition() instead.").printStackTrace();
     }
 
     @Override
-    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
+    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
         new UnsupportedOperationException("Setting external velocity source is not supported in TalonFX").printStackTrace();
     }
 

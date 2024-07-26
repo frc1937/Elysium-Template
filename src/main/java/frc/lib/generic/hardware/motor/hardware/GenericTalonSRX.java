@@ -13,9 +13,10 @@ import java.util.function.DoubleSupplier;
 public class GenericTalonSRX extends Motor {
     private final WPI_TalonSRX talonSRX;
 
-    private
-
+    private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
     private MotorConfiguration currentConfiguration;
+
+    private double conversionFactor = 1;
 
     public GenericTalonSRX(String name, int deviceNumber) {
         super(name);
@@ -40,13 +41,13 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public void setExternalPositionSupplier(DoubleSupplier position) {
-        throw new UnsupportedOperationException("This will be the next pgishat movil project");
+    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) {
+        this.externalPositionSupplier = positionSupplier;
     }
 
     @Override
-    public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-        throw new UnsupportedOperationException("This will be the next pgishat movil project");
+    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
+        this.externalVelocitySupplier = velocitySupplier;
     }
 
     @Override
@@ -88,27 +89,43 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     public double getMotorPosition() {
-        throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+        if (externalPositionSupplier != null)
+            return externalPositionSupplier.getAsDouble() * conversionFactor;
+
+        new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders. \nUse an external position supplier").printStackTrace();
+        return 0;
     }
 
     @Override
     public double getMotorVelocity() {
-        throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+        if (externalVelocitySupplier != null)
+            return externalVelocitySupplier.getAsDouble() * conversionFactor;
+
+        new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders. \nUse an external velocity supplier").printStackTrace();
+        return 0;
     }
 
     @Override
     public double getSystemPosition() {
-        throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+        if (externalPositionSupplier != null)
+            return externalPositionSupplier.getAsDouble();
+
+        new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders. \nUse an external position supplier").printStackTrace();
+        return 0;
     }
 
     @Override
     public double getSystemVelocity() {
-        throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+        if (externalVelocitySupplier != null)
+            return externalVelocitySupplier.getAsDouble();
+
+        new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders. \nUse an external velocity supplier").printStackTrace();
+        return 0;
     }
 
     @Override
     public void setMotorEncoderPosition(double position) {
-        throw new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.");
+        new UnsupportedOperationException("TalonSRX's don't have built-in relative encoders.").printStackTrace();
     }
 
     @Override
@@ -118,7 +135,7 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     public void setupSignalsUpdates(MotorSignal... signal) {
-        throw new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead");
+        new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead").printStackTrace();
     }
 
     @Override
@@ -128,6 +145,8 @@ public class GenericTalonSRX extends Motor {
         currentConfiguration = configuration;
 
         configureSlots(configuration);
+
+        conversionFactor = currentConfiguration.gearRatio;
 
         TalonSRXConfiguration talonSRXConfiguration = new TalonSRXConfiguration();
 

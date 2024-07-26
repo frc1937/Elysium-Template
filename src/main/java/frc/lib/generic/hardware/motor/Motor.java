@@ -33,20 +33,20 @@ public class Motor implements LoggableHardware {
      * the feedforward and PID controllers to use an external encoder position value instead
      * of the system's position, allowing for more precise control using external {@link Encoder Encoders}.
      *
-     * @param position A {@link DoubleSupplier} providing the position to be used
+     * @param positionSupplier A {@link DoubleSupplier} providing the position to be used
      *                 by the motor control system.
      */
-    public void setExternalPositionSupplier(DoubleSupplier position) { }
+    public void setExternalPositionSupplier(DoubleSupplier positionSupplier) { }
 
     /**
      * Supplies velocity from an external source for the motor control system. This method allows
      * the feedforward and PID controllers to use the externally supplied velocity value instead
      * of the system's calculated velocity, allowing for more precise control using external {@link Encoder Encoders}.
      *
-     * @param velocity A {@link DoubleSupplier} providing the velocity to be used
+     * @param velocitySupplier A {@link DoubleSupplier} providing the velocity to be used
      *                 by the motor control system.
      */
-    public void setExternalVelocitySupplier(DoubleSupplier velocity) { }
+    public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) { }
 
     /**
      * In case you need to re-set the slot on runtime, use this.
@@ -254,7 +254,7 @@ public class Motor implements LoggableHardware {
 
     public boolean isAtSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
-            throw new UnsupportedOperationException("NUH UH");
+            new UnsupportedOperationException("NUH UH").printStackTrace();
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }

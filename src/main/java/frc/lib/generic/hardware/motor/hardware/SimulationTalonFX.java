@@ -71,7 +71,7 @@ public class SimulationTalonFX extends Motor {
             }
 
             case CURRENT ->
-                    throw new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.");
+                    new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
         }
     }
 
