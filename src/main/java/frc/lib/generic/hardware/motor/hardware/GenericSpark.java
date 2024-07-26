@@ -47,13 +47,16 @@ public class GenericSpark extends Motor {
 
     private DoubleSupplier positionSupplier, velocitySupplier;
 
-    private TrapezoidProfile motionProfile;
+    private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
+
+    private double previousVelocity = 0;
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
-        if (sparkType == MotorProperties.SparkType.FLEX) spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
+        if (sparkType == MotorProperties.SparkType.FLEX)
+            spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
         else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
 
         encoder = spark.getEncoder();
@@ -154,14 +157,23 @@ public class GenericSpark extends Motor {
     }
 
     private void configureProfile(MotorConfiguration configuration) {
-        if (configuration.profiledMaxVelocity == 0 || configuration.profiledTargetAcceleration == 0) return;
+        if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration == 0) {
+            final TrapezoidProfile.Constraints positionMotionConstraints = new TrapezoidProfile.Constraints(
+                    configuration.profiledMaxVelocity,
+                    configuration.profiledTargetAcceleration
+            );
 
-        final TrapezoidProfile.Constraints motionConstraints = new TrapezoidProfile.Constraints(
-                configuration.profiledMaxVelocity,
-                configuration.profiledTargetAcceleration
-        );
+            positionMotionProfile = new TrapezoidProfile(positionMotionConstraints);
+        }
 
-        motionProfile = new TrapezoidProfile(motionConstraints);
+        if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
+            final TrapezoidProfile.Constraints velocityMotionConstraints = new TrapezoidProfile.Constraints(
+                    configuration.profiledTargetAcceleration,
+                    configuration.profiledJerk
+            );
+
+            velocityMotionProfile = new TrapezoidProfile(velocityMotionConstraints);
+        }
     }
 
     private void configureFeedForward() {
@@ -224,18 +236,10 @@ public class GenericSpark extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        double feedforwardOutput = 0, feedbackOutput, acceleration = 0;
+        double feedforwardOutput = 0, feedbackOutput = 0, acceleration = 0;
 
-        if (motionProfile == null) {
-            feedbackOutput = getModeBasedFeedback(controlMode, goalState);
-            //todo: acceleration
-
-            if (controlMode == MotorProperties.ControlMode.VELOCITY)
-                feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
-            if (controlMode == MotorProperties.ControlMode.POSITION)
-                feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
-        } else {
-            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+        if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
+            final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
@@ -243,7 +247,33 @@ public class GenericSpark extends Motor {
             feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
 
             previousSetpoint = currentSetpoint;
+
+            if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
+                feedforwardOutput = feedforward;
+
+            spark.setVoltage(feedforwardOutput + feedbackOutput);
+
+            return;
         }
+
+        if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
+            final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
+
+            feedforwardOutput = getFeedforwardOutput(new TrapezoidProfile.State(0, currentSetpoint.position), currentSetpoint.velocity);
+            feedbackOutput = getModeBasedFeedback(controlMode, new TrapezoidProfile.State(0, currentSetpoint.position));
+
+            previousSetpoint = currentSetpoint;
+
+            if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
+                feedforwardOutput = feedforward;
+
+            spark.setVoltage(feedforwardOutput + feedbackOutput);
+
+            return;
+        }
+
+        feedbackOutput = getModeBasedFeedback(controlMode, goalState);
+        feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
 
         if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
             feedforwardOutput = feedforward;
@@ -262,7 +292,11 @@ public class GenericSpark extends Motor {
         if (stateFromOutput != null && goalState == null || !goalState.equals(stateFromOutput)) {
             feedback.reset();
 
-            previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+            if (controlMode == MotorProperties.ControlMode.POSITION)
+                previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+            else if (controlMode == MotorProperties.ControlMode.VELOCITY)
+                previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
+
             goalState = stateFromOutput;
         }
     }
@@ -292,6 +326,14 @@ public class GenericSpark extends Motor {
         return velocitySupplier == null ? getSystemVelocityPrivate() : velocitySupplier.getAsDouble();
     }
 
+    private double getEffectiveAcceleration() {
+        final double acceleration = velocitySupplier == null ? getSystemVelocityPrivate() - previousVelocity : velocitySupplier.getAsDouble() - previousVelocity;
+
+        previousVelocity = velocitySupplier == null ? getSystemVelocityPrivate() : velocitySupplier.getAsDouble();
+
+        return acceleration;
+    }
+
     /**
      * Explanation here: <a href="https://docs.revrobotics.com/brushless/spark-max/control-interfaces">REV DOCS</a>
      */
@@ -301,7 +343,8 @@ public class GenericSpark extends Motor {
         signalsToLog[signal.getType().getId()] = true;
 
         switch (signal.getType()) {
-            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE ->
+                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }

@@ -88,6 +88,19 @@ public class MotorConfiguration {
     public double profiledTargetAcceleration = 0;
 
     /**
+     * This is the target jerk of the velocity motion profile will try to honour.
+     * Only set this if a VELOCITY profile is desired.
+     *
+     * <ul>
+     *   <li> <b>Minimum Value:</b> 0
+     *   <li> <b>Maximum Value:</b> 9999
+     *   <li> <b>Default Value:</b> 0
+     *   <li> <b>Units:</b> rot per sec²
+     * </ul>
+     */
+    public double profiledJerk = 0;
+
+    /**
      * Tolerance for closed-loop control, used for determining if the target is reached.
      * If this is not set, {@link Motor#isAtSetpoint()} will throw an exception
      * <ul>
