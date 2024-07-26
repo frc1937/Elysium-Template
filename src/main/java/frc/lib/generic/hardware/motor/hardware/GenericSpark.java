@@ -45,7 +45,7 @@ public class GenericSpark extends Motor {
 
     private PIDController feedback;
 
-    private DoubleSupplier positionSupplier, velocitySupplier;
+    private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
 
     private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
@@ -104,12 +104,12 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setExternalPositionSupplier(DoubleSupplier positionSupplier) {
-        this.positionSupplier = positionSupplier;
+        this.externalPositionSupplier = positionSupplier;
     }
 
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) {
-        this.velocitySupplier = velocitySupplier;
+        this.externalVelocitySupplier = velocitySupplier;
     }
 
     @Override
@@ -299,17 +299,17 @@ public class GenericSpark extends Motor {
     }
 
     private double getEffectivePosition() {
-        return positionSupplier == null ? getSystemPositionPrivate() : positionSupplier.getAsDouble();
+        return externalPositionSupplier == null ? getSystemPositionPrivate() : externalPositionSupplier.getAsDouble();
     }
 
     private double getEffectiveVelocity() {
-        return velocitySupplier == null ? getSystemVelocityPrivate() : velocitySupplier.getAsDouble();
+        return externalVelocitySupplier == null ? getSystemVelocityPrivate() : externalVelocitySupplier.getAsDouble();
     }
 
     private double getEffectiveAcceleration() {
-        final double acceleration = velocitySupplier == null ? getSystemVelocityPrivate() - previousVelocity : velocitySupplier.getAsDouble() - previousVelocity;
+        final double acceleration = externalVelocitySupplier == null ? getSystemVelocityPrivate() - previousVelocity : externalVelocitySupplier.getAsDouble() - previousVelocity;
 
-        previousVelocity = velocitySupplier == null ? getSystemVelocityPrivate() : velocitySupplier.getAsDouble();
+        previousVelocity = externalVelocitySupplier == null ? getSystemVelocityPrivate() : externalVelocitySupplier.getAsDouble();
 
         return acceleration;
     }

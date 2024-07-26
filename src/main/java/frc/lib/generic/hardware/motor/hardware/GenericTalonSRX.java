@@ -3,6 +3,7 @@ package frc.lib.generic.hardware.motor.hardware;
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.lib.generic.hardware.motor.*;
@@ -11,6 +12,8 @@ import java.util.function.DoubleSupplier;
 
 public class GenericTalonSRX extends Motor {
     private final WPI_TalonSRX talonSRX;
+
+    private
 
     private MotorConfiguration currentConfiguration;
 
@@ -33,7 +36,7 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output, double feedforward) {
-        throw new UnsupportedOperationException("I ain't implementing this lmfao");
+        new UnsupportedOperationException("I ain't implementing this lmfao").printStackTrace();
     }
 
     @Override
@@ -158,7 +161,6 @@ public class GenericTalonSRX extends Motor {
     protected void refreshInputs(MotorInputs inputs) {
         if (talonSRX == null) return;
 
-        //todo: AKIT!!!
 
         inputs.current = talonSRX.getStatorCurrent();
         inputs.voltage = talonSRX.getMotorOutputVoltage();

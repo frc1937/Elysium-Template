@@ -78,7 +78,7 @@ public class GenericTalonFX extends Motor {
                 }
             }
 
-            case CURRENT -> throw new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.");
+            case CURRENT -> new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();
         }
     }
 
@@ -119,12 +119,12 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void setExternalPositionSupplier(DoubleSupplier position) {
-//todo: do
+        new UnsupportedOperationException("Setting external position source is not supported in TalonFX.\n Periodically call #setMotorEncoderPosition() instead.").printStackTrace();
     }
 
     @Override
     public void setExternalVelocitySupplier(DoubleSupplier velocity) {
-        //todo: Implement.
+        new UnsupportedOperationException("Setting external velocity source is not supported in TalonFX").printStackTrace();
     }
 
     @Override
@@ -289,8 +289,6 @@ public class GenericTalonFX extends Motor {
             case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
         }
     }
-
-
 
     @Override
     protected void refreshInputs(MotorInputs inputs) {
