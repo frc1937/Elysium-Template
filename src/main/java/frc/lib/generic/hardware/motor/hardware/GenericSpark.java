@@ -1,12 +1,7 @@
 package frc.lib.generic.hardware.motor.hardware;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -31,6 +26,7 @@ public class GenericSpark extends Motor {
 
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
+    private final SparkPIDController controller;
 
     private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
@@ -60,6 +56,9 @@ public class GenericSpark extends Motor {
         else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
 
         encoder = spark.getEncoder();
+        controller = spark.getPIDController();
+
+        optimizeBusUsage();
     }
 
     @Override
@@ -73,12 +72,12 @@ public class GenericSpark extends Motor {
         setGoal(mode, output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> spark.set(output);
+            case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
 
             case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
 
-            case VOLTAGE -> spark.setVoltage(output);
-            case CURRENT -> spark.getPIDController().setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse);
+            case VOLTAGE -> controller.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
+            case CURRENT -> controller.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
     }
 
@@ -150,8 +149,6 @@ public class GenericSpark extends Motor {
         configurePID(configuration);
 
         configureFeedForward();
-
-        optimizeBusUsage();
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -263,7 +260,7 @@ public class GenericSpark extends Motor {
 
         if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER) feedforwardOutput = feedforward;
 
-        spark.setVoltage(feedforwardOutput + feedbackOutput);
+        controller.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
