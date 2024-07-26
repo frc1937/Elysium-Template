@@ -3,7 +3,6 @@ package frc.lib.generic.hardware.motor.hardware;
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.lib.generic.hardware.motor.*;
@@ -16,6 +15,7 @@ public class GenericTalonSRX extends Motor {
     private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
     private MotorConfiguration currentConfiguration;
 
+    private double closedLoopTarget = 0;
     private double conversionFactor = 1;
 
     public GenericTalonSRX(String name, int deviceNumber) {
@@ -26,6 +26,8 @@ public class GenericTalonSRX extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
+        closedLoopTarget = output;
+
         switch (controlMode) {
             case POSITION -> talonSRX.set(ControlMode.Position, output);
             case VELOCITY -> talonSRX.set(ControlMode.Velocity, output);
@@ -180,11 +182,16 @@ public class GenericTalonSRX extends Motor {
     protected void refreshInputs(MotorInputs inputs) {
         if (talonSRX == null) return;
 
+        if (externalPositionSupplier != null)
+            inputs.systemPosition = externalPositionSupplier.getAsDouble();
+
+        if (externalVelocitySupplier != null)
+            inputs.systemVelocity = externalVelocitySupplier.getAsDouble();
+
+        inputs.target = closedLoopTarget;
 
         inputs.current = talonSRX.getStatorCurrent();
         inputs.voltage = talonSRX.getMotorOutputVoltage();
         inputs.temperature = talonSRX.getTemperature();
-
-        //todo: IMPLEMENT AKIT
     }
 }
