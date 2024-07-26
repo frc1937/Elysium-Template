@@ -236,60 +236,40 @@ public class GenericSpark extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        double feedforwardOutput = 0, feedbackOutput = 0, acceleration = 0;
+        double feedforwardOutput, feedbackOutput, acceleration = 0;
+
+        feedbackOutput = getModeBasedFeedback(controlMode, goalState);
+        feedforwardOutput = getFeedforwardOutput(goalState.position, goalState.velocity, acceleration);
 
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
             final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
-            feedforwardOutput = getFeedforwardOutput(currentSetpoint, acceleration);
-            feedbackOutput = getModeBasedFeedback(controlMode, currentSetpoint);
+            feedforwardOutput = getFeedforwardOutput(currentSetpoint.position, currentSetpoint.velocity, acceleration);
+            feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-
-            if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
-                feedforwardOutput = feedforward;
-
-            spark.setVoltage(feedforwardOutput + feedbackOutput);
-
-            return;
         }
 
         if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
-
-            feedforwardOutput = getFeedforwardOutput(new TrapezoidProfile.State(0, currentSetpoint.position), currentSetpoint.velocity);
-            feedbackOutput = getModeBasedFeedback(controlMode, new TrapezoidProfile.State(0, currentSetpoint.position));
+            //Position -> velocity. Velocity -> acc.
+            feedforwardOutput = getFeedforwardOutput(0, currentSetpoint.position, currentSetpoint.velocity);
+            feedbackOutput = feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-
-            if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
-                feedforwardOutput = feedforward;
-
-            spark.setVoltage(feedforwardOutput + feedbackOutput);
-
-            return;
         }
 
-        feedbackOutput = getModeBasedFeedback(controlMode, goalState);
-        feedforwardOutput = getFeedforwardOutput(goalState, acceleration);
-
-        if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER)
-            feedforwardOutput = feedforward;
+        if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER) feedforwardOutput = feedforward;
 
         spark.setVoltage(feedforwardOutput + feedbackOutput);
     }
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
-        TrapezoidProfile.State stateFromOutput = null;
+        final TrapezoidProfile.State stateFromOutput = new TrapezoidProfile.State(output, 0);
 
-        if (controlMode == MotorProperties.ControlMode.POSITION)
-            stateFromOutput = new TrapezoidProfile.State(output, 0);
-        if (controlMode == MotorProperties.ControlMode.VELOCITY)
-            stateFromOutput = new TrapezoidProfile.State(0, output);
-
-        if (stateFromOutput != null && goalState == null || !goalState.equals(stateFromOutput)) {
+        if (goalState == null || !goalState.equals(stateFromOutput)) {
             feedback.reset();
 
             if (controlMode == MotorProperties.ControlMode.POSITION)
@@ -311,11 +291,11 @@ public class GenericSpark extends Motor {
         return feedback.calculate(getEffectiveVelocity(), goal.velocity);
     }
 
-    private double getFeedforwardOutput(TrapezoidProfile.State goal, double acceleration) {
+    private double getFeedforwardOutput(double position, double velocity, double acceleration) {
         if (getCurrentSlot().gravityType() == null || getCurrentSlot().gravityType() == GravityTypeValue.Elevator_Static)
-            return feedforward.calculate(goal.velocity, acceleration);
+            return feedforward.calculate(velocity, acceleration);
 
-        return feedforward.calculate(goal.position, goal.velocity, acceleration);
+        return feedforward.calculate(position, velocity, acceleration);
     }
 
     private double getEffectivePosition() {
