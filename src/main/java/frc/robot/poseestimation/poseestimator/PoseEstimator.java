@@ -9,8 +9,10 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.lib.math.Optimizations;
 import frc.robot.RobotContainer;
 import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
 import org.littletonrobotics.junction.Logger;
@@ -94,6 +96,11 @@ public class PoseEstimator implements AutoCloseable {
         }
         if (timestamps.length == 0) {
             System.out.println("0!! Timestamps");
+            return;
+        }
+
+        if (Optimizations.isColliding()) {
+            DriverStation.reportWarning("The robot collided! Discarding odometry at timestamp", false);
             return;
         }
 
