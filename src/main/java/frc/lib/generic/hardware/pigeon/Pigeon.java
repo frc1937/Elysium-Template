@@ -2,6 +2,7 @@ package frc.lib.generic.hardware.pigeon;
 
 import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
+import frc.lib.generic.hardware.motor.MotorSignal;
 import org.littletonrobotics.junction.Logger;
 
 public class Pigeon implements LoggableHardware {
@@ -24,8 +25,9 @@ public class Pigeon implements LoggableHardware {
     /**
      * Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.
      */
-    public void setupSignalUpdates(PigeonSignal signal) {}
+    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) { }
 
+    public void setupSignalUpdates(PigeonSignal signal) { setupSignalUpdates(signal, false); }
     @Override
     public void periodic() {
         refreshInputs(inputs);

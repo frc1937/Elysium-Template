@@ -136,7 +136,7 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public void setupSignalsUpdates(MotorSignal... signal) {
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
         new UnsupportedOperationException("Talon SRX does NOT use signals. Use GenericTalonFX instead").printStackTrace();
     }
 

@@ -27,14 +27,11 @@ public class SimulatedCanCoder extends Encoder {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(EncoderSignal... signals) {
-        for (EncoderSignal signal : signals) {
-            signalsToLog[signal.getType().getId()] = true;
+    public void setupSignalUpdates(EncoderSignal signal, boolean useFasterThread) {
+        signalsToLog[signal.getId()] = true;
 
-            if (signal.useFasterThread()) {
-                signalsToLog[signal.getType().getId() + EncoderInputs.ENCODER_INPUTS_LENGTH / 2] = true;
-            }
-        }
+        if (useFasterThread)
+            signalsToLog[signal.getId() + EncoderInputs.ENCODER_INPUTS_LENGTH / 2] = true;
     }
 
     @Override

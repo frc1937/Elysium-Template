@@ -35,14 +35,14 @@ public class GenericIMU extends Pigeon {
     }
 
     @Override
-    public void setupSignalUpdates(PigeonSignal signal) {
-        signalsToLog[signal.getType().getId()] = true;
+    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) {
+        signalsToLog[signal.getId()] = true;
 
-        if (!signal.useFasterThread()) return;
+        if (!useFasterThread) return;
 
-        signalsToLog[signal.getType().getId() + PIGEON_INPUTS_LENGTH / 2] = true;
+        signalsToLog[signal.getId() + PIGEON_INPUTS_LENGTH / 2] = true;
 
-        switch (signal.getType()) {
+        switch (signal) {
             case YAW -> signalQueueList.put("yaw", OdometryThread.getInstance().registerSignal(pigeon::getYaw));
             case ROLL -> signalQueueList.put("roll", OdometryThread.getInstance().registerSignal(pigeon::getRoll));
             case PITCH -> signalQueueList.put("pitch", OdometryThread.getInstance().registerSignal(pigeon::getPitch));

@@ -67,6 +67,8 @@ public class GenericSpark extends Motor {
         closedLoopTarget = output;
         setGoal(mode, output);
 
+
+
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
 
@@ -116,13 +118,6 @@ public class GenericSpark extends Motor {
     public void setFollowerOf(String name, int masterPort) {
         spark.follow(new CANSparkMax(masterPort, CANSparkLowLevel.MotorType.kBrushless));
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
-    }
-
-    @Override
-    public void setupSignalsUpdates(MotorSignal... signals) {
-        for (MotorSignal signalType : signals) {
-            setupSignalUpdates(signalType);
-        }
     }
 
     @Override
@@ -293,23 +288,23 @@ public class GenericSpark extends Motor {
     /**
      * Explanation here: <a href="https://docs.revrobotics.com/brushless/spark-max/control-interfaces">REV DOCS</a>
      */
-    private void setupSignalUpdates(MotorSignal signal) {
-        final int ms = (int) (1000 / signal.getUpdateRate());
+    @Override
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+        final int ms = 1000 / (useFasterThread ? 200 : 50);
 
-        signalsToLog[signal.getType().getId()] = true;
+        signalsToLog[signal.getId()] = true;
 
-        switch (signal.getType()) {
-            case VELOCITY, CURRENT, TEMPERATURE ->
-                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+        switch (signal) {
+            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
 
-        if (!signal.useFasterThread()) return;
+        if (!useFasterThread) return;
 
-        signalsToLog[signal.getType().getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+        signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
-        switch (signal.getType()) {
+        switch (signal) {
             case POSITION ->
                     signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
             case VELOCITY ->

@@ -13,7 +13,7 @@ import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.simulation.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.lib.generic.hardware.motor.MotorSignal.SignalType.*;
+import static frc.lib.generic.hardware.motor.MotorSignal.*;
 
 public class ArmConstants {
     static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
@@ -48,10 +48,8 @@ public class ArmConstants {
 
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
-        ABSOLUTE_ARM_ENCODER.setSignalsUpdateFrequency(
-                new EncoderSignal(EncoderSignal.SignalType.POSITION),
-                new EncoderSignal(EncoderSignal.SignalType.VELOCITY)
-        );
+        ABSOLUTE_ARM_ENCODER.setupSignalUpdates(EncoderSignal.POSITION);
+        ABSOLUTE_ARM_ENCODER.setupSignalUpdates(EncoderSignal.VELOCITY);
 
         ABSOLUTE_ARM_ENCODER.setSimulatedEncoderPositionSource(ARM_MOTOR::getSystemPosition);
         ABSOLUTE_ARM_ENCODER.setSimulatedEncoderVelocitySource(ARM_MOTOR::getSystemVelocity);
@@ -102,9 +100,9 @@ public class ArmConstants {
 
         ARM_MOTOR.configure(motorConfiguration);
 
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(POSITION));
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VELOCITY));
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VOLTAGE));
+        ARM_MOTOR.setupSignalUpdates(POSITION);
+        ARM_MOTOR.setupSignalUpdates(VELOCITY);
+        ARM_MOTOR.setupSignalUpdates(VOLTAGE);
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

@@ -40,43 +40,26 @@ public class GenericCanCoder extends Encoder {
     }
 
     @Override
-    public void setSignalsUpdateFrequency(EncoderSignal... signals) {
-        for (EncoderSignal signal : signals) {
-            signalsToLog[signal.getType().getId()] = true;
+    public void setupSignalUpdates(EncoderSignal signal, boolean useFasterThread) {
+        final int updateFrequency = useFasterThread ? 200 : 50;
 
-            switch (signal.getType()) {
-                case POSITION -> setupSignal(signal, positionSignal);
-                case VELOCITY -> setupSignal(signal, velocitySignal);
-            }
+        signalsToLog[signal.getId()] = true;
 
-            if (!signal.useFasterThread()) return;
-
-            signalsToLog[signal.getType().getId() + ENCODER_INPUTS_LENGTH / 2] = true;
-
-            switch (signal.getType()) {
-                case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
-                case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
-            }
-        }
-    }
-
-    @Override
-    public StatusSignal<Double> getRawStatusSignal(EncoderSignal signal) {
-        return switch (signal.getType()) {
-            case POSITION -> positionSignal;
-            case VELOCITY -> velocitySignal;
-        };
-    }
-
-    @Override
-    public void refreshStatusSignals(EncoderSignal... signals) {
-        ArrayList<BaseStatusSignal> baseStatusSignals = new ArrayList<>();
-
-        for (EncoderSignal signal : signals) {
-            baseStatusSignals.add(getRawStatusSignal(signal));
+        switch (signal) {
+            case POSITION -> setupSignal(positionSignal, updateFrequency);
+            case VELOCITY -> setupSignal(velocitySignal, updateFrequency);
         }
 
-        BaseStatusSignal.refreshAll(baseStatusSignals.toArray(new BaseStatusSignal[0]));
+        if (!useFasterThread) return;
+
+        signalsToLog[signal.getId() + ENCODER_INPUTS_LENGTH / 2] = true;
+
+        switch (signal) {
+            case POSITION ->
+                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
+            case VELOCITY ->
+                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+        }
     }
 
     @Override
@@ -135,8 +118,8 @@ public class GenericCanCoder extends Encoder {
         return velocitySignal.refresh().getValue();
     }
 
-    private void setupSignal(final EncoderSignal signal, final StatusSignal<Double> correspondingSignal) {
+    private void setupSignal(final StatusSignal<Double> correspondingSignal, int updateFrequency) {
         signalsToUpdateList.add(correspondingSignal);
-        correspondingSignal.setUpdateFrequency(signal.getUpdateRate());
+        correspondingSignal.setUpdateFrequency(updateFrequency);
     }
 }

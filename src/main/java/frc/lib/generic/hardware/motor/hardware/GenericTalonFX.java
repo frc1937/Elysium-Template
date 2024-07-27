@@ -148,13 +148,6 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
-    public void setupSignalsUpdates(MotorSignal... signals) {
-        for (MotorSignal signal : signals) {
-            setupSignalUpdates(signal);
-        }
-    }
-
-    @Override
     public boolean configure(MotorConfiguration configuration) {
         this.currentConfiguration = configuration;
 
@@ -264,23 +257,26 @@ public class GenericTalonFX extends Motor {
         return statusCode == StatusCode.OK;
     }
 
-    private void setupSignalUpdates(MotorSignal signal) {
-        signalsToLog[signal.getType().getId()] = true;
+    @Override
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+        final int updateFrequency = useFasterThread ? 200 : 50;
 
-        switch (signal.getType()) {
-            case VELOCITY -> setupSignal(signal, velocitySignal);
-            case POSITION -> setupSignal(signal, positionSignal);
-            case VOLTAGE -> setupSignal(signal, voltageSignal);
-            case CURRENT -> setupSignal(signal, currentSignal);
-            case TEMPERATURE -> setupSignal(signal, temperatureSignal);
-            case CLOSED_LOOP_TARGET -> setupSignal(signal, closedLoopTarget);
+        signalsToLog[signal.getId()] = true;
+
+        switch (signal) {
+            case VELOCITY -> setupSignal(velocitySignal, updateFrequency);
+            case POSITION -> setupSignal(positionSignal, updateFrequency);
+            case VOLTAGE -> setupSignal(voltageSignal, updateFrequency);
+            case CURRENT -> setupSignal(currentSignal, updateFrequency);
+            case TEMPERATURE -> setupSignal(temperatureSignal, updateFrequency);
+            case CLOSED_LOOP_TARGET -> setupSignal(closedLoopTarget, updateFrequency);
         }
 
-        if (!signal.useFasterThread()) return;
+        if (!useFasterThread) return;
 
-        signalsToLog[signal.getType().getId() + MotorInputs.MOTOR_INPUTS_LENGTH / 2] = true;
+        signalsToLog[signal.getId() + MotorInputs.MOTOR_INPUTS_LENGTH / 2] = true;
 
-        switch (signal.getType()) {
+        switch (signal) {
             case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
             case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
             case VOLTAGE -> signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
@@ -332,8 +328,8 @@ public class GenericTalonFX extends Motor {
         return currentSignal.getValue();
     }
 
-    private void setupSignal(final MotorSignal signal, final StatusSignal<Double> correspondingSignal) {
+    private void setupSignal(final StatusSignal<Double> correspondingSignal, final int updateFrequency) {
         signalsToUpdateList.add(correspondingSignal);
-        correspondingSignal.setUpdateFrequency(signal.getUpdateRate());
+        correspondingSignal.setUpdateFrequency(updateFrequency);
     }
 }

@@ -69,7 +69,7 @@ public class SwerveConstants {
 
     private static void configureGyro() {
         GYRO.resetConfigurations();
-        GYRO.setupSignalUpdates(new PigeonSignal(PigeonSignal.SignalType.YAW, true));
+        GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
     }
 
     private static void configureRotationController() {

@@ -6,7 +6,7 @@ import frc.lib.generic.hardware.encoder.*;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 
-import static frc.lib.generic.hardware.motor.MotorSignal.SignalType.*;
+import static frc.lib.generic.hardware.motor.MotorSignal.*;
 import static frc.robot.subsystems.swerve.SwerveConstants.DRIVE_GEAR_RATIO;
 import static frc.robot.subsystems.swerve.SwerveConstants.STEER_GEAR_RATIO;
 
@@ -27,9 +27,6 @@ public class SwerveModuleConstants {
     static final int ANGLE_CURRENT_LIMIT = 30;
     static final int DRIVE_SUPPLY_CURRENT_LIMIT = 35;
     static final int DRIVE_STATOR_CURRENT_LIMIT = 50;
-
-    static final EncoderSignal STEER_POSITION_SIGNAL = new EncoderSignal(EncoderSignal.SignalType.POSITION, true);
-    static final MotorSignal DRIVE_POSITION_SIGNAL = new MotorSignal(POSITION, true);
 
     static final MotorProperties.Slot DRIVE_SLOT = new MotorProperties.Slot(
             0.053067, 0.0, 0.0,
@@ -91,7 +88,7 @@ public class SwerveModuleConstants {
 
         steerEncoder.configure(encoderConfiguration);
 
-        steerEncoder.setSignalsUpdateFrequency(STEER_POSITION_SIGNAL);
+        steerEncoder.setupSignalUpdates(EncoderSignal.POSITION, true);
     }
 
     private static void setSimulatedEncoderSources(Encoder steerEncoder, Motor simulationSource) {
@@ -100,17 +97,17 @@ public class SwerveModuleConstants {
     }
 
     private static void configureDriveMotor(Motor driveMotor) {
-        driveMotor.setupSignalsUpdates(DRIVE_POSITION_SIGNAL);
+        driveMotor.setupSignalUpdates(POSITION, true);
 
-        driveMotor.setupSignalsUpdates(new MotorSignal(VELOCITY));
-        driveMotor.setupSignalsUpdates(new MotorSignal(VOLTAGE));
-        driveMotor.setupSignalsUpdates(new MotorSignal(TEMPERATURE));
+        driveMotor.setupSignalUpdates(VELOCITY);
+        driveMotor.setupSignalUpdates(VOLTAGE);
+        driveMotor.setupSignalUpdates(TEMPERATURE);
 
         driveMotor.configure(driveMotorConfiguration);
     }
 
     private static void configureSteerMotor(Motor steerMotor, Encoder encoder) {
-        steerMotor.setupSignalsUpdates(new MotorSignal(POSITION));
+        steerMotor.setupSignalUpdates(POSITION);
         steerMotor.configure(steerMotorConfiguration);
 
         steerMotor.setExternalPositionSupplier(encoder::getEncoderPosition);

@@ -90,13 +90,6 @@ public class SimulationTalonFX extends Motor {
         talonFX.stopMotor();
     }
 
-    @Override
-    public void setupSignalsUpdates(MotorSignal... signals) {
-        for (MotorSignal signal : signals) {
-            setupSignalUpdates(signal);
-        }
-    }
-
     public TalonFXSimState getSimulationState() {
         return talonFX.getSimState();
     }
@@ -180,8 +173,9 @@ public class SimulationTalonFX extends Motor {
         return statusCode == StatusCode.OK;
     }
 
-    private void setupSignalUpdates(MotorSignal signal) {
-        switch (signal.getType()) {
+    @Override
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+        switch (signal) {
             case VELOCITY -> velocitySignal.setUpdateFrequency(1000);
             case POSITION -> positionSignal.setUpdateFrequency(1000);
             case VOLTAGE -> voltageSignal.setUpdateFrequency(1000);

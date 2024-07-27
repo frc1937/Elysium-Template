@@ -32,12 +32,12 @@ public class SimulatedIMU extends Pigeon {
     }
 
     @Override
-    public void setupSignalUpdates(PigeonSignal signal) {
-        if (signal.useFasterThread()) {
-            signalsToLog[signal.getType().getId() + PIGEON_INPUTS_LENGTH / 2] = true;
+    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) {
+        if (useFasterThread) {
+            signalsToLog[signal.getId() + PIGEON_INPUTS_LENGTH / 2] = true;
         }
 
-        signalsToLog[signal.getType().getId()] = true;
+        signalsToLog[signal.getId()] = true;
     }
 
     @Override

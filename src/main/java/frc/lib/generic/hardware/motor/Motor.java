@@ -220,8 +220,10 @@ public class Motor implements LoggableHardware {
 
     public void setFollowerOf(String name, int masterPort) { }
 
-    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
-    public void setupSignalsUpdates(MotorSignal... signals) { }
+    /** Signals are lazily loaded - only these explicitly called will be updated. Thus you must call this method. when using a signal.*/
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) { }
+
+    public void setupSignalUpdates(MotorSignal signal) { setupSignalUpdates(signal, false); }
 
     public boolean configure(MotorConfiguration configuration) {
         this.configuration = configuration;

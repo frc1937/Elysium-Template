@@ -69,13 +69,11 @@ public class SimulatedMotor extends Motor {
     }
 
     @Override
-    public void setupSignalsUpdates(MotorSignal... signals) {
-        for (MotorSignal signal : signals) {
-            if (signal.useFasterThread())
-                signalsToLog[signal.getType().getId() + MOTOR_INPUTS_LENGTH / 2] = true;
+    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+        if (useFasterThread)
+            signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
-            signalsToLog[signal.getType().getId()] = true;
-        }
+        signalsToLog[signal.getId()] = true;
     }
 
     @Override

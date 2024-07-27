@@ -23,14 +23,11 @@ public abstract class GenericSimulation {
 
         motor = new SimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        MotorSignal[] signals = List.of(new MotorSignal(MotorSignal.SignalType.CURRENT),
-                new MotorSignal(MotorSignal.SignalType.POSITION),
-                new MotorSignal(MotorSignal.SignalType.VELOCITY),
-                new MotorSignal(MotorSignal.SignalType.VOLTAGE),
-                new MotorSignal(MotorSignal.SignalType.TEMPERATURE),
-                new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET)).toArray(new MotorSignal[0]);
-
-        motor.setupSignalsUpdates(signals);
+        motor.setupSignalUpdates(MotorSignal.POSITION);
+        motor.setupSignalUpdates(MotorSignal.VELOCITY);
+        motor.setupSignalUpdates(MotorSignal.VOLTAGE);
+        motor.setupSignalUpdates(MotorSignal.TEMPERATURE);
+        motor.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
 
         motorSimulatedState = motor.getSimulationState();
         motorSimulatedState.setSupplyVoltage(12); //Voltage compensation.
