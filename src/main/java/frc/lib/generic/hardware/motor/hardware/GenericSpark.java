@@ -6,7 +6,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
-import frc.lib.generic.Properties;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorInputs;
@@ -34,12 +33,11 @@ public class GenericSpark extends Motor {
     private double closedLoopTarget;
 
     private MotorConfiguration currentConfiguration;
-    private Feedforward feedforward;
+    private Feedforward.Type feedforward;
+    private PIDController feedback;
 
     private int slotToUse = 0;
     private double conversionFactor = 1;
-
-    private PIDController feedback;
 
     private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
 
@@ -176,31 +174,21 @@ public class GenericSpark extends Motor {
     private void configureFeedForward() {
         MotorProperties.Slot currentSlot = getCurrentSlot();
 
-        if (currentSlot.gravityType() == null) {
-            feedforward = new Feedforward(Properties.FeedforwardType.SIMPLE,
-                    currentSlot.kS(),
-                    currentSlot.kV(),
-                    currentSlot.kA()
-            );
-        }
+        if (currentSlot.gravityType() == null)
+            feedforward = Feedforward.Type.SIMPLE;
 
-        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine) {
-            feedforward = new Feedforward(Properties.FeedforwardType.ARM,
-                    currentSlot.kS(),
-                    currentSlot.kV(),
-                    currentSlot.kA(),
-                    currentSlot.kG()
-            );
-        }
+        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine)
+            feedforward = Feedforward.Type.ARM;
 
-        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static) {
-            feedforward = new Feedforward(Properties.FeedforwardType.ELEVATOR,
-                    currentSlot.kS(),
-                    currentSlot.kV(),
-                    currentSlot.kA(),
-                    currentSlot.kG()
-            );
-        }
+        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static)
+            feedforward = Feedforward.Type.ELEVATOR;
+
+        feedforward.setFeedforwardConstants(
+                currentSlot.kS(),
+                currentSlot.kV(),
+                currentSlot.kA(),
+                currentSlot.kG()
+        );
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -233,17 +221,17 @@ public class GenericSpark extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        double feedforwardOutput, feedbackOutput, acceleration = 0;
+        double feedforwardOutput, feedbackOutput, acceleration;
 
         feedbackOutput = getModeBasedFeedback(controlMode, goalState);
-        feedforwardOutput = getFeedforwardOutput(goalState.position, goalState.velocity, acceleration);
+        feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
 
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
             final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
-            feedforwardOutput = getFeedforwardOutput(currentSetpoint.position, currentSetpoint.velocity, acceleration);
+            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
             feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
@@ -252,7 +240,7 @@ public class GenericSpark extends Motor {
         if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
             //Position -> velocity. Velocity -> acc.
-            feedforwardOutput = getFeedforwardOutput(0, currentSetpoint.position, currentSetpoint.velocity);
+            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
             feedbackOutput = feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
@@ -286,13 +274,6 @@ public class GenericSpark extends Motor {
         }
 
         return feedback.calculate(getEffectiveVelocity(), goal.velocity);
-    }
-
-    private double getFeedforwardOutput(double position, double velocity, double acceleration) {
-        if (getCurrentSlot().gravityType() == null || getCurrentSlot().gravityType() == GravityTypeValue.Elevator_Static)
-            return feedforward.calculate(velocity, acceleration);
-
-        return feedforward.calculate(position, velocity, acceleration);
     }
 
     private double getEffectivePosition() {

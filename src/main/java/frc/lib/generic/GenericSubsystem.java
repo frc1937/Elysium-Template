@@ -19,7 +19,7 @@ public abstract class GenericSubsystem extends SubsystemBase {
      */
     public final Command getSysIdQuastatic(SysIdRoutine.Direction direction) throws IllegalStateException {
         if (routine == null)
-            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!");
+            new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!").printStackTrace();
 
         return routine.quasistatic(direction);
     }
@@ -33,7 +33,7 @@ public abstract class GenericSubsystem extends SubsystemBase {
      */
     public final Command getSysIdDynamic(SysIdRoutine.Direction direction) throws IllegalStateException {
         if (routine == null)
-            throw new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!");
+            new IllegalStateException("Subsystem " + getName() + " doesn't have a SysId routine!").printStackTrace();
 
         return routine.dynamic(direction);
     }

@@ -46,8 +46,9 @@ public class AdvancedSwerveKinematics {
      * @param moduleLocations Location of all 4 swerve modules, LF/RF/LR/RR
      */
     public AdvancedSwerveKinematics(Translation2d... moduleLocations) {
-        if (moduleLocations.length < 2)
-            throw new IllegalArgumentException("A swerve drive requires at least two modules");
+        if (moduleLocations.length < 2) {
+            new IllegalArgumentException("A swerve drive requires at least two modules").printStackTrace();
+        }
 
         this.moduleLocations = moduleLocations;
     }

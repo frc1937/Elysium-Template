@@ -4,6 +4,8 @@ import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 
+import java.io.PrintStream;
+
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
@@ -16,9 +18,8 @@ public class SimulatedMotor extends Motor {
     public SimulatedMotor(String name) {
         super(name);
 
-        if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION) {
-            throw new RuntimeException("DO NOT Initialize THIS MOTOR! Use the factory methods instead!");
-        }
+        if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION)
+            new RuntimeException("DO NOT Initialize THIS MOTOR! Use the factory methods instead!").printStackTrace();
     }
 
     @Override
@@ -80,7 +81,7 @@ public class SimulatedMotor extends Motor {
     @Override
     protected void refreshInputs(MotorInputs inputs) {
         if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION) {
-            throw new RuntimeException("This motor should NEVER be initialized manually! Use the factory methods instead!");
+            new RuntimeException("This motor should NEVER be initialized manually! Use the factory methods instead!").printStackTrace();
         }
 
         if (simulation == null) return;
