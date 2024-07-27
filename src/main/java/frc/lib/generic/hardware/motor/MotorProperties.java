@@ -1,6 +1,11 @@
 package frc.lib.generic.hardware.motor;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkMax;
+
+import java.util.function.Function;
 
 public class MotorProperties {
     public enum IdleMode {
@@ -8,7 +13,14 @@ public class MotorProperties {
     }
 
     public enum SparkType {
-        MAX, FLEX
+        MAX((id -> new CANSparkMax(id, CANSparkMax.MotorType.kBrushless))),
+        FLEX((id -> new CANSparkFlex(id, CANSparkFlex.MotorType.kBrushless)));
+
+        public final Function<Integer, CANSparkBase> sparkCreator;
+
+        SparkType(Function<Integer, CANSparkBase> sparkCreator) {
+            this.sparkCreator = sparkCreator;
+        }
     }
 
     /**
@@ -20,14 +32,14 @@ public class MotorProperties {
          * <p>Control type: Current control</p>
          * <p>Units: Amperes (A)</p>
          */
-        CURRENT,
-
+        CURRENT(),
+//TODO: Realize how to do control wtihout siwtch statement in here.
         /**
          * Control the motor output based on the desired voltage.
          * <p>Control type: Voltage control</p>
          * <p>Units: Volts (V)</p>
          */
-        VOLTAGE,
+        VOLTAGE(),
 
         /**
          * Control the motor output based on the desired duty cycle.
@@ -35,21 +47,25 @@ public class MotorProperties {
          * <p>Units: Percentage (%)</p>
          * <p>Note: 0.5 represents 50% duty cycle.</p>
          */
-        PERCENTAGE_OUTPUT,
+        PERCENTAGE_OUTPUT(),
 
         /**
          * Control the motor to achieve a specific position.
          * <p>Control type: Position control</p>
          * <p>Units: Rotations</p>
          */
-        POSITION,
+        POSITION(),
 
         /**
          * Control the motor to achieve a specific velocity.
          * <p>Control type: Velocity control</p>
          * <p>Units: Rotations per second (RPS)</p>
          */
-        VELOCITY
+        VELOCITY();
+
+        ControlMode() {
+
+        }
     }
 
     public static final class Slot {

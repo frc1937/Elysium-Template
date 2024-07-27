@@ -49,9 +49,7 @@ public class GenericSpark extends Motor {
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
 
-        if (sparkType == MotorProperties.SparkType.FLEX)
-            spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
-        else spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
+        spark = sparkType.sparkCreator.apply(deviceId);
 
         encoder = spark.getEncoder();
         controller = spark.getPIDController();
