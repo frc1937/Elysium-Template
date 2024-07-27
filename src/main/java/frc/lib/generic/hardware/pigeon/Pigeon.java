@@ -17,9 +17,9 @@ public class Pigeon implements LoggableHardware {
     }
 
     public void resetConfigurations() {}
-    public double getYaw() {return inputs.gyroYawDegrees;}
-    public double getPitch() {return inputs.gyroPitchDegrees;}
-    public double getRoll() {return inputs.gyroRollDegrees;}
+    public double getYaw() { return inputs.gyroYawDegrees; }
+    public double getPitch() { return inputs.gyroPitchDegrees; }
+    public double getRoll() { return inputs.gyroRollDegrees; }
     public void setGyroYaw(double yawDegrees) {}
 
     /**
@@ -28,6 +28,7 @@ public class Pigeon implements LoggableHardware {
     public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) { }
 
     public void setupSignalUpdates(PigeonSignal signal) { setupSignalUpdates(signal, false); }
+
     @Override
     public void periodic() {
         refreshInputs(inputs);

@@ -16,6 +16,10 @@ public class FlywheelsConstants {
 
     SIMULATION_SLOT = new MotorProperties.Slot(12, 0, 0, 0, 0, 0);
 
+    protected static final double
+            LEFT_FLYWHEEL_DIAMETER = 4,
+            RIGHT_FLYWHEEL_DIAMETER = 3;
+
     static {
         configureMotor(LEFT_FLYWHEEL_MOTOR, true, LEFT_SLOT);
         configureMotor(RIGHT_FLYWHEEL_MOTOR, false, RIGHT_SLOT);

@@ -4,10 +4,11 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
+import frc.lib.math.Conversions;
 import frc.lib.util.commands.ExecuteEndCommand;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.flywheels;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.*;
 
 public class Flywheels extends GenericSubsystem {
     private final int flywheelIndexToLog = 0;
@@ -82,5 +83,12 @@ public class Flywheels extends GenericSubsystem {
         for (SingleFlywheel flywheel : flywheels) {
             flywheel.setTargetVelocity(targetRPS);
         }
+    }
+
+    public double getFlywheelTangentialVelocity() {
+        return Math.min(
+                Conversions.rpsToMps(flywheels[0].getVelocity(), LEFT_FLYWHEEL_DIAMETER),
+                Conversions.rpsToMps(flywheels[1].getVelocity(), RIGHT_FLYWHEEL_DIAMETER)
+        );
     }
 }
