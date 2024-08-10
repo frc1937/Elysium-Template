@@ -116,7 +116,10 @@
           },
           "open": true
         },
-        "open": true
+        "open": true,
+        "physics": {
+          "open": true
+        }
       }
     }
   },
@@ -141,7 +144,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 282,
+          "height": 380,
           "series": [
             {
               "color": [
@@ -190,12 +193,21 @@
             },
             {
               "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
+                0.8549020290374756,
+                0.545098066329956,
+                0.7647059559822083,
                 1.0
               ],
-              "id": "NT:/AdvantageKit/RealOutputs/ANGLE TargetAngle"
+              "id": "NT:/SmartDashboard/physics/FunctionTheta Deg"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/physics/distance"
             }
           ]
         }

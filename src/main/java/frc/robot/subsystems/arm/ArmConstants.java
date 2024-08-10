@@ -103,6 +103,7 @@ public class ArmConstants {
         ARM_MOTOR.setupSignalUpdates(POSITION);
         ARM_MOTOR.setupSignalUpdates(VELOCITY);
         ARM_MOTOR.setupSignalUpdates(VOLTAGE);
+        ARM_MOTOR.setupSignalUpdates(CLOSED_LOOP_TARGET);
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

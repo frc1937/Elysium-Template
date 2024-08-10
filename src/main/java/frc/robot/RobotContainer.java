@@ -33,6 +33,10 @@ import static frc.lib.util.Controller.Axis.LEFT_Y;
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
+//TODO:
+// Go over the TalonSRX. some goofness mgiht be there in the following specefiically.
+// Physics shoot. Press button, shoot note. Perhaps even sim animation for shooting note?
+
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
     public static final Swerve SWERVE = new Swerve();
@@ -80,19 +84,9 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
         driveController.getButton(Controller.Inputs.A)
-                .whileTrue(SWERVE.rotateToTarget(BLUE_SPEAKER.toPose2d())
-                        .alongWith(shooterCommands.receiveFloorNote())
+                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(), () -> false)
+                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
                 );
-
-
-        driveController.getButton(Controller.Inputs.B)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(90)));
-
-        driveController.getButton(Controller.Inputs.Y)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(-10)));
-
-        driveController.getButton(Controller.Inputs.X)
-                .whileTrue(shooterCommands.shootWithoutPhysics(25, Rotation2d.fromDegrees(110)));
 
         userButton.toggleOnTrue(Commands.startEnd(
                 () -> {
@@ -104,6 +98,7 @@ public class RobotContainer {
 
                 ARM, LEDS).ignoringDisable(true)
         ).debounce(0.5);
+
         configureButtons(ButtonLayout.TELEOP);
     }
 
