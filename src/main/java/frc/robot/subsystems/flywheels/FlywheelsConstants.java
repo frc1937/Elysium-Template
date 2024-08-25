@@ -34,6 +34,9 @@ public class FlywheelsConstants {
         configuration.supplyCurrentLimit = 40;
         configuration.statorCurrentLimit = 40;
 
+        configuration.profiledTargetAcceleration = 15;
+        configuration.profiledJerk = 10;
+
         configuration.slot0 = slot;
 
         configuration.closedLoopTolerance = 0.1;
