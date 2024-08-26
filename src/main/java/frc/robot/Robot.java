@@ -14,6 +14,7 @@ public class Robot extends LoggedRobot {
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
 
+
     @Override
     public void robotInit() {
         robotContainer = new RobotContainer();

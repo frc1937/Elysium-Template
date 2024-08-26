@@ -3,12 +3,21 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import frc.lib.Note;
+import frc.lib.math.Conversions;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
-import java.util.function.DoubleSupplier;
-
-import static frc.robot.RobotContainer.*;
+import static frc.robot.RobotContainer.ARM;
+import static frc.robot.RobotContainer.FLYWHEELS;
+import static frc.robot.RobotContainer.INTAKE;
+import static frc.robot.RobotContainer.KICKER;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 
 public class ShooterCommands {
 
@@ -50,16 +59,25 @@ public class ShooterCommands {
     }
 
     public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
+
         ConditionalCommand shootFromKicker = new ConditionalCommand(
                 KICKER.setKickerPercentageOutput(0.5),
                 KICKER.setKickerPercentageOutput(0.0),
                 () -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
         );
 
+        Note note = new Note(
+                new Pose3d(POSE_ESTIMATOR.getCurrentPose()),
+                Conversions.rpsToMps(targetRPS, Units.inchesToMeters(4)),
+                POSE_ESTIMATOR.getCurrentPose().getRotation(),
+                armAngle);
+
+
         return new ParallelCommandGroup(
                 ARM.setTargetPosition(armAngle),
-//                FLYWHEELS.setFlywheelsTargetVelocity(targetRPS),
-                shootFromKicker
+                FLYWHEELS.setTargetVelocity(targetRPS),
+                note.fly(),
+            shootFromKicker
         );
     }
 }
