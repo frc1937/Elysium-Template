@@ -87,7 +87,7 @@ public class RobotContainer {
 //                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
 //                );
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(25,
+        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
                 Rotation2d.fromDegrees(45)));
 
 

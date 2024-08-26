@@ -1,43 +1,52 @@
 package frc.lib;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.UUID;
-
 import static frc.robot.GlobalConstants.GRAVITY;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class Note {
     private final double initialVelocity;
-    private final Rotation2d yawAngle, pitchAngle;
-    private final Pose3d startPose;
+    private final Rotation2d pitchAngle;
+    private final Rotation2d yawAngle;
+    private Pose3d startPose;
 
-    private final Timer timer = new Timer();
-    private final UUID id = UUID.randomUUID();
-
-    public Note(Pose3d noteStartingPose, double initialVelocityMps, Rotation2d yawAngle, Rotation2d pitchAngle) {
+    public Note(double initialVelocityMps, Rotation2d pitchAngle, Rotation2d yawAngle) {
         this.initialVelocity = initialVelocityMps;
-        this.yawAngle = yawAngle;
         this.pitchAngle = pitchAngle;
-        startPose = noteStartingPose;
+        this.yawAngle = yawAngle;
+    }
+
+    public static Command createAndShootNote(double initialVelocity, Rotation2d pitchAngle) {
+        return new FunctionalCommand(
+                () -> {
+                    final Note note = new Note(initialVelocity, pitchAngle, POSE_ESTIMATOR.getCurrentPose().getRotation());
+                    note.fly().schedule();
+                },
+                () -> {},
+                interrupted -> {},
+                () -> false
+        );
     }
 
     /**
     Get the fly command for the note! Uses CMD to be periodically ran.
      */
-    public Command fly() {
+    private Command fly() {
+        final Timer timer = new Timer();
+
         return new FunctionalCommand(
-                timer::start,
+                () -> {
+                    timer.start();
+                    startPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose());
+                },
                 () -> calculatePosition(timer.get()),
                 interrupted -> {},
-                () -> timer.advanceIfElapsed(5)
+                () -> timer.advanceIfElapsed(7)
         );
     }
 
@@ -50,12 +59,16 @@ public class Note {
 
     private Transform3d getPhysicsPositionDelta(double time) {
         final double zVelocity = initialVelocity * pitchAngle.getSin();
+
         final double diagonalVelocityCompensator = initialVelocity * pitchAngle.getCos();
-        final double yVelocity = diagonalVelocityCompensator * yawAngle.getSin();
         final double xVelocity = diagonalVelocityCompensator * yawAngle.getCos();
+        final double yVelocity = diagonalVelocityCompensator * yawAngle.getSin();
 
         final double timeSquared = time * time;
-        final double frictionDeceleration = 1;
+        final double frictionDeceleration = 2.5;
+
+        System.out.println("The y vel: " + Math.max(yVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0));
+        System.out.println("X vel: " + Math.max(xVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0));
 
         return new Transform3d(new Translation3d(
                 Math.max(xVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0),

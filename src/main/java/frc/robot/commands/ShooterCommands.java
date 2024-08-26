@@ -59,24 +59,16 @@ public class ShooterCommands {
     }
 
     public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
-
         ConditionalCommand shootFromKicker = new ConditionalCommand(
                 KICKER.setKickerPercentageOutput(0.5),
                 KICKER.setKickerPercentageOutput(0.0),
                 () -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
         );
 
-        Note note = new Note(
-                new Pose3d(POSE_ESTIMATOR.getCurrentPose()),
-                Conversions.rpsToMps(targetRPS, Units.inchesToMeters(4)),
-                POSE_ESTIMATOR.getCurrentPose().getRotation(),
-                armAngle);
-
-
         return new ParallelCommandGroup(
                 ARM.setTargetPosition(armAngle),
                 FLYWHEELS.setTargetVelocity(targetRPS),
-                note.fly(),
+                Note.createAndShootNote(Conversions.rpsToMps(targetRPS, Units.inchesToMeters(4)), armAngle),
             shootFromKicker
         );
     }
