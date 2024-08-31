@@ -5,19 +5,13 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.lib.Note;
 import frc.lib.math.Conversions;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
-import static frc.robot.RobotContainer.ARM;
-import static frc.robot.RobotContainer.FLYWHEELS;
-import static frc.robot.RobotContainer.INTAKE;
-import static frc.robot.RobotContainer.KICKER;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 
 public class ShooterCommands {
 
@@ -44,17 +38,17 @@ public class ShooterCommands {
                 () -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
         );
 
-        final Command aimAtTargetPhysics = Commands.run(() -> {
-            final double angle = new ShooterPhysicsCalculations()
-                    .getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity);
-
-            ARM.setTargetPosition(Rotation2d.fromRadians(angle));
-            FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
-        }, ARM, FLYWHEELS);
+        final Command aimAtTargetPhysics = new ParallelCommandGroup(
+                FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity),
+                ARM.setTargetPosition(Rotation2d.fromRadians(
+                        new ShooterPhysicsCalculations()
+                                .getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity))
+                ));
 
         return new ParallelCommandGroup(
                 aimAtTargetPhysics,
-                shootFromKicker
+                shootFromKicker,
+                Note.createAndShootNote(tangentialVelocity, Rotation2d.fromDegrees(ARM.getTargetAngleRotations()))
         );
     }
 
@@ -69,7 +63,7 @@ public class ShooterCommands {
                 ARM.setTargetPosition(armAngle),
                 FLYWHEELS.setTargetVelocity(targetRPS),
                 Note.createAndShootNote(Conversions.rpsToMps(targetRPS, Units.inchesToMeters(4)), armAngle),
-            shootFromKicker
+                shootFromKicker
         );
     }
 }
