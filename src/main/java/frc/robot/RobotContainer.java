@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -30,6 +29,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 //TODO:
@@ -82,13 +82,13 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-//        driveController.getButton(Controller.Inputs.A)
-//                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(), () -> false)
-//                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
-//                );
+        driveController.getButton(Controller.Inputs.A)
+                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(), () -> false)
+                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
+                );
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
-                Rotation2d.fromDegrees(45)));
+//        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
+//                Rotation2d.fromDegrees(45)));
 
 
         userButton.toggleOnTrue(Commands.startEnd(

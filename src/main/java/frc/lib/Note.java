@@ -6,76 +6,66 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import static frc.robot.GlobalConstants.GRAVITY;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class Note {
-    private final double initialVelocity;
-    private final Rotation2d pitchAngle;
-    private final Rotation2d yawAngle;
+    private final DoubleSupplier initialVelocity;
     private Pose3d startPose;
 
-    public Note(double initialVelocityMps, Rotation2d pitchAngle, Rotation2d yawAngle) {
+    public Note(DoubleSupplier initialVelocityMps) {
         this.initialVelocity = initialVelocityMps;
-        this.pitchAngle = pitchAngle;
-        this.yawAngle = yawAngle;
     }
 
-    public static Command createAndShootNote(double initialVelocity, Rotation2d pitchAngle) {
-        return new FunctionalCommand(
-                () -> {
-                    final Note note = new Note(initialVelocity, pitchAngle, POSE_ESTIMATOR.getCurrentPose().getRotation());
-                    note.fly().schedule();
-                },
-                () -> {},
-                interrupted -> {},
-                () -> false
-        );
+    public static Command createAndShootNote(DoubleSupplier initialVelocity, Supplier<Rotation2d> pitchAngle) {
+         final Note note = new Note(initialVelocity);
+         return note.fly(pitchAngle);
     }
 
     /**
     Get the fly command for the note! Uses CMD to be periodically ran.
      */
-    private Command fly() {
+    private Command fly(Supplier<Rotation2d> pitchAngle) {
         final Timer timer = new Timer();
+        final Rotation2d[] currentPitchAngle = {pitchAngle.get()};
+        final double[] currentVelocity = {initialVelocity.getAsDouble()};
 
         return new FunctionalCommand(
                 () -> {
-                    timer.start();
                     startPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose());
+                    timer.restart();
+
+                    currentPitchAngle[0] = pitchAngle.get();
+                    currentVelocity[0] = initialVelocity.getAsDouble();
                 },
-                () -> calculatePosition(timer.get()),
-                interrupted -> {},
-                () -> timer.advanceIfElapsed(7)
+                () -> calculatePosition(timer.get(), currentPitchAngle[0], currentVelocity[0]),
+
+                interrupted -> timer.reset(),
+                () -> timer.hasElapsed(5)
         );
     }
 
-    public void calculatePosition(double time) {
-        final Transform3d calculatedTranslation = getPhysicsPositionDelta(time);
+    private void calculatePosition(double time, Rotation2d pitchAngle, double initialVelocity) {
+        final Transform3d calculatedTranslation = getPhysicsPositionDelta(time, pitchAngle, initialVelocity);
         final Pose3d currentPose = startPose.transformBy(calculatedTranslation);
 
         Logger.recordOutput("Note", currentPose);
     }
 
-    private Transform3d getPhysicsPositionDelta(double time) {
+    private Transform3d getPhysicsPositionDelta(double time, Rotation2d pitchAngle, double initialVelocity) {
         final double zVelocity = initialVelocity * pitchAngle.getSin();
-
-        final double diagonalVelocityCompensator = initialVelocity * pitchAngle.getCos();
-        final double xVelocity = diagonalVelocityCompensator * yawAngle.getCos();
-        final double yVelocity = diagonalVelocityCompensator * yawAngle.getSin();
+        final double xyVelocity = initialVelocity * pitchAngle.getCos();
 
         final double timeSquared = time * time;
-        final double frictionDeceleration = 2.5;
-
-        System.out.println("The y vel: " + Math.max(yVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0));
-        System.out.println("X vel: " + Math.max(xVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0));
+        final double frictionDeceleration = 1.5;
 
         return new Transform3d(new Translation3d(
-                Math.max(xVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0),
-                Math.max(yVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0),
-
+                Math.max(xyVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0),
+                0,
                 Math.max(zVelocity * time - 0.5 * GRAVITY * timeSquared, 0)),
-
                 new Rotation3d());
     }
 }

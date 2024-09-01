@@ -11,7 +11,7 @@ import frc.lib.generic.simulation.SimulationProperties;
 
 public class KickerConstants {
     public static final Sensor BEAM_BREAKER = SensorFactory.createDigitalInput("Beam Breaker", 0);
-    public static final Motor MOTOR = MotorFactory.createTalonSRX("Kicker", 8);
+    public static final Motor MOTOR = MotorFactory.createTalonSRX("Kicker Motor", 8);
 
     static {
         configureMotor();
@@ -28,6 +28,8 @@ public class KickerConstants {
                 1.0,
                 0.003
         );
+
+        configuration.simulationSlot = new MotorProperties.Slot(5, 0,0);
 
         MOTOR.configure(configuration);
     }

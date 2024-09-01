@@ -88,10 +88,10 @@ public class ArmConstants {
         );
 
         motorConfiguration.simulationSlot = new MotorProperties.Slot(
-                100,
+                30,
                 0,
                 0,
-                27,
+                22,
                 0,
                 0.053988,
                 0.04366,

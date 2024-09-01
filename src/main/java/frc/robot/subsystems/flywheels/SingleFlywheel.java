@@ -45,6 +45,10 @@ public class SingleFlywheel {
         return motor.getSystemVelocity();
     }
 
+    public double getTargetVelocityRPS() {
+        return motor.getClosedLoopTarget();
+    }
+
     public void setVoltage(double voltage) {
         motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }

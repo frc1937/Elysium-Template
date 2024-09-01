@@ -8,6 +8,8 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.commands.ExecuteEndCommand;
 
+import java.util.function.Supplier;
+
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.arm.ArmConstants.*;
 
@@ -21,6 +23,13 @@ public class Arm extends GenericSubsystem {
         return ARM_MOTOR.isAtSetpoint();
     }
 
+    public Command setContinuousTargetPosition(Supplier<Rotation2d> targetPosition) {
+        return new ExecuteEndCommand(
+                () -> setMotorTargetPosition(targetPosition.get()),
+                ARM_MOTOR::stopMotor,
+                this);
+    }
+
     public Command setTargetPosition(Rotation2d targetPosition) {
         return new ExecuteEndCommand(
                 () -> setMotorTargetPosition(targetPosition),
@@ -30,11 +39,7 @@ public class Arm extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        if (ARM_MOTOR.getClosedLoopTarget() != 0)
-            ARM_MECHANISM.updateMechanism(
-                    Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()),
-                    Rotation2d.fromRotations(ARM_MOTOR.getClosedLoopTarget())
-            );
+        ARM_MECHANISM.updateMechanism(Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()));
     }
 
     public double getTargetAngleRotations() {
@@ -65,5 +70,6 @@ public class Arm extends GenericSubsystem {
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
+        ARM_MECHANISM.setTargetAngle(targetPosition);
     }
 }
