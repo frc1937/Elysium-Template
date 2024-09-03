@@ -46,6 +46,10 @@ public class Arm extends GenericSubsystem {
         return ARM_MOTOR.getClosedLoopTarget();
     }
 
+    public double getCurrentAngleRotations() {
+        return ARM_MOTOR.getSystemPosition();
+    }
+
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         ARM_MOTOR.setIdleMode(idleMode);
     }
@@ -69,7 +73,7 @@ public class Arm extends GenericSubsystem {
     }
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
-        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
         ARM_MECHANISM.setTargetAngle(targetPosition);
     }
 }

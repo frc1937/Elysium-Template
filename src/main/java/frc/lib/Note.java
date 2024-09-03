@@ -13,6 +13,8 @@ import static frc.robot.GlobalConstants.GRAVITY;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class Note {
+    private double previousAngle = 0;
+
     private final DoubleSupplier initialVelocity;
     private Pose3d startPose;
 
@@ -61,6 +63,11 @@ public class Note {
 
         final double timeSquared = time * time;
         final double frictionDeceleration = 1.5;
+
+        if (previousAngle != pitchAngle.getDegrees()) {
+            System.out.println("Release speed " + initialVelocity + " m/s" + ", Release angle: " + pitchAngle.getDegrees() + " degrees");
+            previousAngle = pitchAngle.getDegrees();
+        }
 
         return new Transform3d(new Translation3d(
                 Math.max(xyVelocity * time - 0.5 * frictionDeceleration * timeSquared, 0),

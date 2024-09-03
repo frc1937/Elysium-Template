@@ -40,7 +40,7 @@ public class ShooterCommands {
         final ConditionalCommand shootFromKicker = new ConditionalCommand(
                 KICKER.setKickerPercentageOutput(0.5).alongWith(
                         Note.createAndShootNote(FLYWHEELS::getFlywheelTangentialVelocity,
-                                () -> Rotation2d.fromRotations(ARM.getTargetAngleRotations())
+                                () -> Rotation2d.fromRotations(ARM.getCurrentAngleRotations())
                         )
                 ),
                 KICKER.setKickerPercentageOutput(0.0),

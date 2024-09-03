@@ -27,12 +27,23 @@ public class ShooterPhysicsCalculations {
         final Pose3d exitPose = getNoteExitPose(robotPose, targetPose);
 
         final double vSquared = tangentialVelocity * tangentialVelocity;
-
+        final double vQuad = vSquared * vSquared;
         final double z = targetPose.getZ() - exitPose.getZ();
         final double distance = getDistanceToTarget(exitPose, targetPose);
 
-        final double sqrt = Math.sqrt(vSquared * vSquared - GRAVITY_FORCE * (GRAVITY_FORCE * distance * distance + 2 * vSquared * z));
-        final double theta = Math.atan((vSquared - sqrt) / (GRAVITY_FORCE * distance));
+        final double discriminant = vQuad - GRAVITY_FORCE * (GRAVITY_FORCE * distance * distance + 2 * vSquared * z);
+
+        if (discriminant < 0) {
+            throw new IllegalArgumentException("No valid shooting angle: discriminant is negative");
+        }
+
+        final double sqrt = Math.sqrt(discriminant);
+        final double denominator = GRAVITY_FORCE * distance;
+
+        double theta = Math.atan((vSquared - sqrt) / denominator);
+
+        if (Double.isNaN(theta) || Double.isInfinite(theta) || theta < 0) //Use the other solution if the angle is invalid
+            theta = Math.atan((vSquared + sqrt) / denominator);
 
         SmartDashboard.putNumber("physics/DivNumerator", (vSquared + sqrt));
         SmartDashboard.putNumber("physics/DivDenominator", GRAVITY_FORCE * distance);
@@ -41,6 +52,7 @@ public class ShooterPhysicsCalculations {
         SmartDashboard.putNumber("physics/distance", distance);
         SmartDashboard.putString("physics/robotPose", exitPose.toString());
         SmartDashboard.putNumber("physics/FunctionTheta Deg", Units.radiansToDegrees(theta));
+
 
         return theta;
     }

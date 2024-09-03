@@ -30,6 +30,6 @@ public class GlobalConstants {
 
     public static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
-    public static final Pose3d BLUE_SPEAKER = new Pose3d(new Translation3d(-0.0381,5.547868, 1.9), new Rotation3d());
+    public static final Pose3d BLUE_SPEAKER = new Pose3d(new Translation3d(-0.0381,5.547868, 2.1), new Rotation3d());
 //            TAG_ID_TO_POSE.get(7).plus(new Transform3d(new Translation3d(0.2, 0.0, 1.3), new Rotation3d()));
 }
