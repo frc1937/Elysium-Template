@@ -22,18 +22,18 @@ public class Feedforward {
         );
 
         public final Function<ClosedLoopValues, Double> calculationFunction;
-        public FeedForwardConstants constants = new FeedForwardConstants(0, 0, 0, 0);
+        public FeedForwardConstants konstants = new FeedForwardConstants(0, 0, 0, 0);
 
         Type(Function<ClosedLoopValues, Double> calculationFunction) {
             this.calculationFunction = calculationFunction;
         }
 
         public void setFeedforwardConstants(double kS, double kV, double kA, double kG) {
-            this.constants = new FeedForwardConstants(kS, kV, kA, kG);
+            this.konstants = new FeedForwardConstants(kS, kV, kA, kG);
         }
 
         public void setFeedforwardConstants(double kS, double kV, double kA) {
-            this.constants = new FeedForwardConstants(kS, kV, kA, 0);
+            this.konstants = new FeedForwardConstants(kS, kV, kA, 0);
         }
 
         /**
@@ -43,7 +43,7 @@ public class Feedforward {
          * @return The input for the motor, in voltage
          */
         public double calculate(double positionRotations, double velocityRPS, double accelerationRPSPS) {
-            return calculationFunction.apply(new ClosedLoopValues(constants, new FeedForwardValues(positionRotations, velocityRPS, accelerationRPSPS)));
+            return calculationFunction.apply(new ClosedLoopValues(konstants, new FeedForwardValues(positionRotations, velocityRPS, accelerationRPSPS)));
         }
 
         /**

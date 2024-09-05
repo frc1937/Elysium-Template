@@ -287,6 +287,11 @@ public class GenericTalonFX extends Motor {
     }
 
     @Override
+    protected boolean[] getSignalsToLog() {
+        return signalsToLog;
+    }
+
+    @Override
     protected void refreshInputs(MotorInputs inputs) {
         if (talonFX == null) return;
 

@@ -320,6 +320,11 @@ public class GenericSpark extends Motor {
     }
 
     @Override
+    protected boolean[] getSignalsToLog() {
+        return signalsToLog;
+    }
+
+    @Override
     protected void refreshInputs(MotorInputs inputs) {
         if (spark == null) return;
 

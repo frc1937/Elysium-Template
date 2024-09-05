@@ -5,6 +5,7 @@ import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.hardware.encoder.Encoder;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
 
 /**
@@ -165,7 +166,7 @@ public class Motor implements LoggableHardware {
      *
      * @return the current position of the motor in rotations
      */
-    public double getMotorPosition() { return inputs.systemPosition / getCurrentConfiguration().gearRatio; }
+    public double getMotorPosition() { return getSystemPosition() / getCurrentConfiguration().gearRatio; }
 
     /**
      * Retrieves the current velocity of the motor, with no gearing applied.
@@ -176,47 +177,64 @@ public class Motor implements LoggableHardware {
      *
      * @return the current velocity of the motor, in rotations per second (RPS).
      */
-    public double getMotorVelocity() { return inputs.systemVelocity / getCurrentConfiguration().gearRatio; }
-
-    /**
-     * Get the current running through the motor (STATOR current)
-     *
-     * @Units In amps
-     */
-    public double getCurrent() { return inputs.current; }
+    public double getMotorVelocity() { return getSystemVelocity() / getCurrentConfiguration().gearRatio; }
 
     /**
      * Get the voltage running through the motor
      *
      * @Units In volts
      */
-    public double getVoltage() { return inputs.voltage; }
+    public double getVoltage() {
+        if (!getSignalsToLog()[0]) printSignalError("VOLTAGE");
+        return inputs.voltage;
+    }
+
+    /**
+     * Get the current running through the motor (STATOR current)
+     *
+     * @Units In amps
+     */
+    public double getCurrent() {
+        if (!getSignalsToLog()[1]) printSignalError("CURRENT");
+        return inputs.current;
+    }
+
+    /**
+     * Get the temperature of the motor
+     * @Units In celsius
+     */
+    public double getTemperature() {
+        if (!getSignalsToLog()[2]) printSignalError("TEMPERATURE");
+        return inputs.temperature;
+    }
 
     /**
      * Get the current target of the closed-loop PID
      */
-    public double getClosedLoopTarget() { return inputs.target; }
-
-    /**
-     * Get the temperature of the motor
-     *
-     * @Units In celsius
-     */
-    public double getTemperature() { return inputs.temperature; }
+    public double getClosedLoopTarget() {
+        if (!getSignalsToLog()[3]) printSignalError("CLOSED_LOOP_TARGET");
+        return inputs.target;
+    }
 
     /**
      * Gearing applied
      *
      * @Units In rotations
      */
-    public double getSystemPosition() { return inputs.systemPosition; }
+    public double getSystemPosition() {
+        if (!getSignalsToLog()[4]) printSignalError("POSITION");
+        return inputs.systemPosition;
+    }
 
     /**
      * Gearing applied
      *
      * @Units In rotations per second
      */
-    public double getSystemVelocity() { return inputs.systemVelocity; }
+    public double getSystemVelocity() {
+        if (!getSignalsToLog()[5]) printSignalError("VELOCITY");
+        return inputs.systemVelocity;
+    }
 
     public void setFollowerOf(String name, int masterPort) { }
 
@@ -256,12 +274,14 @@ public class Motor implements LoggableHardware {
 
     public boolean isAtSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
-            new UnsupportedOperationException("NUH UH").printStackTrace();
+            new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
 
     protected void refreshInputs(MotorInputs inputs) { }
+
+    protected boolean[] getSignalsToLog() { return new boolean[0]; }
 
     @Override
     public void periodic() {
@@ -272,5 +292,12 @@ public class Motor implements LoggableHardware {
     @Override
     public MotorInputs getInputs() {
         return inputs;
+    }
+
+
+    private void printSignalError(String signalName) {
+        new NoSuchElementException("--------------\n" +
+                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT MOTOR " + name +
+                "\n--------------").printStackTrace();
     }
 }

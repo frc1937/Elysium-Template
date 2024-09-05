@@ -4,8 +4,6 @@ import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;
 import frc.robot.GlobalConstants;
 
-import java.io.PrintStream;
-
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
@@ -74,6 +72,11 @@ public class SimulatedMotor extends Motor {
             signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
         signalsToLog[signal.getId()] = true;
+    }
+
+    @Override
+    protected boolean[] getSignalsToLog() {
+        return signalsToLog;
     }
 
     @Override
