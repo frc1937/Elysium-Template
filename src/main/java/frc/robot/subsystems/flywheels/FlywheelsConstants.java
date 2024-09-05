@@ -7,8 +7,8 @@ import frc.lib.generic.simulation.SimulationProperties;
 public class FlywheelsConstants {
     private static final DCMotor FLYWHEEL_MOTOR_GEARBOX = DCMotor.getNeoVortex(1);
 
-    private static final Motor LEFT_FLYWHEEL_MOTOR = MotorFactory.createSpark("Left Flywheel", 28, MotorProperties.SparkType.FLEX);
-    private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("Right Flywheel", 15, MotorProperties.SparkType.FLEX);
+    private static final Motor LEFT_FLYWHEEL_MOTOR = MotorFactory.createSpark("LEFT_FLYWHEEL", 28, MotorProperties.SparkType.FLEX);
+    private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
             LEFT_SLOT = new MotorProperties.Slot(0, 0, 0, 0.10904, 0.025022, 0.22468),

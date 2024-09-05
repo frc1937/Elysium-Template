@@ -7,11 +7,16 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.Conversions;
 import frc.lib.util.commands.ExecuteEndCommand;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.*;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.LEFT_FLYWHEEL_DIAMETER;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.flywheels;
 
 public class Flywheels extends GenericSubsystem {
-    private final int flywheelIndexToLog = 0;
+    private final int FLYWHEEL_INDEX_TO_LOG_SYSID = 0;
 
     public Command setTargetVelocity(double velocityRPS) {
         return new ExecuteEndCommand(
@@ -24,7 +29,8 @@ public class Flywheels extends GenericSubsystem {
     public Command setTargetTangentialVelocity(double velocityMPS) {
         return new ExecuteEndCommand(
                 () -> setFlywheelsTangentialVelocity(velocityMPS),
-                () -> {},
+                () -> {
+                },
                 this
         );
     }
@@ -38,15 +44,15 @@ public class Flywheels extends GenericSubsystem {
 
     @Override
     public void sysIdDrive(double voltage) {
-        flywheels[flywheelIndexToLog].setVoltage(voltage);
+        flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].setVoltage(voltage);
     }
 
     @Override
     public void sysIdUpdateLog(SysIdRoutineLog log) {
-        log.motor("Flywheel " + flywheelIndexToLog)
-                .voltage(Volts.of(flywheels[flywheelIndexToLog].getVoltage()))
-                .angularPosition(Rotations.of(flywheels[flywheelIndexToLog].getPosition()))
-                .angularVelocity(RotationsPerSecond.of(flywheels[flywheelIndexToLog].getVelocity()));
+        log.motor("Flywheel " + FLYWHEEL_INDEX_TO_LOG_SYSID)
+                .voltage(Volts.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getVoltage()))
+                .angularPosition(Rotations.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getPosition()))
+                .angularVelocity(RotationsPerSecond.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getVelocity()));
     }
 
     @Override
@@ -61,7 +67,7 @@ public class Flywheels extends GenericSubsystem {
     public boolean hasReachedTarget() {
         for (SingleFlywheel flywheel : flywheels) {
             if (!flywheel.hasReachedTarget()) {
-                return true; //todo: Fix flywheels goofy
+                return false;
             }
         }
         return true;

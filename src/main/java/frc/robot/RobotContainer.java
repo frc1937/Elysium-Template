@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -29,7 +30,6 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
-import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 //TODO:
@@ -65,7 +65,7 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
-        new Trigger(() -> RobotController.getBatteryVoltage() < 12).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+        new Trigger(() -> RobotController.getBatteryVoltage() < 11.8).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
@@ -82,13 +82,21 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.A)
-                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier, BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
-                );
+//        driveController.getButton(Controller.Inputs.A)
+//                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+//                                BLUE_SPEAKER.toPose2d(), () -> false)
+//                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
+//                );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
 //                Rotation2d.fromDegrees(45)));
+
+        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
+        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
+        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
+        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+
+        driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(shooterCommands.receiveFloorNote());
 
 
         userButton.toggleOnTrue(Commands.startEnd(

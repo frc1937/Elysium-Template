@@ -145,7 +145,7 @@ public class GenericSpark extends Motor {
     }
 
     private void configureProfile(MotorConfiguration configuration) {
-        if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration == 0) {
+        if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration != 0) {
             final TrapezoidProfile.Constraints positionMotionConstraints = new TrapezoidProfile.Constraints(
                     configuration.profiledMaxVelocity,
                     configuration.profiledTargetAcceleration
@@ -216,9 +216,6 @@ public class GenericSpark extends Motor {
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
         double feedforwardOutput, feedbackOutput, acceleration;
 
-        feedbackOutput = getModeBasedFeedback(controlMode, goalState);
-        feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
-
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
             final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
@@ -228,15 +225,17 @@ public class GenericSpark extends Motor {
             feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-        }
 
-        if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
+        } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
             //Position -> velocity. Velocity -> acc.
             feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
             feedbackOutput = feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
+        } else {
+            feedbackOutput = getModeBasedFeedback(controlMode, goalState);
+            feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
         }
 
         if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER) feedforwardOutput = feedforward;

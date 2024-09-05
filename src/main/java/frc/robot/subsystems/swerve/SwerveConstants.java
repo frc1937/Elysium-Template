@@ -48,8 +48,8 @@ public class SwerveConstants {
      * Units of RADIANS for everything.
      */
     static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            1, 0, 0.0015,
-            new TrapezoidProfile.Constraints(Math.PI, Math.PI / 2)
+            1, 0, 0.0011,
+            new TrapezoidProfile.Constraints(Math.PI / 2, Math.PI / 2)
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -74,6 +74,6 @@ public class SwerveConstants {
 
     private static void configureRotationController() {
         ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
-        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
+        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.8));
     }
 }

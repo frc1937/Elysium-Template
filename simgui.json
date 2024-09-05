@@ -89,6 +89,12 @@
         "Kicker": {
           "open": true
         },
+        "Motors": {
+          "Arm": {
+            "open": true
+          },
+          "open": true
+        },
         "RL_STEER_MOTOR": {
           "open": true
         },
