@@ -102,7 +102,7 @@ public class MotorConfiguration {
 
     /**
      * Tolerance for closed-loop control, used for determining if the target is reached.
-     * If this is not set, {@link Motor#isAtSetpoint()} will throw an exception
+     * If this is not set, {@link Motor#isAtPositionSetpoint()} and {@link Motor#isAtVelocitySetpoint()} will throw an exception
      * <ul>
      *   <li> <b>Minimum Value:</b> 0
      *   <li> <b>Default Value:</b> 0

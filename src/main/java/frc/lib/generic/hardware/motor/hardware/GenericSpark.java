@@ -1,9 +1,15 @@
 package frc.lib.generic.hardware.motor.hardware;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.motor.Motor;
@@ -12,7 +18,6 @@ import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.math.Conversions;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,6 +49,7 @@ public class GenericSpark extends Motor {
 
     private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
+    private final Timer profileTimer = new Timer();
 
     private double previousVelocity = 0;
 
@@ -172,16 +178,12 @@ public class GenericSpark extends Motor {
 
         if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static) feedforward = Feedforward.Type.ELEVATOR;
 
-        Logger.recordOutput("Setting FF: " + getDeviceID(), currentSlot.gravityType() == null);
-
         feedforward.setFeedforwardConstants(
                 currentSlot.kS(),
                 currentSlot.kV(),
                 currentSlot.kA(),
                 currentSlot.kG()
         );
-
-        Logger.recordOutput("Nigga" + getDeviceID(), "HAVE SET FF OUTPUT! TO: " + currentSlot.kS() + " KV " + currentSlot.kV() + " nigga" + currentSlot.kA() + " kg " + currentSlot.kG());
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -229,14 +231,10 @@ public class GenericSpark extends Motor {
         } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
-            System.out.println(currentSetpoint.position + ",  Vel, Accler: " + currentSetpoint.velocity);
-
             feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
             feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-//it's all 0.s
-            System.out.println("Control effort for velocity profile: " + feedforwardOutput + " and " + feedbackOutput);
         } else {
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
@@ -248,9 +246,9 @@ public class GenericSpark extends Motor {
     }
 
     private void setGoal(MotorProperties.ControlMode controlMode, double output) {
-        final TrapezoidProfile.State stateFromOutput = new TrapezoidProfile.State(output, 0);
+        final TrapezoidProfile.State newGoal = new TrapezoidProfile.State(output, 0);
 
-        if (goalState == null || !goalState.equals(stateFromOutput)) {
+        if (goalState == null || !goalState.equals(newGoal) || profileTimer.hasElapsed(5)) {
             feedback.reset();
 
             if (controlMode == MotorProperties.ControlMode.POSITION)
@@ -258,7 +256,8 @@ public class GenericSpark extends Motor {
             else if (controlMode == MotorProperties.ControlMode.VELOCITY)
                 previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
 
-            goalState = stateFromOutput;
+            goalState = newGoal;
+            profileTimer.restart(); //Might cause problems if already maintaing setpoint. But fix later.
         }
     }
 
@@ -298,7 +297,8 @@ public class GenericSpark extends Motor {
         signalsToLog[signal.getId()] = true;
 
         switch (signal) {
-            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE ->
+                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }

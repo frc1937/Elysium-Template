@@ -20,7 +20,7 @@ public class Arm extends GenericSubsystem {
     }
 
     public boolean hasReachedTarget() {
-        return ARM_MOTOR.isAtSetpoint();
+        return ARM_MOTOR.isAtPositionSetpoint();
     }
 
     public Command setContinuousTargetPosition(Supplier<Rotation2d> targetPosition) {

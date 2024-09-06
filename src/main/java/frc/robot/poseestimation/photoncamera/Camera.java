@@ -91,6 +91,8 @@ public class Camera extends PhotonCameraIO {
         if (inputs.hasResult) {
             final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
 
+            Logger.recordOutput("Camera Pitch " + photonCamera.getName(), photonCamera.getLatestResult().getBestTarget().getPitch());
+
             inputs.cameraPose = estimatedRobotPose.estimatedPose;
             inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds;
             inputs.visibleTags = estimatedRobotPose.targetsUsed.size();

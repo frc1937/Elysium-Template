@@ -43,10 +43,8 @@ public class Feedforward {
          * @return The input for the motor, in voltage
          */
         public double calculate(double positionRotations, double velocityRPS, double accelerationRPSPS) {
-            double result =calculationFunction.apply(new ClosedLoopValues(konstants,
+            return calculationFunction.apply(new ClosedLoopValues(konstants,
                     new FeedForwardValues(positionRotations, velocityRPS, accelerationRPSPS)));
-            System.out.println("Calculating FF: " + result + " Constants: " + konstants.kV + " KA: " + konstants.kA );
-            return result;
         }
 
         /**

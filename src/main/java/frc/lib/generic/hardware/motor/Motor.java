@@ -272,12 +272,20 @@ public class Motor implements LoggableHardware {
         }
     }
 
-    public boolean isAtSetpoint() {
+    public boolean isAtPositionSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
             new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
 
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
+
+    public boolean isAtVelocitySetpoint() {
+        if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
+            new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
+
+        return Math.abs(getClosedLoopTarget() - getSystemVelocity()) < getCurrentConfiguration().closedLoopTolerance;
+    }
+
 
     protected void refreshInputs(MotorInputs inputs) { }
 
