@@ -9,7 +9,6 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.motor.Motor;
@@ -49,7 +48,6 @@ public class GenericSpark extends Motor {
 
     private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
-    private final Timer profileTimer = new Timer();
 
     private double previousVelocity = 0;
 
@@ -72,7 +70,6 @@ public class GenericSpark extends Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
-        setGoal(mode, output);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -245,20 +242,16 @@ public class GenericSpark extends Motor {
         controller.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
 
-    private void setGoal(MotorProperties.ControlMode controlMode, double output) {
-        final TrapezoidProfile.State newGoal = new TrapezoidProfile.State(output, 0);
+    @Override
+    public void resetProfile(MotorProperties.ControlMode controlMode, double output) {
+        feedback.reset();
 
-        if (goalState == null || !goalState.equals(newGoal) || profileTimer.hasElapsed(5)) {
-            feedback.reset();
+        if (controlMode == MotorProperties.ControlMode.POSITION)
+            previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+        else if (controlMode == MotorProperties.ControlMode.VELOCITY)
+            previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
 
-            if (controlMode == MotorProperties.ControlMode.POSITION)
-                previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
-            else if (controlMode == MotorProperties.ControlMode.VELOCITY)
-                previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
-
-            goalState = newGoal;
-            profileTimer.restart(); //Might cause problems if already maintaing setpoint. But fix later.
-        }
+        goalState = new TrapezoidProfile.State(output, 0);
     }
 
     private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {

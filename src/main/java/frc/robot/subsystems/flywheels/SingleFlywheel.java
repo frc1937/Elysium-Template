@@ -53,6 +53,15 @@ public class SingleFlywheel {
         motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
+    public void resetProfileRPS(double output) {
+        motor.resetProfile(MotorProperties.ControlMode.VELOCITY, output);
+    }
+
+    public void resetProfileMPS(double output) {
+        motor.resetProfile(MotorProperties.ControlMode.VELOCITY, Conversions.mpsToRps(output, flywheelDiameter));
+    }
+
+
     public void stop() {
         motor.stopMotor();
     }
