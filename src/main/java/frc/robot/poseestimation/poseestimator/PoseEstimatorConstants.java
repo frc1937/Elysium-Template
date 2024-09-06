@@ -23,7 +23,7 @@ import java.util.Map;
 public class PoseEstimatorConstants {
     static final Transform3d ROBOT_TO_FRONT_CAMERA = new Transform3d(
             0.5, 0.175245, 0.46,
-            new Rotation3d(0, Units.degreesToRadians(-36 + 10), 0)
+            new Rotation3d(0, Units.degreesToRadians(-36 + 10 - 8.67), 0)
     );
 
     public static final PhotonCameraIO FRONT_CAMERA = CameraFactory.generateCamera("Front1937", ROBOT_TO_FRONT_CAMERA);
@@ -36,7 +36,7 @@ public class PoseEstimatorConstants {
      * the second one for the y, and the third one is for the theta (rotation).
      * Increase these numbers to trust the odometry less.
      */
-    static final Vector<N3> ODOMETRY_AMBIGUITY = VecBuilder.fill(0.003, 0.003, 0.0002);
+    static final Vector<N3> ODOMETRY_AMBIGUITY = VecBuilder.fill(0.003, 0.003, 0.001);
 
     static final double TRANSLATION_STD_EXPONENT = 0.005;
     static final double ROTATION_STD_EXPONENT = 0.01;

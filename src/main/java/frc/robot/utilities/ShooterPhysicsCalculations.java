@@ -1,13 +1,15 @@
 package frc.robot.utilities;
 
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import static frc.robot.GlobalConstants.GRAVITY_FORCE;
 import static frc.robot.RobotContainer.ARM;
-import static frc.robot.RobotContainer.SWERVE;
 
 public class ShooterPhysicsCalculations {
     private static final double PIVOT_POINT_Z_OFFSET_METRES = 0.21;
@@ -17,10 +19,10 @@ public class ShooterPhysicsCalculations {
     public double getOptimalShootingAngleRadians(final Pose2d robotPose, final Pose3d targetPose, final double tangentialVelocity) {
         final double optimalAngleNoMovement = getPhysicsShootingAngleRadians(robotPose, targetPose, tangentialVelocity);
 
-        final Pose3d targetFromMovingRobot = getTargetFromMovingRobot(targetPose, optimalAngleNoMovement,
-                getDistanceToTarget(robotPose, targetPose), tangentialVelocity, SWERVE.getSelfRelativeVelocity());
-
-        return getPhysicsShootingAngleRadians(robotPose, targetFromMovingRobot, tangentialVelocity);
+//        final Pose3d targetFromMovingRobot = getTargetFromMovingRobot(targetPose, optimalAngleNoMovement,
+//                getDistanceToTarget(robotPose, targetPose), tangentialVelocity, SWERVE.getSelfRelativeVelocity());
+//todo: SOTM
+        return optimalAngleNoMovement;// getPhysicsShootingAngleRadians(robotPose, targetFromMovingRobot, tangentialVelocity);
     }
 
     private double getPhysicsShootingAngleRadians(final Pose2d robotPose, final Pose3d targetPose, final double tangentialVelocity) {
@@ -42,8 +44,12 @@ public class ShooterPhysicsCalculations {
 
         double theta = Math.atan((vSquared - sqrt) / denominator);
 
-        if (Double.isNaN(theta) || Double.isInfinite(theta) || theta < 0) //Use the other solution if the angle is invalid
+        if (Double.isNaN(theta) || Double.isInfinite(theta) || theta < 0) {
+            //Use the other solution if the angle is invalid
+            System.out.println("Using other angle, first is invalid");
+
             theta = Math.atan((vSquared + sqrt) / denominator);
+        }
 
         SmartDashboard.putNumber("physics/DivNumerator", (vSquared + sqrt));
         SmartDashboard.putNumber("physics/DivDenominator", GRAVITY_FORCE * distance);

@@ -47,6 +47,12 @@ public class SwerveModule {
      * @return the position of the module at the given odometry update index
      */
     protected SwerveModulePosition getOdometryPosition(int odometryUpdateIndex) {
+        if (odometryUpdateIndex >= getDriveMotorInputs().threadSystemPosition.length)
+            return new SwerveModulePosition(
+                getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[getDriveMotorInputs().threadSystemPosition.length - 1],
+                Rotation2d.fromRotations(getSteerEncoderInputs().threadPosition[getSteerEncoderInputs().threadPosition.length - 1])
+        );
+
         return new SwerveModulePosition(
                 getDriveMetersTraveled(getDriveMotorInputs().threadSystemPosition)[odometryUpdateIndex],
                 Rotation2d.fromRotations(getSteerEncoderInputs().threadPosition[odometryUpdateIndex])
@@ -62,6 +68,8 @@ public class SwerveModule {
     }
 
     protected void setTargetVelocity(double velocityMetresPerSecond, boolean openLoop) {
+        if (!isTemperatureOkay()) System.out.println("SWERVE MODULE " + driveMotor.getDeviceID() + " is TOO HOT!" );
+
         if (openLoop) {
             final double targetPowerOpenLoop = VOLTAGE_COMPENSATION_SATURATION * (velocityMetresPerSecond / MAX_SPEED_MPS);
             driveMotor.setOutput(MotorProperties.ControlMode.VOLTAGE, targetPowerOpenLoop);
@@ -98,5 +106,9 @@ public class SwerveModule {
 
     private double[] getDriveMetersTraveled(double[] rotationsPositions) {
         return Arrays.stream(rotationsPositions).map(position -> rotationsToMetres(position, WHEEL_DIAMETER)).toArray();
+    }
+
+    private boolean isTemperatureOkay() {
+        return driveMotor.getTemperature() < 80;
     }
 }

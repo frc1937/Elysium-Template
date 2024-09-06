@@ -31,10 +31,6 @@ import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
-//TODO:
-// Go over the TalonSRX. some goofness mgiht be there in the following specefiically.
-// Physics shoot. Press button, shoot note. Perhaps even sim animation for shooting note?
-
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
     public static final Swerve SWERVE = new Swerve();
@@ -64,27 +60,27 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
-        new Trigger(() -> RobotController.getBatteryVoltage() < 11.8).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+        new Trigger(() -> RobotController.getBatteryVoltage() < 11.2).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
 
-        SWERVE.setDefaultCommand(
-                SWERVE.driveOpenLoop(
-                        translationSupplier,
-                        strafeSupplier,
+//        SWERVE.setDefaultCommand(
+//                SWERVE.driveOpenLoop(
+//                        translationSupplier,
+//                        strafeSupplier,
+//
+//                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X),
+//                        () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
+//                ));
 
-                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X),
-                        () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
-                ));
-
-        driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
-        driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
+//        driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
+//        driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
 //        driveController.getButton(Controller.Inputs.A)
 //                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
 //                                BLUE_SPEAKER.toPose2d(), () -> false)
-//                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 25))
+//                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
 //                );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
@@ -96,6 +92,7 @@ public class RobotContainer {
 //        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(shooterCommands.receiveFloorNote());
+//        driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(shooterCommands.outtakeNote());
 //        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands?.shootFloorNote());
 
 

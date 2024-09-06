@@ -15,14 +15,14 @@ public class FlywheelsConstants {
     private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
-            LEFT_SLOT = new MotorProperties.Slot(0, 0, 0, 0.10904, 0.025022, 0.22468),
-            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0, 0.10457, 0.037788, 0.05658),
+            LEFT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10904, 0.025022, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10457, 0.037788, 0.05658),
 
     SIMULATION_SLOT = new MotorProperties.Slot(12, 0, 0, 0, 0, 0);
 
     protected static final double
-            LEFT_FLYWHEEL_DIAMETER = 4,
-            RIGHT_FLYWHEEL_DIAMETER = 3;
+            LEFT_FLYWHEEL_DIAMETER = 0.07,
+            RIGHT_FLYWHEEL_DIAMETER = 0.1;
 
     static {
         configureMotor(LEFT_FLYWHEEL_MOTOR, false, LEFT_SLOT);
@@ -63,7 +63,7 @@ public class FlywheelsConstants {
     }
 
     protected static SingleFlywheel[] flywheels = {
-            new SingleFlywheel(LEFT_FLYWHEEL_MOTOR, 0.07),
-            new SingleFlywheel(RIGHT_FLYWHEEL_MOTOR, 0.1)
+            new SingleFlywheel(LEFT_FLYWHEEL_MOTOR, LEFT_FLYWHEEL_DIAMETER),
+            new SingleFlywheel(RIGHT_FLYWHEEL_MOTOR, RIGHT_FLYWHEEL_DIAMETER)
     };
 }

@@ -13,13 +13,22 @@ import frc.robot.utilities.ShooterPhysicsCalculations;
 import static frc.robot.RobotContainer.*;
 
 public class ShooterCommands {
-
     public Command receiveFloorNote() {
+//        return FLYWHEELS.setTargetTangentialVelocity(-10);
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
                         FLYWHEELS.setTargetTangentialVelocity(-5),
                         INTAKE.setIntakeSpeed(0.5),
                         KICKER.setKickerPercentageOutput(-0.5)
+                );
+    }
+
+    public Command outtakeNote() {
+        return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
+                .alongWith(
+                        FLYWHEELS.setTargetVelocity(15),
+                        INTAKE.setIntakeSpeed(-0.5),
+                        KICKER.setKickerPercentageOutput(0.5)
                 );
     }
 
@@ -32,8 +41,6 @@ public class ShooterCommands {
 
     public Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
         final Trigger isShooterAtDesiredState = new Trigger(() -> {
-            System.out.println("Flywheels: " + FLYWHEELS.hasReachedTarget() + " Arm: " + ARM.hasReachedTarget());
-
             return FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget();
         });
 
@@ -43,13 +50,16 @@ public class ShooterCommands {
                                 () -> Rotation2d.fromRotations(ARM.getCurrentAngleRotations())
                         )
                 ),
+
                 KICKER.setKickerPercentageOutput(0.0),
+
                 isShooterAtDesiredState
         );
 
         final Command aimAtTargetPhysics = new ParallelCommandGroup(
                 FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity),
-                ARM.setContinuousTargetPosition(() -> Rotation2d.fromRadians(
+                ARM.setContinuousTargetPosition(() ->
+                        Rotation2d.fromRadians(
                         new ShooterPhysicsCalculations()
                                 .getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity))
                 ));

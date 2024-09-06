@@ -12,6 +12,7 @@ import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.math.Conversions;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -66,8 +67,6 @@ public class GenericSpark extends Motor {
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
         setGoal(mode, output);
-
-
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -165,16 +164,15 @@ public class GenericSpark extends Motor {
     }
 
     private void configureFeedForward() {
-        MotorProperties.Slot currentSlot = getCurrentSlot();
+        final MotorProperties.Slot currentSlot = getCurrentSlot();
 
-        if (currentSlot.gravityType() == null)
-            feedforward = Feedforward.Type.SIMPLE;
+        if (currentSlot.gravityType() == null) feedforward = Feedforward.Type.SIMPLE;
 
-        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine)
-            feedforward = Feedforward.Type.ARM;
+        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine) feedforward = Feedforward.Type.ARM;
 
-        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static)
-            feedforward = Feedforward.Type.ELEVATOR;
+        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static) feedforward = Feedforward.Type.ELEVATOR;
+
+        Logger.recordOutput("Setting FF: " + getDeviceID(), currentSlot.gravityType() == null);
 
         feedforward.setFeedforwardConstants(
                 currentSlot.kS(),
@@ -182,6 +180,8 @@ public class GenericSpark extends Motor {
                 currentSlot.kA(),
                 currentSlot.kG()
         );
+
+        Logger.recordOutput("Nigga" + getDeviceID(), "HAVE SET FF OUTPUT! TO: " + currentSlot.kS() + " KV " + currentSlot.kV() + " nigga" + currentSlot.kA() + " kg " + currentSlot.kG());
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -228,11 +228,15 @@ public class GenericSpark extends Motor {
 
         } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
-            //Position -> velocity. Velocity -> acc.
+
+            System.out.println(currentSetpoint.position + ",  Vel, Accler: " + currentSetpoint.velocity);
+
             feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
-            feedbackOutput = feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
+            feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
+//it's all 0.s
+            System.out.println("Control effort for velocity profile: " + feedforwardOutput + " and " + feedbackOutput);
         } else {
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
