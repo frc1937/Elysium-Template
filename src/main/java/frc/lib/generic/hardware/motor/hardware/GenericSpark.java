@@ -70,6 +70,7 @@ public class GenericSpark extends Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
+        setGoal(mode, output);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -216,6 +217,8 @@ public class GenericSpark extends Motor {
         double feedforwardOutput, feedbackOutput, acceleration;
 
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
+            if (goalState == null) return;
+
             final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
@@ -226,6 +229,8 @@ public class GenericSpark extends Motor {
             previousSetpoint = currentSetpoint;
 
         } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
+            if (goalState == null) return;
+
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
@@ -233,6 +238,8 @@ public class GenericSpark extends Motor {
 
             previousSetpoint = currentSetpoint;
         } else {
+            if (goalState == null) return;
+
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
         }
@@ -262,6 +269,21 @@ public class GenericSpark extends Motor {
         }
 
         return feedback.calculate(getEffectiveVelocity(), goal.velocity);
+    }
+
+    private void setGoal(MotorProperties.ControlMode controlMode, double output) {
+        final TrapezoidProfile.State stateFromOutput = new TrapezoidProfile.State(output, 0);
+
+        if (goalState == null || !goalState.equals(stateFromOutput) && velocityMotionProfile == null && positionMotionProfile == null) {
+            feedback.reset();
+
+            if (controlMode == MotorProperties.ControlMode.POSITION)
+                previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+            else if (controlMode == MotorProperties.ControlMode.VELOCITY)
+                previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
+
+            goalState = stateFromOutput;
+        }
     }
 
     private double getEffectivePosition() {

@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
 import java.util.function.BooleanSupplier;
@@ -52,24 +53,27 @@ public class ShooterCommands {
     }
 
     public Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
-        final Command shootNote = KICKER.setKickerPercentageOutput(0.5)
-                .onlyWhile(() -> {
-                    System.out.println("Flywheels: " + FLYWHEELS.hasReachedTarget() + " ARM: " + ARM.hasReachedTarget());
-                    return FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget();
+        final Trigger isReadyToShoot = new Trigger(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget());
 
-                });
+        final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
+
         final Command setArmPosition = ARM.setTargetPosition(
                 Rotation2d.fromRadians(calculations.getOptimalShootingAngleRadians(
                         POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity
                 ))
         );
 
+        final ConditionalCommand shootKicker = new ConditionalCommand(
+                KICKER.setKickerPercentageOutput(0.7),
+                KICKER.setKickerPercentageOutput(0.0),
+                isReadyToShoot
+        );
+
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
-                shootNote
+                shootKicker
         );
 //
 //

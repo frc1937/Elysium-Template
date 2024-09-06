@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -23,6 +24,8 @@ public class Arm extends GenericSubsystem {
     }
 
     public boolean hasReachedTarget() {
+        Logger.recordOutput("IsArmReady: ", ARM_MOTOR.isAtPositionSetpoint());
+
         return ARM_MOTOR.isAtPositionSetpoint();
     }
 

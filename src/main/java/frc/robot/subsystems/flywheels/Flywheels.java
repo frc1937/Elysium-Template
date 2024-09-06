@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.math.Conversions;
 import frc.lib.util.commands.ExecuteEndCommand;
+import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -39,7 +40,9 @@ public class Flywheels extends GenericSubsystem {
 
     public Command setTargetTangentialVelocity(double velocityMPS) {
         return new FunctionalCommand(
-                () -> resetProfileMPS(velocityMPS),
+                () -> {
+                    resetProfileMPS(velocityMPS);
+                },
                 () -> setFlywheelsTangentialVelocity(velocityMPS),
                 interrupted -> stop(),
                 () -> false,
@@ -79,10 +82,11 @@ public class Flywheels extends GenericSubsystem {
     public boolean hasReachedTarget() {
         for (SingleFlywheel flywheel : flywheels) {
             if (!flywheel.hasReachedTarget()) {
-                System.out.println("flywheel: " + flywheel.toString() + " hasn't reached target: ");
+                Logger.recordOutput("AreFlywheelReady", false);
                 return false;
             }
         }
+        Logger.recordOutput("AreFlywheelReady", true);
         return true;
     }
 

@@ -22,7 +22,7 @@ public class ArmConstants {
             Seconds.of(10)
     );
 
-    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(0.5);
+    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(2);
 
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
