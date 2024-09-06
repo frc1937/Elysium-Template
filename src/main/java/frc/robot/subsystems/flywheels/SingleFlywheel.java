@@ -30,6 +30,10 @@ public class SingleFlywheel {
     }
 
     public void setTargetTangentialVelocity(double velocityMPS) {
+        System.out.println("Setting target vel MPS: " + velocityMPS);
+        System.out.println("Setting target vel CALCULATED: " + Conversions.mpsToRps(velocityMPS, flywheelDiameter) + " diameter: " + flywheelDiameter);
+        //-35.0
+        //CALCULATED: -1.8568076694054456 diameter: 6.0 inches
         motor.setOutput(MotorProperties.ControlMode.VELOCITY, Conversions.mpsToRps(velocityMPS, flywheelDiameter));
     }
 

@@ -1,7 +1,11 @@
 package frc.robot.subsystems.flywheels;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.generic.hardware.motor.*;
+import frc.lib.generic.hardware.motor.Motor;
+import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.MotorFactory;
+import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.generic.simulation.SimulationProperties;
 
 public class FlywheelsConstants {
@@ -21,8 +25,8 @@ public class FlywheelsConstants {
             RIGHT_FLYWHEEL_DIAMETER = 3;
 
     static {
-        configureMotor(LEFT_FLYWHEEL_MOTOR, true, LEFT_SLOT);
-        configureMotor(RIGHT_FLYWHEEL_MOTOR, false, RIGHT_SLOT);
+        configureMotor(LEFT_FLYWHEEL_MOTOR, false, LEFT_SLOT);
+        configureMotor(RIGHT_FLYWHEEL_MOTOR, true, RIGHT_SLOT);
     }
 
     private static void configureMotor(Motor motor, boolean invert, MotorProperties.Slot slot) {
@@ -34,8 +38,8 @@ public class FlywheelsConstants {
         configuration.supplyCurrentLimit = 40;
         configuration.statorCurrentLimit = 40;
 
-        configuration.profiledTargetAcceleration = 15;
-        configuration.profiledJerk = 10;
+        configuration.profiledTargetAcceleration = 40;
+        configuration.profiledJerk = 30;
 
         configuration.slot0 = slot;
 
@@ -59,7 +63,7 @@ public class FlywheelsConstants {
     }
 
     protected static SingleFlywheel[] flywheels = {
-            new SingleFlywheel(LEFT_FLYWHEEL_MOTOR, 6.0),
-            new SingleFlywheel(RIGHT_FLYWHEEL_MOTOR, 6.0)
+            new SingleFlywheel(LEFT_FLYWHEEL_MOTOR, 0.07),
+            new SingleFlywheel(RIGHT_FLYWHEEL_MOTOR, 0.1)
     };
 }

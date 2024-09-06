@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -91,12 +90,13 @@ public class RobotContainer {
 //        driveController.getButton(Controller.Inputs.A).whileTrue(shooterCommands.shootWithoutPhysics(35,
 //                Rotation2d.fromDegrees(45)));
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
-        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+//        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
+//        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
+//        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
+//        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(shooterCommands.receiveFloorNote());
+//        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(shooterCommands?.shootFloorNote());
 
 
         userButton.toggleOnTrue(Commands.startEnd(

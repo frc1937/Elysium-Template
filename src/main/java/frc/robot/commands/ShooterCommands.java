@@ -17,9 +17,9 @@ public class ShooterCommands {
     public Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setTargetTangentialVelocity(-15),
+                        FLYWHEELS.setTargetTangentialVelocity(-5),
                         INTAKE.setIntakeSpeed(0.5),
-                        KICKER.setKickerPercentageOutput(0.5)
+                        KICKER.setKickerPercentageOutput(-0.5)
                 );
     }
 
