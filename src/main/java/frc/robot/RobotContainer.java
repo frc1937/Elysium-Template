@@ -156,6 +156,7 @@ public class RobotContainer {
 
             return LOW_BATTERY_THRESHOLD < lowBatteryCounter[0];
         }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+
         new Trigger(KICKER::doesSeeNote).onTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
 
     }

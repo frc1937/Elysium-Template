@@ -35,9 +35,7 @@ public class Arm extends GenericSubsystem {
     public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
         return new FunctionalCommand(
                 () -> resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
-                () -> {
-                    setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble()));
-                },
+                () -> setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble())),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
