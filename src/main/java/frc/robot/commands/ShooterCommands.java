@@ -6,10 +6,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.utilities.ShooterPhysicsCalculations;
-
-import java.util.function.BooleanSupplier;
 
 import static frc.robot.RobotContainer.ARM;
 import static frc.robot.RobotContainer.FLYWHEELS;
@@ -22,16 +20,15 @@ public class ShooterCommands {
     public Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setVoltage(-4),
+                        FLYWHEELS.setVoltage(-8),
                         INTAKE.setIntakeSpeed(0.5),
                         KICKER.setKickerPercentageOutput(-0.5)
                 );
     }
 
     public Command outtakeNote() {
-        return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
+        return FLYWHEELS.setTargetVelocity(15)
                 .alongWith(
-                        FLYWHEELS.setTargetVelocity(15),
                         INTAKE.setIntakeSpeed(-0.5),
                         KICKER.setKickerPercentageOutput(0.5)
                 );
@@ -44,64 +41,29 @@ public class ShooterCommands {
         );
     }
 
-    public static Command getContinuousConditionalCommand(Command onTrue, Command onFalse, BooleanSupplier condition) {
-        return new ConditionalCommand(
-                onTrue.onlyWhile(condition),
-                onFalse.onlyWhile(() -> !condition.getAsBoolean()),
-                condition
-        ).repeatedly();
-    }
-
     public Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final Trigger isReadyToShoot = new Trigger(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget());
+//        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
+        final Command waitAndShoot = new WaitCommand(2).andThen(KICKER.setKickerPercentageOutput(1));
 
         final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
 
-        final Command setArmPosition = ARM.setTargetPosition(
-                Rotation2d.fromRadians(calculations.getOptimalShootingAngleRadians(
+        final Command setArmPosition = ARM.setContinousTargetPosition(
+                () -> calculations.getOptimalShootingAngleRadians(
                         POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity
-                ))
-        );
+                ));
 
-        final ConditionalCommand shootKicker = new ConditionalCommand(
-                KICKER.setKickerPercentageOutput(0.7),
-                KICKER.setKickerPercentageOutput(0.0),
-                isReadyToShoot
-        );
+//        final ConditionalCommand shootKicker = new ConditionalCommand(
+//                KICKER.setKickerPercentageOutput(1),
+//                KICKER.setKickerPercentageOutput(0.0),
+//                isReadyToShoot
+//        );
 
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
-                shootKicker
+                waitAndShoot
         );
-//
-//
-//
-//        final ConditionalCommand shootFromKicker = new ConditionalCommand(
-//                KICKER.setKickerPercentageOutput(0.5).alongWith(
-//                        Note.createAndShootNote(FLYWHEELS::getFlywheelTangentialVelocity,
-//                                () -> Rotation2d.fromRotations(ARM.getCurrentAngleRotations())
-//                        )
-//                ),
-//
-//                KICKER.setKickerPercentageOutput(0.0),
-//
-//                isShooterAtDesiredState
-//        );
-//
-//        final Command aimAtTargetPhysics = new ParallelCommandGroup(
-//                FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity),
-//                ARM.setContinuousTargetPosition(() ->
-//                        Rotation2d.fromRadians(
-//                        new ShooterPhysicsCalculations()
-//                                .getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity))
-//                ));
-//
-//        return new ParallelCommandGroup(
-//                aimAtTargetPhysics,
-//                shootFromKicker
-//        );
     }
 
     public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {

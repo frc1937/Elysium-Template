@@ -36,7 +36,8 @@ public class ShooterPhysicsCalculations {
         final double discriminant = vQuad - GRAVITY_FORCE * (GRAVITY_FORCE * distance * distance + 2 * vSquared * z);
 
         if (discriminant < 0) {
-            throw new IllegalArgumentException("No valid shooting angle: discriminant is negative");
+            new IllegalArgumentException("No valid shooting angle: discriminant is negative").printStackTrace();
+            return Units.degreesToRadians(35);
         }
 
         final double sqrt = Math.sqrt(discriminant);

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -8,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -27,6 +30,18 @@ public class Arm extends GenericSubsystem {
         Logger.recordOutput("IsArmReady: ", ARM_MOTOR.isAtPositionSetpoint());
 
         return ARM_MOTOR.isAtPositionSetpoint();
+    }
+
+    public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
+        return new FunctionalCommand(
+                () -> resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
+                () -> {
+                    setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble()));
+                },
+                interrupted -> ARM_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     public Command setTargetPosition(Rotation2d targetPosition) {
@@ -79,7 +94,7 @@ public class Arm extends GenericSubsystem {
         ARM_MECHANISM.setTargetAngle(targetPosition);
     }
 
-    private void resetMotor(double output) {
-        ARM_MOTOR.resetProfile(MotorProperties.ControlMode.POSITION, output);
+    private void resetMotor(double outputRotations) {
+        ARM_MOTOR.resetProfile(MotorProperties.ControlMode.POSITION, outputRotations);
     }
 }

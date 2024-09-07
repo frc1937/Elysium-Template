@@ -48,7 +48,7 @@ public class SwerveConstants {
      * Units of RADIANS for everything.
      */
     static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            1, 0, 0.0011,
+            1.9, 0, 0.0011,
             new TrapezoidProfile.Constraints(Math.PI / 2, Math.PI / 2)
     );
 

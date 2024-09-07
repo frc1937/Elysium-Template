@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -61,8 +62,7 @@ public class RobotContainer {
     private void configureBindings() {
         DriverStation.silenceJoystickConnectionWarning(true);
 
-        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
-        new Trigger(() -> RobotController.getBatteryVoltage() < 11).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+        setupLEDs();
 
         DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
         DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
@@ -85,16 +85,22 @@ public class RobotContainer {
 //                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
 //                );
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
-        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+        driveController.getButton(Controller.Inputs.A).whileTrue(
+                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
+                        .alongWith(new WaitCommand(3).andThen(KICKER.setKickerPercentageOutput(1))
+                )
+        );
+
+//        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
+//        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
+//        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
+//        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(shooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(shooterCommands.outtakeNote());
 
         driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(
-                shooterCommands.shootPhysics(BLUE_SPEAKER, 10));
+                shooterCommands.shootPhysics(BLUE_SPEAKER, 11));
 
         driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(
                 SWERVE.driveWhilstRotatingToTarget(() -> 0, () -> 0,
@@ -137,5 +143,20 @@ public class RobotContainer {
         TELEOP,
         CHARACTERIZE_FLYWHEEL,
         CHARACTERIZE_ARM
+    }
+
+    private void setupLEDs() {
+        LEDS.setDefaultCommand(LEDS.setLEDStatus(Leds.LEDMode.DEFAULT, 0));
+
+        final int LOW_BATTERY_THRESHOLD = 150;
+        final int[] lowBatteryCounter = {0};
+
+        new Trigger(() -> {
+            if (RobotController.getBatteryVoltage() < 11.7) lowBatteryCounter[0]++;
+
+            return LOW_BATTERY_THRESHOLD < lowBatteryCounter[0];
+        }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+        new Trigger(KICKER::doesSeeNote).onTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
+
     }
 }
