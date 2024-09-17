@@ -17,6 +17,7 @@ import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.math.Conversions;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,8 @@ public class GenericSpark extends Motor {
     private TrapezoidProfile.State previousSetpoint, goalState;
 
     private double previousVelocity = 0;
+    private boolean hasStoppedOccurred = false;
+    private double lastProfileCalculationTimestamp;
 
     public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
         super(name);
@@ -89,6 +92,7 @@ public class GenericSpark extends Motor {
 
     @Override
     public void stopMotor() {
+        hasStoppedOccurred = true;
         spark.stopMotor();
     }
 
@@ -227,7 +231,7 @@ public class GenericSpark extends Motor {
             feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-
+            lastProfileCalculationTimestamp = Logger.getTimestamp();
         } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
             if (goalState == null) return;
 
@@ -237,6 +241,7 @@ public class GenericSpark extends Motor {
             feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
+            lastProfileCalculationTimestamp = Logger.getTimestamp();
         } else {
             if (goalState == null) return;
 
@@ -249,18 +254,6 @@ public class GenericSpark extends Motor {
         controller.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
 
-    @Override
-    public void resetProfile(MotorProperties.ControlMode controlMode, double output) {
-        feedback.reset();
-
-        if (controlMode == MotorProperties.ControlMode.POSITION)
-            previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
-        else if (controlMode == MotorProperties.ControlMode.VELOCITY)
-            previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
-
-        goalState = new TrapezoidProfile.State(output, 0);
-    }
-
     private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
         if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY) return 0;
 
@@ -271,19 +264,19 @@ public class GenericSpark extends Motor {
         return feedback.calculate(getEffectiveVelocity(), goal.velocity);
     }
 
-    private void setGoal(MotorProperties.ControlMode controlMode, double output) {
-        final TrapezoidProfile.State stateFromOutput = new TrapezoidProfile.State(output, 0);
+    private void setGoal(MotorProperties.ControlMode controlMode, double goal) {
+        if (!shouldResetProfile(new TrapezoidProfile.State(goal, 0))) return;
 
-        if (goalState == null || !goalState.equals(stateFromOutput) && velocityMotionProfile == null && positionMotionProfile == null) {
-            feedback.reset();
+        hasStoppedOccurred = false;
 
-            if (controlMode == MotorProperties.ControlMode.POSITION)
-                previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
-            else if (controlMode == MotorProperties.ControlMode.VELOCITY)
-                previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
+        feedback.reset();
 
-            goalState = stateFromOutput;
-        }
+        if (controlMode == MotorProperties.ControlMode.POSITION)
+            previousSetpoint = new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity());
+        else if (controlMode == MotorProperties.ControlMode.VELOCITY)
+            previousSetpoint = new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration());
+
+        goalState = new TrapezoidProfile.State(goal, 0);
     }
 
     private double getEffectivePosition() {
@@ -369,5 +362,11 @@ public class GenericSpark extends Motor {
 
     private double getSystemVelocityPrivate() {
         return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
+    }
+
+    private boolean shouldResetProfile(TrapezoidProfile.State newGoal) {
+        return !goalState.equals(newGoal) ||
+                hasStoppedOccurred ||
+                Logger.getRealTimestamp() - lastProfileCalculationTimestamp > 0.1 ;
     }
 }

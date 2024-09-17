@@ -139,11 +139,6 @@ public class Motor implements LoggableHardware {
     public void stopMotor() { }
 
     /**
-     * Reset the profile. Use when STARTING a command.
-     */
-    public void resetProfile(MotorProperties.ControlMode controlMode, double output) { }
-
-    /**
      * Sets the encoder position of the motor to a specified value.
      *
      * <p>This method allows for manually setting the encoder position of the motor.

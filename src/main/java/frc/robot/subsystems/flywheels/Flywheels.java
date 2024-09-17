@@ -22,7 +22,8 @@ public class Flywheels extends GenericSubsystem {
 
     public Command setTargetVelocity(double velocityRPS) {
         return new FunctionalCommand(
-                () -> resetProfileRPS(velocityRPS),
+                () -> {
+                },
                 () -> setFlywheelsTargetVelocity(velocityRPS),
                 interrupted -> stop(),
                 () -> false,
@@ -41,7 +42,7 @@ public class Flywheels extends GenericSubsystem {
     public Command setTargetTangentialVelocity(double velocityMPS) {
         return new FunctionalCommand(
                 () -> {
-                    resetProfileMPS(velocityMPS);
+
                 },
                 () -> setFlywheelsTangentialVelocity(velocityMPS),
                 interrupted -> stop(),
@@ -105,18 +106,6 @@ public class Flywheels extends GenericSubsystem {
     private void setFlywheelsTargetVelocity(double targetRPS) {
         for (SingleFlywheel flywheel : flywheels) {
             flywheel.setTargetVelocity(targetRPS);
-        }
-    }
-
-    private void resetProfileRPS(double output) {
-        for (SingleFlywheel flywheel : flywheels) {
-            flywheel.resetProfileRPS(output);
-        }
-    }
-
-    private void resetProfileMPS(double output) {
-        for (SingleFlywheel flywheel : flywheels) {
-            flywheel.resetProfileMPS(output);
         }
     }
 

@@ -1,7 +1,6 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -34,7 +33,7 @@ public class Arm extends GenericSubsystem {
 
     public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
         return new FunctionalCommand(
-                () -> resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
+                () -> {},//resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
                 () -> setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble())),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
@@ -44,7 +43,7 @@ public class Arm extends GenericSubsystem {
 
     public Command setTargetPosition(Rotation2d targetPosition) {
         return new FunctionalCommand(
-                () -> resetMotor(targetPosition.getRotations()),
+                () -> {},
                 () -> setMotorTargetPosition(targetPosition),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
@@ -90,9 +89,5 @@ public class Arm extends GenericSubsystem {
     private void setMotorTargetPosition(Rotation2d targetPosition) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
         ARM_MECHANISM.setTargetAngle(targetPosition);
-    }
-
-    private void resetMotor(double outputRotations) {
-        ARM_MOTOR.resetProfile(MotorProperties.ControlMode.POSITION, outputRotations);
     }
 }
