@@ -19,11 +19,11 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
-import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
+import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
