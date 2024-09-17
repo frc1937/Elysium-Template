@@ -2,107 +2,136 @@ package frc.robot.subsystems.flywheels;
 
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.lib.generic.GenericSubsystem;
+import frc.lib.math.Conversions;
 import frc.lib.util.commands.ExecuteEndCommand;
-import frc.robot.GlobalConstants;
+import org.littletonrobotics.junction.Logger;
 
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Second;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.*;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.LEFT_FLYWHEEL_DIAMETER;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.flywheels;
 
-public class Flywheels extends SubsystemBase {
-    private final FlywheelsConstants constants = FlywheelsConstants.generateConstants();
-    private final SingleFlywheelIO[] singleFlywheels = getFlywheels();
+public class Flywheels extends GenericSubsystem {
+    private final int FLYWHEEL_INDEX_TO_LOG_SYSID = 0;
 
-    private final SysIdRoutine routine;
-
-    public Flywheels() {
-        int flywheelToSysID = 0;
-
-        SysIdRoutine.Mechanism mechanism = new SysIdRoutine.Mechanism(
-                (voltage) -> setRawVoltage(flywheelToSysID, voltage.in(Volts)),
-                (SysIdRoutineLog log) -> sysIdLogFlywheel(flywheelToSysID, log),
+    public Command setTargetVelocity(double velocityRPS) {
+        return new FunctionalCommand(
+                () -> resetProfileRPS(velocityRPS),
+                () -> setFlywheelsTargetVelocity(velocityRPS),
+                interrupted -> stop(),
+                () -> false,
                 this
         );
-
-        routine = new SysIdRoutine(SYSID_CONFIG, mechanism);
     }
 
-    public Command setFlywheelsTargetVelocity(double targetRPS) {
+    public Command setVoltage(double voltage) {
         return new ExecuteEndCommand(
-                () -> setTargetVelocity(targetRPS),
+                () -> setFlywheelsVoltage(voltage),
                 this::stop,
                 this
         );
     }
 
-    public Command setFlywheelsTangentialVelocity(double velocityMetersPerSecond) {
-        return new ExecuteEndCommand(
-                () -> setTargetTangentialVelocity(velocityMetersPerSecond),
-                this::stop,
+    public Command setTargetTangentialVelocity(double velocityMPS) {
+        return new FunctionalCommand(
+                () -> {
+                    resetProfileMPS(velocityMPS);
+                },
+                () -> setFlywheelsTangentialVelocity(velocityMPS),
+                interrupted -> stop(),
+                () -> false,
                 this
         );
     }
 
     @Override
     public void periodic() {
-        for (SingleFlywheelIO currentFlywheel : singleFlywheels)
-            currentFlywheel.periodic();
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.periodic();
+        }
+    }
+
+    @Override
+    public void sysIdDrive(double voltage) {
+        flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].setVoltage(voltage);
+    }
+
+    @Override
+    public void sysIdUpdateLog(SysIdRoutineLog log) {
+        log.motor("Flywheel " + FLYWHEEL_INDEX_TO_LOG_SYSID)
+                .voltage(Volts.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getVoltage()))
+                .angularPosition(Rotations.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getPosition()))
+                .angularVelocity(RotationsPerSecond.of(flywheels[FLYWHEEL_INDEX_TO_LOG_SYSID].getVelocity()));
+    }
+
+    @Override
+    public SysIdRoutine.Config getSysIdConfig() {
+        return new SysIdRoutine.Config(
+                Volts.per(Second).of(0.5),
+                Volts.of(2),
+                Second.of(9)
+        );
     }
 
     public boolean hasReachedTarget() {
-        for (SingleFlywheelIO currentFlywheel : singleFlywheels) {
-            if (!currentFlywheel.hasReachedTarget())
+        for (SingleFlywheel flywheel : flywheels) {
+            if (!flywheel.hasReachedTarget()) {
+                Logger.recordOutput("AreFlywheelReady", false);
                 return false;
+            }
         }
-
+        Logger.recordOutput("AreFlywheelReady", true);
         return true;
     }
 
-    public Command sysIdQuastaticTest(SysIdRoutine.Direction direction) {
-        return routine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamicTest(SysIdRoutine.Direction direction) {
-        return routine.dynamic(direction);
-    }
-
-    private void stop() {
-        for (SingleFlywheelIO currentFlywheel : singleFlywheels)
-            currentFlywheel.stop();
-    }
-
-    private void setTargetVelocity(double targetRPS) {
-        for (SingleFlywheelIO currentFlywheel : singleFlywheels)
-            currentFlywheel.setTargetVelocity(targetRPS);
-    }
-
-    private void setTargetTangentialVelocity(double velocityMetersPerSecond) {
-        for (SingleFlywheelIO currentFlywheel : singleFlywheels)
-            currentFlywheel.setTargetTangentialVelocity(velocityMetersPerSecond);
-    }
-
-    private void setRawVoltage(int index, double voltage) {
-        singleFlywheels[index].setRawVoltage(voltage);
-    }
-
-    private void sysIdLogFlywheel(int flywheelIndex, SysIdRoutineLog log) {
-        SingleFlywheelIO currentFlywheel = singleFlywheels[flywheelIndex];
-
-        log.motor(currentFlywheel.getName())
-                .voltage(Volts.of(currentFlywheel.getVoltage()))
-                .angularVelocity(RotationsPerSecond.of(currentFlywheel.getVelocityRotationsPerSecond()));
-    }
-
-    private SingleFlywheelIO[] getFlywheels() {
-        if (GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.REPLAY) {
-            return new SingleFlywheelIO[]{
-                    new SingleFlywheelIO("Left", LEFT_FLYWHEEL_DIAMETER, LEFT_MOTOR_INVERT),
-                    new SingleFlywheelIO("Right", RIGHT_FLYWHEEL_DIAMETER, RIGHT_MOTOR_INVERT)
-            };
+    public void stop() {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.stop();
         }
-
-        return constants.getFlywheels().get();
     }
+
+    private void setFlywheelsTangentialVelocity(double targetMPS) {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.setTargetTangentialVelocity(targetMPS);
+        }
+    }
+
+    private void setFlywheelsTargetVelocity(double targetRPS) {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.setTargetVelocity(targetRPS);
+        }
+    }
+
+    private void resetProfileRPS(double output) {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.resetProfileRPS(output);
+        }
+    }
+
+    private void resetProfileMPS(double output) {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.resetProfileMPS(output);
+        }
+    }
+
+    private void setFlywheelsVoltage(double voltage) {
+        for (SingleFlywheel flywheel : flywheels) {
+            flywheel.setVoltage(voltage);
+        }
+    }
+
+    public double getFlywheelTangentialVelocity() {
+        return Math.min(
+                Conversions.rpsToMps(flywheels[0].getVelocity(), LEFT_FLYWHEEL_DIAMETER),
+                Conversions.rpsToMps(flywheels[1].getVelocity(), RIGHT_FLYWHEEL_DIAMETER)
+        );
+    }
+
+
 }

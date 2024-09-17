@@ -7,21 +7,13 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.generic.encoder.Encoder;
-import frc.lib.generic.encoder.EncoderConfiguration;
-import frc.lib.generic.encoder.EncoderProperties;
-import frc.lib.generic.encoder.EncoderSignal;
-import frc.lib.generic.encoder.hardware.GenericCanCoder;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
-import frc.lib.generic.motor.hardware.GenericSpark;
+import frc.lib.generic.hardware.encoder.*;
+import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.simulation.mechanisms.SingleJointedArmMechanism2d;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.lib.generic.motor.MotorSignal.SignalType.*;
+import static frc.lib.generic.hardware.motor.MotorSignal.*;
 
 public class ArmConstants {
     static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
@@ -30,13 +22,13 @@ public class ArmConstants {
             Seconds.of(10)
     );
 
-    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(0.5);
+    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(2);
 
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
 
-    static final Motor ARM_MOTOR = new GenericSpark("ARM_MOTOR", 1, MotorProperties.SparkType.FLEX);
-    static final Encoder ABSOLUTE_ARM_ENCODER = new GenericCanCoder("ARM_ENCODER", 22);
+    static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",1, MotorProperties.SparkType.FLEX);
+    static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("Arm Encoder", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
 
@@ -56,8 +48,11 @@ public class ArmConstants {
 
         ABSOLUTE_ARM_ENCODER.configure(encoderConfiguration);
 
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new EncoderSignal(EncoderSignal.SignalType.POSITION));
-        ABSOLUTE_ARM_ENCODER.setSignalUpdateFrequency(new EncoderSignal(EncoderSignal.SignalType.VELOCITY));
+        ABSOLUTE_ARM_ENCODER.setupSignalUpdates(EncoderSignal.POSITION);
+        ABSOLUTE_ARM_ENCODER.setupSignalUpdates(EncoderSignal.VELOCITY);
+
+        ABSOLUTE_ARM_ENCODER.setSimulatedEncoderPositionSource(ARM_MOTOR::getSystemPosition);
+        ABSOLUTE_ARM_ENCODER.setSimulatedEncoderVelocitySource(ARM_MOTOR::getSystemVelocity);
     }
 
     private static void configureMotor() {
@@ -81,22 +76,34 @@ public class ArmConstants {
 
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
-        motorConfiguration.simSlot = new SimulationProperties.Slot(
+        motorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.ARM,
                 DCMotor.getKrakenX60(1),
                 150.0,
                 0.2,
                 0.03,
-                Rotation2d.fromDegrees(-20),
-                Rotation2d.fromDegrees(120),
+                Rotation2d.fromDegrees(-180),
+                Rotation2d.fromDegrees(180),
                 true
+        );
+
+        motorConfiguration.simulationSlot = new MotorProperties.Slot(
+                30,
+                0,
+                0,
+                22,
+                0,
+                0.053988,
+                0.04366,
+                GravityTypeValue.Arm_Cosine
         );
 
         ARM_MOTOR.configure(motorConfiguration);
 
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(POSITION));
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VELOCITY));
-        ARM_MOTOR.setupSignalsUpdates(new MotorSignal(VOLTAGE));
+        ARM_MOTOR.setupSignalUpdates(POSITION);
+        ARM_MOTOR.setupSignalUpdates(VELOCITY);
+        ARM_MOTOR.setupSignalUpdates(VOLTAGE);
+        ARM_MOTOR.setupSignalUpdates(CLOSED_LOOP_TARGET);
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);

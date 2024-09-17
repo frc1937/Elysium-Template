@@ -1,47 +1,69 @@
 package frc.robot.subsystems.flywheels;
 
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.GlobalConstants;
-import frc.robot.subsystems.flywheels.real.RealFlywheelsConstants;
-import frc.robot.subsystems.flywheels.simulation.SimulatedFlywheelsConstants;
+import edu.wpi.first.math.system.plant.DCMotor;
+import frc.lib.generic.hardware.motor.Motor;
+import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.MotorFactory;
+import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.simulation.SimulationProperties;
 
-import java.util.Optional;
+public class FlywheelsConstants {
+    private static final DCMotor FLYWHEEL_MOTOR_GEARBOX = DCMotor.getNeoVortex(1);
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.GlobalConstants.CURRENT_MODE;
+    private static final Motor LEFT_FLYWHEEL_MOTOR = MotorFactory.createSpark("LEFT_FLYWHEEL", 28, MotorProperties.SparkType.FLEX);
+    private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
-public abstract class FlywheelsConstants {
-    protected static final double LEFT_FLYWHEEL_DIAMETER =  Units.inchesToMeters(3);
-    protected static final double RIGHT_FLYWHEEL_DIAMETER =  Units.inchesToMeters(4);
+    private static final MotorProperties.Slot
+            LEFT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10904, 0.025022, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10457, 0.037788, 0.05658),
 
-    public static final double TOLERANCE_ROTATIONS_PER_SECONDS = 0.9;
+    SIMULATION_SLOT = new MotorProperties.Slot(12, 0, 0, 0, 0, 0);
 
-    public static final double MAXIMUM_VELOCITY_RPM = 5400;
+    protected static final double
+            LEFT_FLYWHEEL_DIAMETER = 0.07,
+            RIGHT_FLYWHEEL_DIAMETER = 0.1;
 
-    protected static final boolean LEFT_MOTOR_INVERT = true;
-    protected static final boolean RIGHT_MOTOR_INVERT = false;
-
-    protected static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
-            Volts.of(0.8).per(Second),
-            Volts.of(6),
-            Seconds.of(10)
-    );
-
-    static FlywheelsConstants generateConstants() {
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return new SimulatedFlywheelsConstants();
-
-        if (CURRENT_MODE == GlobalConstants.Mode.REAL)
-            return new RealFlywheelsConstants();
-
-        return new FlywheelsConstants() {
-            @Override
-            protected Optional<SingleFlywheelIO[]> getFlywheels() {
-                return Optional.empty();
-            }
-        };
+    static {
+        configureMotor(LEFT_FLYWHEEL_MOTOR, false, LEFT_SLOT);
+        configureMotor(RIGHT_FLYWHEEL_MOTOR, true, RIGHT_SLOT);
     }
 
-    protected abstract Optional<SingleFlywheelIO[]> getFlywheels();
+    private static void configureMotor(Motor motor, boolean invert, MotorProperties.Slot slot) {
+        MotorConfiguration configuration = new MotorConfiguration();
+
+        configuration.idleMode = MotorProperties.IdleMode.COAST;
+        configuration.inverted = invert;
+
+        configuration.supplyCurrentLimit = 40;
+        configuration.statorCurrentLimit = 40;
+
+        configuration.profiledTargetAcceleration = 40;
+        configuration.profiledJerk = 30;
+
+        configuration.slot0 = slot;
+
+        configuration.closedLoopTolerance = 50;
+
+        configuration.simulationProperties = new SimulationProperties.Slot(
+                SimulationProperties.SimulationType.FLYWHEEL,
+                FLYWHEEL_MOTOR_GEARBOX,
+                1,
+                0.017
+        );
+
+        configuration.simulationSlot = SIMULATION_SLOT;
+
+        motor.configure(configuration);
+
+        motor.setupSignalUpdates(MotorSignal.VOLTAGE);
+        motor.setupSignalUpdates(MotorSignal.TEMPERATURE);
+        motor.setupSignalUpdates(MotorSignal.VELOCITY);
+        motor.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
+    }
+
+    protected static SingleFlywheel[] flywheels = {
+            new SingleFlywheel(LEFT_FLYWHEEL_MOTOR, LEFT_FLYWHEEL_DIAMETER),
+            new SingleFlywheel(RIGHT_FLYWHEEL_MOTOR, RIGHT_FLYWHEEL_DIAMETER)
+    };
 }

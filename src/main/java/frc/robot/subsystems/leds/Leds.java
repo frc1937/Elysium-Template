@@ -38,7 +38,7 @@ public class Leds extends SubsystemBase {
             case SHOOTER_EMPTY -> getCommandFromColours(() -> generateCirclingBuffer(
                     new Color8Bit(Color.kCyan),
                     new Color8Bit(Color.kWhite),
-                    new Color8Bit(Color.kPink)
+                    new Color8Bit(Color.kDeepPink)
             ), timeout);
 
             case DEBUG_MODE -> getCommandFromColours(() -> generateBreathingBuffer(

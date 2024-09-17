@@ -1,94 +1,68 @@
 package frc.lib.generic;
 
+import java.util.function.Function;
+
 public class Feedforward {
-    private final double kS; //Volts required to overcome the force of static friction
-    private final double kV; //Volts required to maintain a velocity of one unit
-    private final double kA; //Volts required to accelerate the mechanism by one unit
-    private final double kG; //Volts required to overcome the force of gravity
+    public record FeedForwardConstants(double kS, double kV, double kA, double kG) {}
+    public record FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {}
 
-    private final Properties.FeedforwardType type;
+    public record ClosedLoopValues(FeedForwardConstants constants, FeedForwardValues values) {}
 
-    public Feedforward(Properties.FeedforwardType type, double kS, double kV, double kA) {
-        this.kS = kS;
-        this.kV = kV;
-        this.kA = kA;
-        this.kG = 0;
+    public enum Type {
+        SIMPLE(closedLoopValues -> calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values)),
 
-        this.type = type;
+        ARM(closedLoopValues ->
+                calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
+                closedLoopValues.constants.kG * Math.cos(closedLoopValues.values.positionRotations * 2 * Math.PI)
+        ),
 
-    }
+        ELEVATOR(closedLoopValues ->
+                calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
+                closedLoopValues.constants.kG
+        );
 
-    public Feedforward(Properties.FeedforwardType type, double kS, double kV, double kA, double kG) {
-        this.kS = kS;
-        this.kV = kV;
-        this.kA = kA;
-        this.kG = kG;
+        public final Function<ClosedLoopValues, Double> calculationFunction;
+        public FeedForwardConstants konstants = new FeedForwardConstants(0, 0, 0, 0);
 
-        this.type = type;
-    }
-
-    /**
-     * @param positionRotations            For arm ONLY. This should be in rotations. For non-arms, this will be ignored.
-     * @param velocityRotationsPerSec      unit-less, preferably in rotations per second
-     * @param accelerationRotPerSecSquared unit-less, preferably rotations per second squared
-     * @return The input for the motor, in voltage
-     */
-    public double calculate(double positionRotations, double velocityRotationsPerSec, double accelerationRotPerSecSquared) {
-        switch (type) {
-            case ARM -> {
-                return calculateArmFeedforward(positionRotations, velocityRotationsPerSec, accelerationRotPerSecSquared);
-            }
-
-            case ELEVATOR -> {
-                return calculateElevatorFeedforward(velocityRotationsPerSec, accelerationRotPerSecSquared);
-            }
-
-            case SIMPLE -> {
-                return calculateSimpleMotorFeedforward(velocityRotationsPerSec, accelerationRotPerSecSquared);
-            }
+        Type(Function<ClosedLoopValues, Double> calculationFunction) {
+            this.calculationFunction = calculationFunction;
         }
 
-        throw new UnsupportedOperationException("Can't seem to have a type. How is this even possible?");
+        public void setFeedforwardConstants(double kS, double kV, double kA, double kG) {
+            this.konstants = new FeedForwardConstants(kS, kV, kA, kG);
+        }
+
+        public void setFeedforwardConstants(double kS, double kV, double kA) {
+            this.konstants = new FeedForwardConstants(kS, kV, kA, 0);
+        }
+
+        /**
+         * @param positionRotations            For arm ONLY. This should be in rotations. For non-arms, this will be ignored.
+         * @param velocityRPS      unit-less, preferably in rotations per second
+         * @param accelerationRPSPS unit-less, preferably rotations per second squared
+         * @return The input for the motor, in voltage
+         */
+        public double calculate(double positionRotations, double velocityRPS, double accelerationRPSPS) {
+            return calculationFunction.apply(new ClosedLoopValues(konstants,
+                    new FeedForwardValues(positionRotations, velocityRPS, accelerationRPSPS)));
+        }
+
+        /**
+         * @param velocityRPS      unit-less, preferably in rotations per second
+         * @param accelerationRPSPS unit-less, preferably rotations per second squared
+         * @return The input for the motor, in voltage
+         */
+        public double calculate(double velocityRPS, double accelerationRPSPS) {
+            return calculate(0, velocityRPS, accelerationRPSPS);
+        }
+
+        private static double calculateSimpleFeedforward(FeedForwardConstants constants, FeedForwardValues values) {
+            return constants.kS * Math.signum(values.velocityRPS) + constants.kV * values.velocityRPS + constants.kA * values.accelerationRPSPS;
+        }
     }
 
-    /**
-     * For both simple motor and elevator feed forwards. No position is required.
-     *
-     * @param velocity     - unit-less, preferably in rotations per second
-     * @param acceleration - unit-less, preferably rotations per second squared
-     * @return - the input for the motors
-     */
-    public double calculate(double velocity, double acceleration) {
-        return calculate(0, velocity, acceleration);
-    }
-
-    /**
-     * For both simple motor and elevator feed forwards. With no position or acceleration
-     *
-     * @param velocity - unit-less, preferably in rotations per second
-     * @return - the input for the motors
-     */
-    public double calculate(double velocity) {
-        return calculate(0, velocity, 0);
-    }
-
-    private double calculateSimpleMotorFeedforward(double velocity, double acceleration) {
-        return kS * Math.signum(velocity)
-                + kV * velocity
-                + kA * acceleration;
-    }
-
-    private double calculateElevatorFeedforward(double velocity, double acceleration) {
-        return kG
-                + kS * Math.signum(velocity)
-                + kV * velocity
-                + kA * acceleration;
-    }
-
-    private double calculateArmFeedforward(double positionRadians, double velocity, double acceleration) {
-        return kG * Math.cos(positionRadians * 2 * Math.PI)
-                + kS * Math.signum(velocity)
-                + kV * velocity
-                + kA * acceleration;
-    }
+    // kS; Volts required to overcome the force of static friction
+    // kV; Volts required to maintain a velocity of one unit
+    // kA; Volts required to accelerate the mechanism by one unit
+    // kG; Volts required to overcome the force of gravity
 }

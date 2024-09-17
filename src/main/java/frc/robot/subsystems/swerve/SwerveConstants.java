@@ -8,22 +8,17 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
-import frc.lib.generic.pigeon.Pigeon;
-import frc.lib.util.LoggedTunableNumber;
-import frc.robot.GlobalConstants;
-import frc.robot.subsystems.swerve.real.RealSwerveConstants;
-import frc.robot.subsystems.swerve.simulation.SimulationSwerveConstants;
-
-import java.util.Optional;
-import java.util.function.Supplier;
+import frc.lib.generic.hardware.pigeon.Pigeon;
+import frc.lib.generic.hardware.pigeon.PigeonFactory;
+import frc.lib.generic.hardware.pigeon.PigeonSignal;
+import frc.lib.math.AdvancedSwerveKinematics;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
-import static frc.robot.GlobalConstants.CURRENT_MODE;
 
-public abstract class SwerveConstants {
+public class SwerveConstants {
     public static final double DRIVE_GEAR_RATIO = (6.75);
-    public static final double ANGLE_GEAR_RATIO = (150.0 / 7.0);
+    public static final double STEER_GEAR_RATIO = (150.0 / 7.0);
 
     public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
 
@@ -34,29 +29,27 @@ public abstract class SwerveConstants {
     public static final double MAX_ROTATION_RAD_PER_S = 3 * Math.PI;
 
     public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
-
-    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(
+    
+    private static final Translation2d[] moduleLocations = {
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
-
             new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
-            new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0));
+            new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
+    };
+
+    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(moduleLocations);
+    public static final AdvancedSwerveKinematics ADVANCED_KINEMATICS = new AdvancedSwerveKinematics(moduleLocations);
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.2,
             ROTATION_NEUTRAL_DEADBAND = 0.2;
 
-    static final LoggedTunableNumber
-            ROTATION_KP = new LoggedTunableNumber("Swerve/RotationKP", 1),
-            ROTATION_MAX_VELOCITY = new LoggedTunableNumber("Swerve/RotationMaxVelocity", Math.PI),
-            ROTATION_MAX_ACCELERATION = new LoggedTunableNumber("Swerve/RotationMaxAcceleration", Math.PI / 2);
-
     /**
      * Units of RADIANS for everything.
      */
-    public static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            ROTATION_KP.get(), 0, 0.015,
-            new TrapezoidProfile.Constraints(ROTATION_MAX_VELOCITY.get(), ROTATION_MAX_ACCELERATION.get())
+    static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
+            1.9, 0, 0.0011,
+            new TrapezoidProfile.Constraints(Math.PI / 2, Math.PI / 2)
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -67,38 +60,20 @@ public abstract class SwerveConstants {
             new ReplanningConfig(true, false)
     );
 
-    public static <T> Optional<T> ofReplayable(Supplier<T> value) {
-        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
-            return Optional.empty();
+    static final Pigeon GYRO = PigeonFactory.createIMU("GYRO", 30);
 
-        return Optional.of(value.get());
+    static {
+        configureGyro();
+        configureRotationController();
     }
 
-    static SwerveConstants generateConstants() {
+    private static void configureGyro() {
+        GYRO.resetConfigurations();
+        GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
+    }
+
+    private static void configureRotationController() {
         ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
-        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.5));
-
-        if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION)
-            return new SimulationSwerveConstants();
-
-        if (CURRENT_MODE == GlobalConstants.Mode.REAL) {
-            return new RealSwerveConstants();
-        }
-
-        return new SwerveConstants() {
-            @Override
-            protected Optional<Pigeon> getPigeon() {
-                return Optional.empty();
-            }
-
-            @Override
-            protected Optional<SwerveModuleIO[]> getModulesIO() {
-                return Optional.empty();
-            }
-        };
+        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.8));
     }
-
-
-    protected abstract Optional<Pigeon> getPigeon();
-    protected abstract Optional<SwerveModuleIO[]> getModulesIO();
 }

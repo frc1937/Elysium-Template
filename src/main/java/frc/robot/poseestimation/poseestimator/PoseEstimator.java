@@ -9,10 +9,12 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.lib.math.Optimizations;
 import frc.robot.RobotContainer;
-import frc.robot.poseestimation.robotposesources.RobotPoseSource;
+import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.ArrayList;
@@ -27,7 +29,7 @@ import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
  */
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
-    private final RobotPoseSource[] robotPoseSources;
+    private final PhotonCameraIO[] robotPoseSources;
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
 
     /**
@@ -35,14 +37,14 @@ public class PoseEstimator implements AutoCloseable {
      *
      * @param robotPoseSources the sources that should update the pose estimator apart from the odometry. This should be cameras etc.
      */
-    public PoseEstimator(RobotPoseSource... robotPoseSources) {
+    public PoseEstimator(PhotonCameraIO... robotPoseSources) {
         this.robotPoseSources = robotPoseSources;
 
         putAprilTagsOnFieldWidget();
 
         SmartDashboard.putData("Field", field);
 
-        PathPlannerLogging.setLogActivePathCallback((pose) -> {
+        PathPlannerLogging.setLogActivePathCallback(pose -> {
             field.getObject("path").setPoses(pose);
             Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
         });
@@ -84,8 +86,30 @@ public class PoseEstimator implements AutoCloseable {
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
     public void updatePoseEstimatorStates(SwerveDriveWheelPositions[] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
+        if (swerveWheelPositions.length == 0) {
+            System.out.println("0!! Sweel Wheel Positions");
+            return;
+        }
+        if (gyroRotations.length == 0) {
+            System.out.println("0!! Gyro Rotations");
+            return;
+        }
+        if (timestamps.length == 0) {
+            System.out.println("0!! Timestamps");
+            return;
+        }
+
+        if (Optimizations.isColliding()) {
+            DriverStation.reportWarning("The robot collided! Discarding odometry at timestamp", false);
+            return;
+        }
+
         for (int i = 0; i < swerveWheelPositions.length; i++)
-            poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(swerveWheelPositions[i], gyroRotations[i], timestamps[i]));
+            poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(
+                    swerveWheelPositions[i],
+                    gyroRotations[i],
+                    timestamps[i])
+            );
     }
 
     private void updateFromVision() {
@@ -96,19 +120,25 @@ public class PoseEstimator implements AutoCloseable {
 
     private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
         List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
-        for (RobotPoseSource robotPoseSource : robotPoseSources) {
+
+        for (PhotonCameraIO robotPoseSource : robotPoseSources) {
             final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(robotPoseSource);
+
             if (visionObservation != null)
                 viableVisionObservations.add(visionObservation);
         }
+
         return viableVisionObservations;
     }
 
-    private PoseEstimator6328.VisionObservation getVisionObservation(RobotPoseSource robotPoseSource) {
-        robotPoseSource.update();
+    private PoseEstimator6328.VisionObservation getVisionObservation(PhotonCameraIO robotPoseSource) {
+        robotPoseSource.refresh();
+
         if (!robotPoseSource.hasNewResult())
             return null;
+
         final Pose2d robotPose = robotPoseSource.getRobotPose();
+
         if (robotPose == null)
             return null;
 

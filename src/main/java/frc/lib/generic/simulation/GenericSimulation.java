@@ -1,17 +1,13 @@
 package frc.lib.generic.simulation;
 
 import com.ctre.phoenix6.sim.TalonFXSimState;
-import frc.lib.generic.motor.Motor;
-import frc.lib.generic.motor.MotorConfiguration;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.generic.motor.MotorSignal;
-import frc.lib.generic.motor.hardware.GenericTalonFX;
-import frc.robot.GlobalConstants;
+import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.motor.hardware.SimulationTalonFX;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public abstract class GenericSimulation {
     /**
@@ -19,27 +15,22 @@ public abstract class GenericSimulation {
      */
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
-    private Motor motor;
-    private TalonFXSimState motorSimulationState;
+    private final SimulationTalonFX motor;
+    private final TalonFXSimState motorSimulatedState;
 
     protected GenericSimulation() {
-        if (CURRENT_MODE == GlobalConstants.Mode.REAL) return;
-
         REGISTERED_SIMULATIONS.add(this);
 
-        motor = new GenericTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
+        motor = new SimulationTalonFX("Amit Sucher", REGISTERED_SIMULATIONS.size() - 1);
 
-        //This is simulation. we don't give a damn fuck! about performance.
-        MotorSignal[] signals = new MotorSignal[]{
-                new MotorSignal(MotorSignal.SignalType.POSITION, true), new MotorSignal(MotorSignal.SignalType.VELOCITY, true),
-                new MotorSignal(MotorSignal.SignalType.CURRENT, true), new MotorSignal(MotorSignal.SignalType.VOLTAGE, true),
-                new MotorSignal(MotorSignal.SignalType.TEMPERATURE, true), new MotorSignal(MotorSignal.SignalType.CLOSED_LOOP_TARGET, true)
-        };
+        motor.setupSignalUpdates(MotorSignal.POSITION);
+        motor.setupSignalUpdates(MotorSignal.VELOCITY);
+        motor.setupSignalUpdates(MotorSignal.VOLTAGE);
+        motor.setupSignalUpdates(MotorSignal.TEMPERATURE);
+        motor.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
 
-        motor.setupSignalsUpdates(signals);
-
-        motorSimulationState = motor.getSimulationState();
-        motorSimulationState.setSupplyVoltage(12); //Voltage compensation.
+        motorSimulatedState = motor.getSimulationState();
+        motorSimulatedState.setSupplyVoltage(12); //Voltage compensation.
     }
 
     /**
@@ -49,6 +40,10 @@ public abstract class GenericSimulation {
         for (GenericSimulation simulation : REGISTERED_SIMULATIONS) {
             simulation.updateSimulation();
         }
+    }
+
+    public int getDeviceID() {
+        return motor.getDeviceID();
     }
 
     public void configure(MotorConfiguration configuration) {
@@ -67,16 +62,16 @@ public abstract class GenericSimulation {
         return motor.getVoltage();
     }
 
-    private void updateSimulation() {
-        setVoltage(motorSimulationState.getMotorVoltage());
-        update();
-
-        motorSimulationState.setRawRotorPosition(getPositionRotations());
-        motorSimulationState.setRotorVelocity(getVelocityRotationsPerSecond());
-    }
-
     public double getTarget() {
         return motor.getClosedLoopTarget();
+    }
+
+    private void updateSimulation() {
+        setVoltage(motorSimulatedState.getMotorVoltage());
+        update();
+
+        motorSimulatedState.setRawRotorPosition(getPositionRotations());
+        motorSimulatedState.setRotorVelocity(getVelocityRotationsPerSecond());
     }
 
     public abstract double getPositionRotations();

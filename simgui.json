@@ -22,6 +22,10 @@
       "/SmartDashboard/Mechanisms/FlywheelLeftSim": "Mechanism2d",
       "/SmartDashboard/Mechanisms/FlywheelRight": "Mechanism2d",
       "/SmartDashboard/Mechanisms/FlywheelRightSim": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/LEFT_FLYWHEEL": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/Left Flywheel": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/RIGHT_FLYWHEEL": "Mechanism2d",
+      "/SmartDashboard/Mechanisms/Right Flywheel": "Mechanism2d",
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
@@ -47,6 +51,21 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Mechanisms/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Mechanisms/Left Flywheel": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/SmartDashboard/Mechanisms/Right Flywheel": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -66,30 +85,24 @@
     },
     "transitory": {
       "AdvantageKit": {
-        "Flywheel": {
-          "RightSim": {
+        "ARM_MOTOR": {
+          "open": true
+        },
+        "Kicker": {
+          "open": true
+        },
+        "Motors": {
+          "Arm": {
             "open": true
           },
+          "open": true
+        },
+        "RL_STEER_MOTOR": {
           "open": true
         },
         "RealOutputs": {
-          "Logger": {
-            "open": true
-          },
-          "Swerve": {
-            "open": true
-          },
           "open": true
         },
-        "Swerve": {
-          "open": true
-        },
-        "open": true
-      },
-      "LiveWindow": {
-        "open": true
-      },
-      "Shuffleboard": {
         "open": true
       },
       "SmartDashboard": {
@@ -97,6 +110,9 @@
           "open": true
         },
         "Mechanism": {
+          "open": true
+        },
+        "Mechanisms": {
           "open": true
         },
         "TunableNumbers": {
@@ -107,11 +123,18 @@
             "open": true
           },
           "open": true
+        },
+        "open": true,
+        "physics": {
+          "open": true
         }
       }
     }
   },
   "NetworkTables Info": {
+    "Connections": {
+      "open": true
+    },
     "visible": true
   },
   "Plot": {
@@ -129,7 +152,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 282,
+          "height": 380,
           "series": [
             {
               "color": [
@@ -178,12 +201,21 @@
             },
             {
               "color": [
-                0.5764706134796143,
-                0.4705882668495178,
-                0.3764706254005432,
+                0.8549020290374756,
+                0.545098066329956,
+                0.7647059559822083,
                 1.0
               ],
-              "id": "NT:/AdvantageKit/RealOutputs/ANGLE TargetAngle"
+              "id": "NT:/SmartDashboard/physics/FunctionTheta Deg"
+            },
+            {
+              "color": [
+                0.5490196347236633,
+                0.5490196347236633,
+                0.5490196347236633,
+                1.0
+              ],
+              "id": "NT:/SmartDashboard/physics/distance"
             }
           ]
         }

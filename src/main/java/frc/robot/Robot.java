@@ -6,13 +6,14 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.lib.generic.advantagekit.HardwareManager;
+import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.LoggedRobot;
 
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
+
 
     @Override
     public void robotInit() {

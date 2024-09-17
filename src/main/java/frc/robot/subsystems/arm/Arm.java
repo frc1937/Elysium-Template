@@ -1,75 +1,98 @@
 package frc.robot.subsystems.arm;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.generic.motor.MotorProperties;
-import frc.lib.util.commands.ExecuteEndCommand;
+import frc.lib.generic.GenericSubsystem;
+import frc.lib.generic.hardware.motor.MotorProperties;
+import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.arm.ArmConstants.*;
+import java.util.function.DoubleSupplier;
 
-public class Arm extends SubsystemBase {
-    private final SysIdRoutine routine;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
 
+public class Arm extends GenericSubsystem {
     public Arm() {
-        SysIdRoutine.Mechanism mechanism = new SysIdRoutine.Mechanism(
-                (voltage) -> setRawVoltage(voltage.in(Volts)),
-                this::sysIdLogArm,
-                this
-        );
-
-        routine = new SysIdRoutine(SYSID_CONFIG, mechanism);
-
+        setName("Arm Subsystem");
         ARM_MOTOR.setMotorEncoderPosition(ABSOLUTE_ARM_ENCODER.getEncoderPosition());
     }
 
     public boolean hasReachedTarget() {
-        return ARM_MOTOR.isAtSetpoint();
+        Logger.recordOutput("IsArmReady: ", ARM_MOTOR.isAtPositionSetpoint());
+
+        return ARM_MOTOR.isAtPositionSetpoint();
+    }
+
+    public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
+        return new FunctionalCommand(
+                () -> resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
+                () -> setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble())),
+                interrupted -> ARM_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     public Command setTargetPosition(Rotation2d targetPosition) {
-        return new ExecuteEndCommand(
+        return new FunctionalCommand(
+                () -> resetMotor(targetPosition.getRotations()),
                 () -> setMotorTargetPosition(targetPosition),
-                ARM_MOTOR::stopMotor,
-                this);
-    }
-
-    public Command sysIdQuastaticTest(SysIdRoutine.Direction direction) {
-        return routine.quasistatic(direction);
-    }
-
-    public Command sysIdDynamicTest(SysIdRoutine.Direction direction) {
-        return routine.dynamic(direction);
+                interrupted -> ARM_MOTOR.stopMotor(),
+                () -> false,
+                this
+        );
     }
 
     @Override
     public void periodic() {
-        if (ARM_MOTOR.getClosedLoopTarget() != 0)
-            ARM_MECHANISM.updateMechanism(
-                    Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()),
-                    Rotation2d.fromRotations(ARM_MOTOR.getClosedLoopTarget())
-            );
+        ARM_MECHANISM.updateMechanism(Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()));
+    }
+
+    public double getTargetAngleRotations() {
+        return ARM_MOTOR.getClosedLoopTarget();
+    }
+
+    public double getCurrentAngleRotations() {
+        return ARM_MOTOR.getSystemPosition();
     }
 
     public void setIdleMode(MotorProperties.IdleMode idleMode) {
         ARM_MOTOR.setIdleMode(idleMode);
     }
 
-    private void sysIdLogArm(SysIdRoutineLog log) {
+    @Override
+    public SysIdRoutine.Config getSysIdConfig() {
+        return SYSID_CONFIG;
+    }
+
+    @Override
+    public void sysIdUpdateLog(SysIdRoutineLog log) {
         log.motor("Arm")
                 .voltage(Volts.of(ARM_MOTOR.getVoltage()))
                 .angularPosition(Rotations.of(ARM_MOTOR.getSystemPosition()))
                 .angularVelocity(RotationsPerSecond.of(ARM_MOTOR.getSystemVelocity()));
     }
 
-    private void setRawVoltage(double voltage) {
+    @Override
+    public void sysIdDrive(double voltage) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
-        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
+        ARM_MECHANISM.setTargetAngle(targetPosition);
+    }
+
+    private void resetMotor(double outputRotations) {
+        ARM_MOTOR.resetProfile(MotorProperties.ControlMode.POSITION, outputRotations);
     }
 }

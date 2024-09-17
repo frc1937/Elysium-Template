@@ -2,32 +2,30 @@ package frc.robot.subsystems.kicker;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import org.littletonrobotics.junction.Logger;
+import frc.lib.generic.GenericSubsystem;
+import frc.lib.generic.hardware.motor.MotorProperties;
 
-public class Kicker extends SubsystemBase {
-    private final KickerIO kickerIO = KickerIO.generateKickerIO();
-    private final KickerInputsAutoLogged kickerInputs = new KickerInputsAutoLogged();
+import static frc.robot.subsystems.kicker.KickerConstants.BEAM_BREAKER;
+import static frc.robot.subsystems.kicker.KickerConstants.MOTOR;
 
+public class Kicker extends GenericSubsystem {
     public Command setKickerPercentageOutput(double percentageOutput) {
         return Commands.startEnd(
-                () -> kickerIO.setPercentageOutput(percentageOutput),
+                () -> setPercentageOutput(percentageOutput),
                 this::stop,
                 this
         );
     }
 
     public boolean doesSeeNote() {
-        return kickerInputs.doesSeeNote;
+        return BEAM_BREAKER.get() == 0;
+    }
+
+    private void setPercentageOutput(double percentageOutput) {
+        MOTOR.setOutput(MotorProperties.ControlMode.PERCENTAGE_OUTPUT, percentageOutput);
     }
 
     private void stop() {
-        kickerIO.stop();
-    }
-
-    @Override
-    public void periodic() {
-        kickerIO.refreshInputs(kickerInputs);
-        Logger.processInputs("Kicker", kickerInputs);
+        MOTOR.stopMotor();
     }
 }
