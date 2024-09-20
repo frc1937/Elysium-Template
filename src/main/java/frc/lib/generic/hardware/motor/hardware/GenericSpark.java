@@ -241,7 +241,7 @@ public class GenericSpark extends Motor {
             feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
 
             previousSetpoint = currentSetpoint;
-            lastProfileCalculationTimestamp = Logger.getTimestamp();
+            lastProfileCalculationTimestamp = Logger.getRealTimestamp();
         } else {
             if (goalState == null) return;
 
@@ -265,6 +265,8 @@ public class GenericSpark extends Motor {
     }
 
     private void setGoal(MotorProperties.ControlMode controlMode, double goal) {
+        System.out.println("SHOULD RESET PROFILE " + getName() + "I: " + shouldResetProfile(new TrapezoidProfile.State(goal, 0)));
+
         if (!shouldResetProfile(new TrapezoidProfile.State(goal, 0))) return;
 
         hasStoppedOccurred = false;
@@ -365,8 +367,10 @@ public class GenericSpark extends Motor {
     }
 
     private boolean shouldResetProfile(TrapezoidProfile.State newGoal) {
-        return !goalState.equals(newGoal) ||
-                hasStoppedOccurred ||
-                Logger.getRealTimestamp() - lastProfileCalculationTimestamp > 0.1 ;
+        return goalState == null ||
+                !goalState.equals(newGoal) ||
+                hasStoppedOccurred
+                || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) >
+                100000; //(0.1 sec has passed)
     }
 }

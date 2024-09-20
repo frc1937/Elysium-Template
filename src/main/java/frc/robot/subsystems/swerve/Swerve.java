@@ -221,7 +221,7 @@ public class Swerve extends GenericSubsystem {
 
     @AutoLogOutput(key = "Swerve/TargetStates")
     @SuppressWarnings("unused")
-    private SwerveModuleState[] getTargetStates() {
+    private SwerveModuleState[] getModuleTargetStates() {
         final SwerveModuleState[] states = new SwerveModuleState[MODULES.length];
 
         for (int i = 0; i < MODULES.length; i++)

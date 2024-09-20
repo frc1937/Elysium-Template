@@ -80,7 +80,7 @@ public class SwerveModuleConstants {
     };
 
     private static void configureSteerEncoder(Encoder steerEncoder, Rotation2d angleOffset) {
-        EncoderConfiguration encoderConfiguration = new EncoderConfiguration();
+        final EncoderConfiguration encoderConfiguration = new EncoderConfiguration();
 
         encoderConfiguration.invert = CAN_CODER_INVERT;
         encoderConfiguration.sensorRange = EncoderProperties.SensorRange.ZeroToOne;

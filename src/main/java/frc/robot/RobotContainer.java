@@ -5,13 +5,11 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
@@ -19,11 +17,11 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
+import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheels.Flywheels;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
-import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.swerve.Swerve;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -85,11 +83,11 @@ public class RobotContainer {
 //                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
 //                );
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(
-                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
-                        .alongWith(new WaitCommand(3).andThen(KICKER.setKickerPercentageOutput(1))
-                )
-        );
+//        driveController.getButton(Controller.Inputs.A).whileTrue(
+//                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
+//                        .alongWith(new WaitCommand(3).andThen(KICKER.setKickerPercentageOutput(1))
+//                )
+//        );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
 //        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
