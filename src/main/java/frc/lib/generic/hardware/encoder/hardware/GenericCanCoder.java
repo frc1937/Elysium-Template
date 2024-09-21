@@ -90,6 +90,11 @@ public class GenericCanCoder extends Encoder {
     }
 
     @Override
+    protected boolean[] getSignalsToLog() {
+        return signalsToLog;
+    }
+
+    @Override
     protected void refreshInputs(EncoderInputs inputs) {
         if (canCoder == null) return;
 

@@ -35,6 +35,11 @@ public class SimulatedCanCoder extends Encoder {
     }
 
     @Override
+    protected boolean[] getSignalsToLog() {
+        return signalsToLog;
+    }
+
+    @Override
     protected void refreshInputs(EncoderInputs inputs) {
         if (positionSupplier == null || velocitySupplier == null) {
             return;

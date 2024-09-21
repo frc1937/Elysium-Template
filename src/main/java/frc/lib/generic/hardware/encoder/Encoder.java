@@ -1,12 +1,10 @@
 package frc.lib.generic.hardware.encoder;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.StatusSignal;
-import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
-import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.Logger;
 
+import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
 
 public class Encoder implements LoggableHardware {
@@ -26,8 +24,14 @@ public class Encoder implements LoggableHardware {
     public void setSimulatedEncoderVelocitySource(DoubleSupplier velocitySource) {}
 
     /** Returns the encoder position, in Rotations*/
-    public double getEncoderPosition() {return inputs.position; }
-    public double getEncoderVelocity() {return inputs.velocity; }
+    public double getEncoderPosition() {
+        if (!getSignalsToLog()[0]) printSignalError("POSITION");
+        return inputs.position;
+    }
+    public double getEncoderVelocity() {
+        if (!getSignalsToLog()[1]) printSignalError("VELOCITY");
+        return inputs.velocity;
+    }
 
     /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
     public void setupSignalUpdates(EncoderSignal signal, boolean useFasterThread) { }
@@ -47,5 +51,13 @@ public class Encoder implements LoggableHardware {
     @Override
     public EncoderInputs getInputs() {
         return inputs;
+    }
+
+    protected boolean[] getSignalsToLog() { return new boolean[0]; }
+
+    private void printSignalError(String signalName) {
+        new NoSuchElementException("--------------\n" +
+                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT ENCODER " + name +
+                "\n--------------").printStackTrace();
     }
 }
