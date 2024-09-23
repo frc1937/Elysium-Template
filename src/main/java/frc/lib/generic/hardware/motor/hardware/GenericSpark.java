@@ -1,12 +1,7 @@
 package frc.lib.generic.hardware.motor.hardware;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
@@ -367,10 +362,9 @@ public class GenericSpark extends Motor {
     }
 
     private boolean shouldResetProfile(TrapezoidProfile.State newGoal) {
-        return goalState == null ||
-                !goalState.equals(newGoal) ||
-                hasStoppedOccurred
-                || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) >
-                100000; //(0.1 sec has passed)
+        return goalState == null
+                || !goalState.equals(newGoal)
+                || hasStoppedOccurred
+                || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) > 100000; //(0.1 sec has passed)
     }
 }

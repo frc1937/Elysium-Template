@@ -55,7 +55,7 @@ public abstract class GenericSubsystem extends SubsystemBase {
         return new SysIdRoutine(
                 getSysIdConfig(),
                 new SysIdRoutine.Mechanism(
-                        (voltageMeasure) -> sysIdDrive(voltageMeasure.in(Volts)),
+                        voltageMeasure -> sysIdDrive(voltageMeasure.in(Volts)),
                         this::sysIdUpdateLog,
                         this,
                         getName()
