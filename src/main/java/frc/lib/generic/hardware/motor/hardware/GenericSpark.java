@@ -22,8 +22,6 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 
 public class GenericSpark extends Motor {
-    private static final double USE_BUILTIN_FEEDFORWARD_NUMBER = 69420;
-
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
     private final SparkPIDController controller;
@@ -62,7 +60,7 @@ public class GenericSpark extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
-        setOutput(controlMode, output, USE_BUILTIN_FEEDFORWARD_NUMBER);
+        setOutput(controlMode, output, 0);
     }
 
     @Override
@@ -73,7 +71,7 @@ public class GenericSpark extends Motor {
         switch (mode) {
             case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
 
-            case POSITION, VELOCITY -> handleSmoothMotion(mode, feedforward);
+            case POSITION, VELOCITY -> handleSmoothMotion(mode);
 
             case VOLTAGE -> controller.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> controller.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
@@ -212,9 +210,10 @@ public class GenericSpark extends Motor {
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
     }
 
-    private void handleSmoothMotion(MotorProperties.ControlMode controlMode, double feedforward) {
-        double feedforwardOutput, feedbackOutput, acceleration;
+    private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
+        double feedbackOutput, acceleration;
 
+        double feedforwardOutput;
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
             if (goalState == null) return;
 
@@ -243,8 +242,6 @@ public class GenericSpark extends Motor {
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
         }
-
-        if (feedforward != USE_BUILTIN_FEEDFORWARD_NUMBER) feedforwardOutput = feedforward;
 
         controller.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
