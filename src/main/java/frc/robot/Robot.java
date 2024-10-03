@@ -4,11 +4,14 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.LoggedRobot;
 
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
 
 public class Robot extends LoggedRobot {
@@ -28,8 +31,8 @@ public class Robot extends LoggedRobot {
         commandScheduler.run();
         HardwareManager.update();
 
-        VISION_SIMULATION.updateCurrentPose();
-        RobotContainer.POSE_ESTIMATOR.periodic();
+        SWERVE.periodicallyUpdateFromOdometry();
+        POSE_ESTIMATOR.periodic();
     }
 
     @Override
@@ -79,20 +82,15 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void testPeriodic() {
-    }
-
-    @Override
-    public void testExit() {
-    }
-
-    @Override
-    public void simulationInit() {
-    }
-
-    @Override
     public void simulationPeriodic() {
         HardwareManager.updateSimulation();
+
+        SWERVE.periodicallyUpdateFromOdometry();
+        VISION_SIMULATION.updateRobotPose(POSE_ESTIMATOR.getOdometryPose());
+
+        final Field2d simulatedVisionField = VISION_SIMULATION.getDebugField();
+
+        simulatedVisionField.getObject("EstimatedRobot").setPose(POSE_ESTIMATOR.getCurrentPose());
     }
 
     @Override

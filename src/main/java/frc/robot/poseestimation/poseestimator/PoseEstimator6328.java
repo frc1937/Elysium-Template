@@ -1,9 +1,3 @@
-// Copyright (c) 2024 FRC 6328
-// http://github.com/Mechanical-Advantage
-//
-// Use of this source code is governed by an MIT-style
-// license that can be found in the LICENSE file at
-// the root directory of this project.
 package frc.robot.poseestimation.poseestimator;
 
 import edu.wpi.first.math.Matrix;
@@ -25,12 +19,8 @@ import java.util.NoSuchElementException;
 import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 
 public class PoseEstimator6328 {
-    public record OdometryObservation(
-            SwerveDriveWheelPositions wheelPositions, Rotation2d gyroAngle, double timestamp) {
-    }
-
-    public record VisionObservation(Pose2d visionPose, double timestamp, Matrix<N3, N1> stdDevs) {
-    }
+    public record OdometryObservation(SwerveDriveWheelPositions wheelPositions, Rotation2d gyroAngle, double timestamp) { }
+    public record VisionObservation(Pose2d visionPose, double timestamp, Matrix<N3, N1> stdDevs) { }
 
     private static final double POSE_BUFFER_SIZE_SECONDS = 2.0;
 
@@ -45,8 +35,7 @@ public class PoseEstimator6328 {
     private Pose2d odometryPose = new Pose2d();
     private Pose2d estimatedPose = new Pose2d();
 
-    private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
-            TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_SIZE_SECONDS);
+    private final TimeInterpolatableBuffer<Pose2d> poseBuffer = TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_SIZE_SECONDS);
     private final Matrix<N3, N1> qStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
 
     // Odometry
@@ -78,14 +67,14 @@ public class PoseEstimator6328 {
             // Update dtheta for twist if gyro connected
             twist =
                     new Twist2d(
-                            twist.dx, twist.dy, observation.gyroAngle().minus(lastGyroAngle).getRadians());
-            lastGyroAngle = observation.gyroAngle();
+                            twist.dx, twist.dy, observation.gyroAngle.minus(lastGyroAngle).getRadians());
+            lastGyroAngle = observation.gyroAngle;
         }
 
         // Add twist to odometry pose
         odometryPose = odometryPose.exp(twist);
         // Add pose to buffer at timestamp
-        poseBuffer.addSample(observation.timestamp(), odometryPose);
+        poseBuffer.addSample(observation.timestamp, odometryPose);
         // Calculate diff from last odometry pose and add onto pose estimate
         estimatedPose = estimatedPose.exp(twist);
     }
@@ -94,36 +83,35 @@ public class PoseEstimator6328 {
         // If measurement is old enough to be outside the pose buffer's timespan, skip.
         try {
             if (poseBuffer.getInternalBuffer().lastKey() - POSE_BUFFER_SIZE_SECONDS
-                    > observation.timestamp()) {
+                    > observation.timestamp) {
                 return;
             }
         } catch (NoSuchElementException ex) {
             return;
         }
         // Get odometry based pose at timestamp
-        var sample = poseBuffer.getSample(observation.timestamp());
-        if (sample.isEmpty()) {
-            // exit if not there
-            return;
-        }
+        final var sample = poseBuffer.getSample(observation.timestamp);
+
+        if (sample.isEmpty()) return;
 
         // sample --> odometryPose transform and backwards of that
-        var sampleToOdometryTransform = new Transform2d(sample.get(), odometryPose);
-        var odometryToSampleTransform = new Transform2d(odometryPose, sample.get());
+        final var sampleToOdometryTransform = new Transform2d(sample.get(), odometryPose);
+        final var odometryToSampleTransform = new Transform2d(odometryPose, sample.get());
         // get old estimate by applying odometryToSample Transform
-        Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
+        final Pose2d estimateAtTime = estimatedPose.plus(odometryToSampleTransform);
 
         // Calculate 3 x 3 vision matrix
-        var r = new double[3];
+        final var r = new double[3];
+
         for (int i = 0; i < 3; ++i) {
-            r[i] = observation.stdDevs().get(i, 0) * observation.stdDevs().get(i, 0);
+            r[i] = observation.stdDevs.get(i, 0) * observation.stdDevs.get(i, 0);
         }
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md.
-        Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
+        final Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
 
         for (int row = 0; row < 3; ++row) {
-            double stdDev = qStdDevs.get(row, 0);
+            final double stdDev = qStdDevs.get(row, 0);
             if (stdDev == 0.0) {
                 visionK.set(row, row, 0.0);
             } else {
@@ -131,13 +119,14 @@ public class PoseEstimator6328 {
             }
         }
         // difference between estimate and vision pose
-        Transform2d transform = new Transform2d(estimateAtTime, observation.visionPose());
+        final Transform2d transform = new Transform2d(estimateAtTime, observation.visionPose);
         // scale transform by visionK
-        var kTimesTransform =
+        final var kTimesTransform =
                 visionK.times(
                         VecBuilder.fill(
                                 transform.getX(), transform.getY(), transform.getRotation().getRadians()));
-        Transform2d scaledTransform =
+
+        final Transform2d scaledTransform =
                 new Transform2d(
                         kTimesTransform.get(0, 0),
                         kTimesTransform.get(1, 0),

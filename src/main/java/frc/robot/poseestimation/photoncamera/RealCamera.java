@@ -1,13 +1,15 @@
 package frc.robot.poseestimation.photoncamera;
 
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.estimation.TargetModel;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -27,16 +29,13 @@ public class RealCamera extends PhotonCameraIO {
         super(cameraName, robotCenterToCamera);
 
         photonCamera = new PhotonCamera(cameraName);
-
         photonPoseEstimator = new org.photonvision.PhotonPoseEstimator(
                 AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
                 org.photonvision.PhotonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                photonCamera,
                 robotCenterToCamera
         );
 
-        photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
-        photonPoseEstimator.setMultiTagFallbackStrategy(org.photonvision.PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
+        photonPoseEstimator.setMultiTagFallbackStrategy(PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
 
         if (GlobalConstants.Mode.SIMULATION == CURRENT_MODE)
             VISION_SIMULATION.addCamera(photonCamera, robotCenterToCamera);
@@ -87,7 +86,7 @@ public class RealCamera extends PhotonCameraIO {
     @Override
     protected void refreshInputs(CameraInputsAutoLogged inputs) {
         final PhotonPipelineResult latestResult = photonCamera.getLatestResult();
-        final Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update();
+        final Optional<EstimatedRobotPose> optionalEstimatedRobotPose = photonPoseEstimator.update(photonCamera.getLatestResult());
 
         inputs.hasResult = hasResult(optionalEstimatedRobotPose);
 
@@ -103,7 +102,7 @@ public class RealCamera extends PhotonCameraIO {
             inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
         } else {
             inputs.visibleTags = 0;
-            inputs.cameraPose = new Pose3d(new Translation3d(5, 5, 5), new Rotation3d());
+            inputs.cameraPose = new Pose3d();
         }
 
         logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose);

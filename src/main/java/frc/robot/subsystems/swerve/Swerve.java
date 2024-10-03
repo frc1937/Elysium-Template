@@ -83,11 +83,6 @@ public class Swerve extends GenericSubsystem {
         ).withTimeout(5);
     }
 
-    @Override
-    public void periodic() {
-        updatePoseEstimatorStates();
-    }
-
     public void stop() {
         for (SwerveModule currentModule : MODULES)
             currentModule.stop();
@@ -104,6 +99,20 @@ public class Swerve extends GenericSubsystem {
 
     public ChassisSpeeds getSelfRelativeVelocity() {
         return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+    }
+
+    public void periodicallyUpdateFromOdometry() {
+        final int odometryUpdates = GYRO.getInputs().threadGyroYawDegrees.length;
+
+        final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
+        final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
+
+        for (int i = 0; i < odometryUpdates; i++) {
+            swerveWheelPositions[i] = getSwerveWheelPositions(i);
+            gyroRotations[i] = Rotation2d.fromDegrees(GYRO.getInputs().threadGyroYawDegrees[i]);
+        }
+
+        POSE_ESTIMATOR.addOdometryObservations(swerveWheelPositions, gyroRotations, OdometryThread.getInstance().getLatestTimestamps());
     }
 
     private void driveOrientationBased(double xPower, double yPower, double thetaPower, boolean robotCentric) {
@@ -160,20 +169,6 @@ public class Swerve extends GenericSubsystem {
             currentModule.setOpenLoop(openLoop);
 
         ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians());
-    }
-
-    private void updatePoseEstimatorStates() {
-        final int odometryUpdates = GYRO.getInputs().threadGyroYawDegrees.length;
-
-        final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
-        final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
-
-        for (int i = 0; i < odometryUpdates; i++) {
-            swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromDegrees(GYRO.getInputs().threadGyroYawDegrees[i]);
-        }
-
-        POSE_ESTIMATOR.updatePoseEstimatorStates(swerveWheelPositions, gyroRotations, OdometryThread.getInstance().getLatestTimestamps());
     }
 
     private SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
