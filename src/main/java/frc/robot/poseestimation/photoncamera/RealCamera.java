@@ -1,10 +1,8 @@
 package frc.robot.poseestimation.photoncamera;
 
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.*;
+import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.Logger;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
@@ -16,17 +14,19 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import java.util.List;
 import java.util.Optional;
 
+import static frc.robot.GlobalConstants.CURRENT_MODE;
+import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.MAXIMUM_AMBIGUITY;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_ID_TO_POSE;
 
-public class Camera extends PhotonCameraIO {
+public class RealCamera extends PhotonCameraIO {
     private final PhotonCamera photonCamera;
     private final org.photonvision.PhotonPoseEstimator photonPoseEstimator;
 
-    public Camera(String cameraName, Transform3d robotCenterToCamera) {
+    public RealCamera(String cameraName, Transform3d robotCenterToCamera) {
         super(cameraName, robotCenterToCamera);
 
-        photonCamera = new PhotonCamera("Front1937");
+        photonCamera = new PhotonCamera(cameraName);
 
         photonPoseEstimator = new org.photonvision.PhotonPoseEstimator(
                 AprilTagFields.k2024Crescendo.loadAprilTagLayoutField(),
@@ -37,11 +37,14 @@ public class Camera extends PhotonCameraIO {
 
         photonPoseEstimator.setTagModel(TargetModel.kAprilTag36h11);
         photonPoseEstimator.setMultiTagFallbackStrategy(org.photonvision.PhotonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY);
+
+        if (GlobalConstants.Mode.SIMULATION == CURRENT_MODE)
+            VISION_SIMULATION.addCamera(photonCamera, robotCenterToCamera);
     }
 
     private void logVisibleTags(boolean hasResult, Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
         if (!hasResult) {
-            Logger.recordOutput("VisibleTags/" + photonCamera.getName(), new Pose2d[0]);
+            Logger.recordOutput("UsedTags/" + photonCamera.getName(), new Pose2d[0]);
             return;
         }
 
@@ -50,12 +53,12 @@ public class Camera extends PhotonCameraIO {
 
         for (int i = 0; i < visibleTagPoses.length; i++) {
             final int currentId = estimatedRobotPose.targetsUsed.get(i).getFiducialId();
-            final Pose2d currentPose = TAG_ID_TO_POSE.get(currentId).toPose2d();
+            final Pose2d currentTagPose = TAG_ID_TO_POSE.get(currentId).toPose2d();
 
-            visibleTagPoses[i] = currentPose;
+            visibleTagPoses[i] = currentTagPose;
         }
 
-        Logger.recordOutput("VisibleTags/" + photonCamera.getName(), visibleTagPoses);
+        Logger.recordOutput("UsedTags/" + photonCamera.getName(), visibleTagPoses);
     }
 
     private boolean hasResult(Optional<EstimatedRobotPose> optionalEstimatedRobotPose) {
@@ -92,7 +95,7 @@ public class Camera extends PhotonCameraIO {
             final EstimatedRobotPose estimatedRobotPose = optionalEstimatedRobotPose.get();
 
             if (photonCamera.getLatestResult().getBestTarget() != null)
-                Logger.recordOutput("Camera Pitch " + photonCamera.getName(), photonCamera.getLatestResult().getBestTarget().getPitch());
+                Logger.recordOutput("CameraPitch/" + photonCamera.getName(), photonCamera.getLatestResult().getBestTarget().getPitch());
 
             inputs.cameraPose = estimatedRobotPose.estimatedPose;
             inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds;
@@ -100,7 +103,7 @@ public class Camera extends PhotonCameraIO {
             inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
         } else {
             inputs.visibleTags = 0;
-            inputs.cameraPose = new Pose3d();
+            inputs.cameraPose = new Pose3d(new Translation3d(5, 5, 5), new Rotation3d());
         }
 
         logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose);

@@ -109,6 +109,8 @@ public class SwerveModuleConstants {
     private static void configureSteerMotor(Motor steerMotor, Encoder encoder) {
         steerMotor.setupSignalUpdates(POSITION);
         steerMotor.setupSignalUpdates(VELOCITY);
+        steerMotor.setupSignalUpdates(VOLTAGE);
+        steerMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
         steerMotor.configure(steerMotorConfiguration);
 
         steerMotor.setExternalPositionSupplier(encoder::getEncoderPosition);

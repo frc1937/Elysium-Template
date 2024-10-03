@@ -105,16 +105,7 @@ public class RobotContainer {
                         BLUE_SPEAKER.toPose2d(), () -> false)
         );
 
-        userButton.toggleOnTrue(Commands.startEnd(
-                () -> {
-                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
-                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
-                },
-
-                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
-
-                ARM, LEDS).ignoringDisable(true)
-        ).debounce(0.5);
+        setupBrakeMode();
 
         configureButtons(ButtonLayout.TELEOP);
     }
@@ -156,6 +147,18 @@ public class RobotContainer {
         }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         new Trigger(KICKER::doesSeeNote).onTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
+    }
 
+    private void setupBrakeMode() {
+        userButton.toggleOnTrue(Commands.startEnd(
+                () -> {
+                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
+                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
+                },
+
+                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+
+                ARM, LEDS).ignoringDisable(true)
+        ).debounce(0.5);
     }
 }

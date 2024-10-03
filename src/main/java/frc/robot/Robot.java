@@ -9,6 +9,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.LoggedRobot;
 
+import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
+
 public class Robot extends LoggedRobot {
     private Command autonomousCommand;
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
@@ -24,9 +26,9 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         commandScheduler.run();
-
         HardwareManager.update();
 
+        VISION_SIMULATION.updateCurrentPose();
         RobotContainer.POSE_ESTIMATOR.periodic();
     }
 

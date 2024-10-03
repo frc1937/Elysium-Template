@@ -29,7 +29,9 @@ import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
  */
 public class PoseEstimator implements AutoCloseable {
     private final Field2d field = new Field2d();
+
     private final PhotonCameraIO[] robotPoseSources;
+
     private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
 
     /**
@@ -90,10 +92,12 @@ public class PoseEstimator implements AutoCloseable {
             System.out.println("0!! Sweel Wheel Positions");
             return;
         }
+
         if (gyroRotations.length == 0) {
             System.out.println("0!! Gyro Rotations");
             return;
         }
+
         if (timestamps.length == 0) {
             System.out.println("0!! Timestamps");
             return;

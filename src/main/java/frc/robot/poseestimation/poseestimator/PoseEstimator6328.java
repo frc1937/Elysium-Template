@@ -44,9 +44,11 @@ public class PoseEstimator6328 {
     // Pose Estimation Members
     private Pose2d odometryPose = new Pose2d();
     private Pose2d estimatedPose = new Pose2d();
+
     private final TimeInterpolatableBuffer<Pose2d> poseBuffer =
             TimeInterpolatableBuffer.createBuffer(POSE_BUFFER_SIZE_SECONDS);
     private final Matrix<N3, N1> qStdDevs = new Matrix<>(Nat.N3(), Nat.N1());
+
     // Odometry
     private SwerveDriveWheelPositions lastWheelPositions =
             new SwerveDriveWheelPositions(
@@ -56,6 +58,7 @@ public class PoseEstimator6328 {
                             new SwerveModulePosition(),
                             new SwerveModulePosition()
                     });
+
     private Rotation2d lastGyroAngle = new Rotation2d();
 
     private PoseEstimator6328() {
@@ -78,6 +81,7 @@ public class PoseEstimator6328 {
                             twist.dx, twist.dy, observation.gyroAngle().minus(lastGyroAngle).getRadians());
             lastGyroAngle = observation.gyroAngle();
         }
+
         // Add twist to odometry pose
         odometryPose = odometryPose.exp(twist);
         // Add pose to buffer at timestamp
@@ -117,6 +121,7 @@ public class PoseEstimator6328 {
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md.
         Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
+
         for (int row = 0; row < 3; ++row) {
             double stdDev = qStdDevs.get(row, 0);
             if (stdDev == 0.0) {
