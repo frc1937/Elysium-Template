@@ -14,6 +14,6 @@ public class CameraFactory {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY)
             return new PhotonCameraIO(cameraName, robotCenterToCamera);
 
-        return new RealCamera(cameraName, robotCenterToCamera);
+        return new AprilTagsCamera(cameraName, robotCenterToCamera);
     }
 }

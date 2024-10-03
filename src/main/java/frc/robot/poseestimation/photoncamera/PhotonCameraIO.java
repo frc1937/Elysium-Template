@@ -36,7 +36,7 @@ public class PhotonCameraIO {
     }
 
     public Pose2d getRobotPose() {
-        return inputs.cameraPose.transformBy(robotCenterToCamera.inverse()).toPose2d();
+        return inputs.estimatedRobotPose.toPose2d();
     }
 
     protected void refreshInputs(CameraInputsAutoLogged inputs) { }
@@ -62,6 +62,6 @@ public class PhotonCameraIO {
         public double lastResultTimestamp = 0;
         public double averageDistanceFromTags = 0;
 
-        public Pose3d cameraPose = new Pose3d();
+        public Pose3d estimatedRobotPose = new Pose3d();
     }
 }

@@ -21,11 +21,11 @@ import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULAT
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.MAXIMUM_AMBIGUITY;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_ID_TO_POSE;
 
-public class RealCamera extends PhotonCameraIO {
+public class AprilTagsCamera extends PhotonCameraIO {
     private final PhotonCamera photonCamera;
     private final org.photonvision.PhotonPoseEstimator photonPoseEstimator;
 
-    public RealCamera(String cameraName, Transform3d robotCenterToCamera) {
+    public AprilTagsCamera(String cameraName, Transform3d robotCenterToCamera) {
         super(cameraName, robotCenterToCamera);
 
         photonCamera = new PhotonCamera(cameraName);
@@ -96,13 +96,13 @@ public class RealCamera extends PhotonCameraIO {
             if (photonCamera.getLatestResult().getBestTarget() != null)
                 Logger.recordOutput("CameraPitch/" + photonCamera.getName(), photonCamera.getLatestResult().getBestTarget().getPitch());
 
-            inputs.cameraPose = estimatedRobotPose.estimatedPose;
+            inputs.estimatedRobotPose = estimatedRobotPose.estimatedPose;
             inputs.lastResultTimestamp = estimatedRobotPose.timestampSeconds;
             inputs.visibleTags = estimatedRobotPose.targetsUsed.size();
             inputs.averageDistanceFromTags = getAverageDistanceFromTags(latestResult);
         } else {
             inputs.visibleTags = 0;
-            inputs.cameraPose = new Pose3d();
+            inputs.estimatedRobotPose = new Pose3d();
         }
 
         logVisibleTags(inputs.hasResult, optionalEstimatedRobotPose);
