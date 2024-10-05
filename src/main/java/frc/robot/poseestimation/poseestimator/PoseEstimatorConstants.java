@@ -21,12 +21,8 @@ import java.util.Map;
 public class PoseEstimatorConstants {
     static final Transform3d ROBOT_TO_FRONT_CAMERA = new Transform3d(
             0.5, 0.175245, 0.46,
-            new Rotation3d(0, Units.degreesToRadians(3), 0)
+            new Rotation3d(0, Units.degreesToRadians(-25), 0)
     );
-
-//    static final Transform3d ROBOT_TO_FRONT_CAMERA = new Transform3d(
-//            new Translation3d(0, 0.0, 0), new Rotation3d()
-//    );
 
     public static final PhotonCameraIO FRONT_CAMERA = CameraFactory.generateCamera("Front1937", ROBOT_TO_FRONT_CAMERA);
 

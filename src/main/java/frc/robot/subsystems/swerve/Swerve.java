@@ -65,7 +65,7 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
                 () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
-                (interrupt) -> {
+                interrupt -> {
                 },
                 ROTATION_CONTROLLER::atGoal,
                 this
@@ -76,7 +76,7 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
                 () -> driveWithTarget(0, 0, target, false),
-                (interrupt) -> {
+                interrupt -> {
                 },
                 ROTATION_CONTROLLER::atGoal,
                 this
@@ -155,8 +155,7 @@ public class Swerve extends GenericSubsystem {
             return;
         }
 
-        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS
-                .toSwerveModuleStates(correctForDynamics(chassisSpeeds));
+        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(correctForDynamics(chassisSpeeds));
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_SPEED_MPS);
 
