@@ -35,6 +35,7 @@ import static frc.robot.GlobalConstants.*;
 public class OdometryThread extends Thread {
     private final List<DoubleSupplier> signals = new ArrayList<>();
     private final List<Queue<Double>> queues = new ArrayList<>();
+
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
 
     private static OdometryThread INSTANCE = null;

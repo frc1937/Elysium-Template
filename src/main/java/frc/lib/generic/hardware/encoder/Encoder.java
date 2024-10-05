@@ -2,10 +2,14 @@ package frc.lib.generic.hardware.encoder;
 
 import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.hardware.HardwareManager;
+import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.NoSuchElementException;
 import java.util.function.DoubleSupplier;
+
+import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class Encoder implements LoggableHardware {
     private final EncoderInputs inputs = new EncoderInputs();
@@ -53,9 +57,11 @@ public class Encoder implements LoggableHardware {
         return inputs;
     }
 
-    protected boolean[] getSignalsToLog() { return new boolean[0]; }
+    protected boolean[] getSignalsToLog() { return new boolean[ENCODER_INPUTS_LENGTH]; }
 
     private void printSignalError(String signalName) {
+        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) return;
+
         new NoSuchElementException("--------------\n" +
                 "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT ENCODER " + name +
                 "\n--------------").printStackTrace();

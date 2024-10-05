@@ -34,6 +34,7 @@ import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRON
 
 public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
+
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
     public static final Flywheels FLYWHEELS = new Flywheels();
@@ -77,11 +78,11 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-//        driveController.getButton(Controller.Inputs.A)
-//                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
-//                                BLUE_SPEAKER.toPose2d(), () -> false)
-//                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
-//                );
+        driveController.getButton(Controller.Inputs.A)
+                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+                                BLUE_SPEAKER.toPose2d(), () -> false)
+                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
+                );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(
 //                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
@@ -105,16 +106,7 @@ public class RobotContainer {
                         BLUE_SPEAKER.toPose2d(), () -> false)
         );
 
-        userButton.toggleOnTrue(Commands.startEnd(
-                () -> {
-                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
-                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
-                },
-
-                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
-
-                ARM, LEDS).ignoringDisable(true)
-        ).debounce(0.5);
+        setupBrakeMode();
 
         configureButtons(ButtonLayout.TELEOP);
     }
@@ -156,6 +148,18 @@ public class RobotContainer {
         }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
 
         new Trigger(KICKER::doesSeeNote).onTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
+    }
 
+    private void setupBrakeMode() {
+        userButton.toggleOnTrue(Commands.startEnd(
+                () -> {
+                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
+                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
+                },
+
+                () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+
+                ARM, LEDS).ignoringDisable(true)
+        ).debounce(0.5);
     }
 }
