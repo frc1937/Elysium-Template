@@ -7,11 +7,9 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import frc.lib.generic.hardware.pigeon.Pigeon;
 import frc.lib.generic.hardware.pigeon.PigeonFactory;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
-import frc.lib.math.AdvancedSwerveKinematics;
 
 import static edu.wpi.first.units.Units.Inch;
 import static edu.wpi.first.units.Units.Meters;
@@ -38,7 +36,6 @@ public class SwerveConstants {
     };
 
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(moduleLocations);
-    public static final AdvancedSwerveKinematics ADVANCED_KINEMATICS = new AdvancedSwerveKinematics(moduleLocations);
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.2,
@@ -48,8 +45,9 @@ public class SwerveConstants {
      * Units of RADIANS for everything.
      */
     static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
-            1.9, 0, 0.0011,
-            new TrapezoidProfile.Constraints(Math.PI / 2, Math.PI / 2)
+//            1.9, 0, 0.0011,
+            4, 0, 0.05,
+            new TrapezoidProfile.Constraints(360, 360)
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
@@ -73,7 +71,7 @@ public class SwerveConstants {
     }
 
     private static void configureRotationController() {
-        ROTATION_CONTROLLER.enableContinuousInput(-Math.PI, Math.PI);
-        ROTATION_CONTROLLER.setTolerance(Units.degreesToRadians(0.8));
+        ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
+        ROTATION_CONTROLLER.setTolerance(0.8);
     }
 }

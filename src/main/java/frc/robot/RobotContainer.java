@@ -33,7 +33,9 @@ import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
-    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(FRONT_CAMERA);
+    public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
+            FRONT_CAMERA
+    );
 
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();

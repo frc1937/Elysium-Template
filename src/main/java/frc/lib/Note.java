@@ -6,7 +6,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import static frc.robot.GlobalConstants.GRAVITY;
@@ -15,14 +14,14 @@ import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 public class Note {
     private double previousAngle = 0;
 
-    private final DoubleSupplier initialVelocity;
+    private final double initialVelocity;
     private Pose3d startPose;
 
-    public Note(DoubleSupplier initialVelocityMps) {
+    public Note(double initialVelocityMps) {
         this.initialVelocity = initialVelocityMps;
     }
 
-    public static Command createAndShootNote(DoubleSupplier initialVelocity, Supplier<Rotation2d> pitchAngle) {
+    public static Command createAndShootNote(double initialVelocity, Supplier<Rotation2d> pitchAngle) {
          final Note note = new Note(initialVelocity);
          return note.fly(pitchAngle);
     }
@@ -33,7 +32,6 @@ public class Note {
     private Command fly(Supplier<Rotation2d> pitchAngle) {
         final Timer timer = new Timer();
         final Rotation2d[] currentPitchAngle = {pitchAngle.get()};
-        final double[] currentVelocity = {initialVelocity.getAsDouble()};
 
         return new FunctionalCommand(
                 () -> {
@@ -41,11 +39,11 @@ public class Note {
                     timer.restart();
 
                     currentPitchAngle[0] = pitchAngle.get();
-                    currentVelocity[0] = initialVelocity.getAsDouble();
                 },
-                () -> calculatePosition(timer.get(), currentPitchAngle[0], currentVelocity[0]),
+                () -> calculatePosition(timer.get(), currentPitchAngle[0], initialVelocity),
 
                 interrupted -> timer.reset(),
+
                 () -> timer.hasElapsed(5)
         );
     }

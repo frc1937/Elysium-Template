@@ -6,6 +6,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
@@ -20,15 +22,15 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import static frc.lib.math.AdvancedSwerveKinematics.correctForDynamics;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
-import static frc.lib.math.Conversions.proportionalPowerToRotation;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
+    private double lastTimestamp = Timer.getFPGATimestamp();
+
     public Swerve() {
         configurePathPlanner();
     }
@@ -126,10 +128,11 @@ public class Swerve extends GenericSubsystem {
         final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
         final Rotation2d targetAngle = getAngleFromPoseToPose(RobotContainer.POSE_ESTIMATOR.getCurrentPose(), target);
 
-        final double controllerOutput = ROTATION_CONTROLLER.calculate(
-                currentAngle.getRadians(),
-                targetAngle.getRadians()
-        );
+        final double controllerOutput = Units.degreesToRadians(
+                ROTATION_CONTROLLER.calculate(
+                        currentAngle.getDegrees(),
+                        targetAngle.getDegrees()
+                ));
 
         if (robotCentric)
             driveSelfRelative(xPower, yPower, controllerOutput);
@@ -150,12 +153,14 @@ public class Swerve extends GenericSubsystem {
     }
 
     private void driveSelfRelative(ChassisSpeeds chassisSpeeds) {
+        chassisSpeeds = discretize(chassisSpeeds);
+
         if (Optimizations.isStill(chassisSpeeds)) {
             stop();
             return;
         }
 
-        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(correctForDynamics(chassisSpeeds));
+        final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
 
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_SPEED_MPS);
 
@@ -167,7 +172,7 @@ public class Swerve extends GenericSubsystem {
         for (SwerveModule currentModule : MODULES)
             currentModule.setOpenLoop(openLoop);
 
-        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getRadians());
+        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
     }
 
     private SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
@@ -199,7 +204,7 @@ public class Swerve extends GenericSubsystem {
         return new ChassisSpeeds(
                 proportionalPowerToMps(chassisSpeeds.vxMetersPerSecond, MAX_SPEED_MPS),
                 proportionalPowerToMps(chassisSpeeds.vyMetersPerSecond, MAX_SPEED_MPS),
-                proportionalPowerToRotation(chassisSpeeds.omegaRadiansPerSecond, MAX_ROTATION_RAD_PER_S)
+                chassisSpeeds.omegaRadiansPerSecond
         );
     }
 
@@ -222,5 +227,13 @@ public class Swerve extends GenericSubsystem {
             states[i] = MODULES[i].getTargetState();
 
         return states;
+    }
+
+    private ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
+        final double currentTimestamp = Timer.getFPGATimestamp();
+        final double difference = currentTimestamp - lastTimestamp;
+        lastTimestamp = currentTimestamp;
+
+        return ChassisSpeeds.discretize(chassisSpeeds, difference);
     }
 }
