@@ -15,7 +15,7 @@ import frc.robot.utilities.ShooterPhysicsCalculations;
 import static frc.robot.RobotContainer.*;
 
 public class ShooterCommands {
-    public Command receiveFloorNote() {
+    public static Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
                         FLYWHEELS.setVoltage(-8),
@@ -24,7 +24,7 @@ public class ShooterCommands {
                 );
     }
 
-    public Command outtakeNote() {
+    public static Command outtakeNote() {
         return FLYWHEELS.setTargetVelocity(15)
                 .alongWith(
                         INTAKE.setIntakeSpeed(-0.5),
@@ -32,14 +32,14 @@ public class ShooterCommands {
                 );
     }
 
-    public Command shootToTargetWithPhysics(Pose2d target, double tangentialVelocity) {
+    public static Command shootToTargetWithPhysics(Pose2d target, double tangentialVelocity) {
         return SWERVE.rotateToTarget(target).alongWith(
                 FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity),
                 ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
         );
     }
 
-    public Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
+    public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
 //        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
         final Command waitAndShoot = new WaitCommand(2).andThen(KICKER.setKickerPercentageOutput(1));
 
@@ -66,7 +66,7 @@ public class ShooterCommands {
         );
     }
 
-    public Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
+    public static Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
         ConditionalCommand shootFromKicker = new ConditionalCommand(
                 KICKER.setKickerPercentageOutput(0.5),
                 KICKER.setKickerPercentageOutput(0.0),

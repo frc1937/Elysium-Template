@@ -46,8 +46,6 @@ public class RobotContainer {
 
     public static final BuiltInAccelerometer ROBORIO_ACCELEROMETER = new BuiltInAccelerometer();
 
-    private final ShooterCommands shooterCommands = new ShooterCommands();
-
     private final Trigger userButton = new Trigger(RobotController::getUserButton);
 
     private final Controller driveController = new Controller(0);
@@ -83,7 +81,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
                                 BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(shooterCommands.shootPhysics(BLUE_SPEAKER, 15))
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
                 );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(
@@ -97,11 +95,11 @@ public class RobotContainer {
 //        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
 //        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
-        driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(shooterCommands.receiveFloorNote());
-        driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(shooterCommands.outtakeNote());
+        driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
+        driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
 
         driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(
-                shooterCommands.shootPhysics(BLUE_SPEAKER, 11));
+                ShooterCommands.shootPhysics(BLUE_SPEAKER, 11));
 
         driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(
                 SWERVE.driveWhilstRotatingToTarget(() -> 0, () -> 0,
