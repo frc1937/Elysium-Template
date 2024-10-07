@@ -81,7 +81,7 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.A)
                 .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
                                 BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 20))
                 );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(

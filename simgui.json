@@ -28,6 +28,11 @@
           "visible": true
         }
       },
+      "/SmartDashboard/Mechanisms/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/VisionSystemSim-main/Sim Field": {
         "EstimatedRobot": {
           "arrowWeight": 3.0,

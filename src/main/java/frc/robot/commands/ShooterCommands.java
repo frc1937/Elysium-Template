@@ -3,16 +3,20 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import frc.lib.Note;
-import frc.lib.math.Conversions;
+import frc.lib.SimulateShootingCommand;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
-import static frc.robot.RobotContainer.*;
+import static frc.robot.RobotContainer.ARM;
+import static frc.robot.RobotContainer.FLYWHEELS;
+import static frc.robot.RobotContainer.INTAKE;
+import static frc.robot.RobotContainer.KICKER;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 
 public class ShooterCommands {
     public static Command receiveFloorNote() {
@@ -41,7 +45,8 @@ public class ShooterCommands {
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
 //        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
-        final Command waitAndShoot = new WaitCommand(2).andThen(KICKER.setKickerPercentageOutput(1));
+        final Command waitAndShoot = new WaitCommand(2).andThen(
+                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
 
         final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
 
@@ -60,8 +65,6 @@ public class ShooterCommands {
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
-                Note.createAndShootNote(Conversions.mpsToRps(tangentialVelocity, Units.inchesToMeters(3)),
-                        () -> Rotation2d.fromRotations(ARM.getTargetAngleRotations())),
                 waitAndShoot
         );
     }
@@ -80,5 +83,11 @@ public class ShooterCommands {
 //                        () -> Rotation2d.fromRotations(ARM.getTargetAngleRotations())),
                 shootFromKicker
         );
+    }
+
+    public static Command simulateNoteShooting() {
+        return new InstantCommand(
+                () -> new SimulateShootingCommand()
+                        .schedule());
     }
 }

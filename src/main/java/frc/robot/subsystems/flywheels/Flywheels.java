@@ -103,6 +103,13 @@ public class Flywheels extends GenericSubsystem {
         }
     }
 
+    public double getFlywheelTangentialVelocity() {
+        return Math.min(
+                Conversions.rpsToMps(flywheels[0].getVelocity(), LEFT_FLYWHEEL_DIAMETER),
+                Conversions.rpsToMps(flywheels[1].getVelocity(), RIGHT_FLYWHEEL_DIAMETER)
+        );
+    }
+
     private void setFlywheelsTargetVelocity(double targetRPS) {
         for (SingleFlywheel flywheel : flywheels) {
             flywheel.setTargetVelocity(targetRPS);
@@ -114,13 +121,4 @@ public class Flywheels extends GenericSubsystem {
             flywheel.setVoltage(voltage);
         }
     }
-
-    public double getFlywheelTangentialVelocity() {
-        return Math.min(
-                Conversions.rpsToMps(flywheels[0].getVelocity(), LEFT_FLYWHEEL_DIAMETER),
-                Conversions.rpsToMps(flywheels[1].getVelocity(), RIGHT_FLYWHEEL_DIAMETER)
-        );
-    }
-
-
 }

@@ -78,23 +78,23 @@ public class ArmConstants {
 
         motorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.ARM,
-                DCMotor.getKrakenX60(1),
-                150.0,
-                0.2,
-                0.03,
-                Rotation2d.fromDegrees(-180),
-                Rotation2d.fromDegrees(180),
+                DCMotor.getFalcon500Foc(2),
+                227.77777,
+                0.5,
+                11,
+                Rotation2d.fromDegrees(-10),
+                Rotation2d.fromDegrees(150),
                 true
         );
 
         motorConfiguration.simulationSlot = new MotorProperties.Slot(
-                30,
+                130,
                 0,
                 0,
-                22,
+                32,
                 0,
-                0.053988,
-                0.04366,
+                0.2,
+                0.2,
                 GravityTypeValue.Arm_Cosine
         );
 
