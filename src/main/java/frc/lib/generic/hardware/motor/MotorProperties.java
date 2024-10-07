@@ -1,11 +1,6 @@
 package frc.lib.generic.hardware.motor;
 
 import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkMax;
-
-import java.util.function.Function;
 
 public class MotorProperties {
     public enum IdleMode {
@@ -13,14 +8,7 @@ public class MotorProperties {
     }
 
     public enum SparkType {
-        MAX((id -> new CANSparkMax(id, CANSparkMax.MotorType.kBrushless))),
-        FLEX((id -> new CANSparkFlex(id, CANSparkFlex.MotorType.kBrushless)));
-
-        public final Function<Integer, CANSparkBase> sparkCreator;
-
-        SparkType(Function<Integer, CANSparkBase> sparkCreator) {
-            this.sparkCreator = sparkCreator;
-        }
+        MAX, FLEX;
     }
 
     /**

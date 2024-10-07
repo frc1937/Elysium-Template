@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Queue;
 
 public class MotorUtilities {
-    static void handleThreadedInputs(MotorInputs inputs, Map<String, Queue<Double>> signalQueueList) {
+    public static void handleThreadedInputs(MotorInputs inputs, Map<String, Queue<Double>> signalQueueList) {
         if (signalQueueList.isEmpty()) return;
 
         if (signalQueueList.get("position") != null)

@@ -1,6 +1,7 @@
 package frc.lib.generic.hardware.motor;
 
-import frc.lib.generic.hardware.motor.hardware.GenericSpark;
+import frc.lib.generic.hardware.motor.hardware.spark.GenericSparkFlex;
+import frc.lib.generic.hardware.motor.hardware.spark.GenericSparkMax;
 import frc.lib.generic.hardware.motor.hardware.GenericTalonFX;
 import frc.lib.generic.hardware.motor.hardware.GenericTalonSRX;
 import frc.lib.generic.hardware.motor.hardware.SimulatedMotor;
@@ -10,19 +11,22 @@ import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class MotorFactory {
     public static Motor createSpark(String name, int port, MotorProperties.SparkType type) {
-        Motor motor = createSimOrReplayMotor(name);
+        final Motor motor = createSimOrReplayMotor(name);
+
         if (motor != null) return motor;
-        return new GenericSpark(name, port, type);
+
+        if (type == MotorProperties.SparkType.FLEX) return new GenericSparkFlex(name, port);
+        else return new GenericSparkMax(name, port);
     }
 
     public static Motor createTalonFX(String name, int port) {
-        Motor motor = createSimOrReplayMotor(name);
+        final Motor motor = createSimOrReplayMotor(name);
         if (motor != null) return motor;
         return new GenericTalonFX(name, port);
     }
 
     public static Motor createTalonSRX(String name, int port) {
-        Motor motor = createSimOrReplayMotor(name);
+        final Motor motor = createSimOrReplayMotor(name);
         if (motor != null) return motor;
         return new GenericTalonSRX(name, port);
     }

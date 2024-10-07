@@ -1,16 +1,21 @@
-package frc.lib.generic.hardware.motor.hardware;
+package frc.lib.generic.hardware.motor.hardware.spark;
 
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.*;
+import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.CANSparkLowLevel;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.REVLibError;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
-import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.Logger;
 
@@ -21,10 +26,10 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 
-public class GenericSpark extends Motor {
+public class GenericSparkMax extends GenericSparkBase {
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
-    private final SparkPIDController controller;
+    private final SparkPIDController sparkController;
 
     private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
@@ -47,13 +52,12 @@ public class GenericSpark extends Motor {
     private boolean hasStoppedOccurred = false;
     private double lastProfileCalculationTimestamp;
 
-    public GenericSpark(String name, int deviceId, MotorProperties.SparkType sparkType) {
-        super(name);
+    public GenericSparkMax(String name, int deviceId) {
+        super(name, deviceId);
 
-        spark = sparkType.sparkCreator.apply(deviceId);
-
+        spark = new CANSparkMax(deviceId, CANSparkFlex.MotorType.kBrushless);
         encoder = spark.getEncoder();
-        controller = spark.getPIDController();
+        sparkController = spark.getPIDController();
 
         optimizeBusUsage();
     }
@@ -69,12 +73,10 @@ public class GenericSpark extends Motor {
         setGoal(mode, output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> controller.setReference(output, CANSparkBase.ControlType.kDutyCycle);
-
+            case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
             case POSITION, VELOCITY -> handleSmoothMotion(mode);
-
-            case VOLTAGE -> controller.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
-            case CURRENT -> controller.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
+            case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
+            case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
     }
 
@@ -138,7 +140,6 @@ public class GenericSpark extends Motor {
 
         configureProfile(configuration);
         configurePID(configuration);
-
         configureFeedForward();
 
         return spark.burnFlash() == REVLibError.kOk;
@@ -146,32 +147,31 @@ public class GenericSpark extends Motor {
 
     private void configureProfile(MotorConfiguration configuration) {
         if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration != 0) {
-            final TrapezoidProfile.Constraints positionMotionConstraints = new TrapezoidProfile.Constraints(
-                    configuration.profiledMaxVelocity,
-                    configuration.profiledTargetAcceleration
-            );
-
-            positionMotionProfile = new TrapezoidProfile(positionMotionConstraints);
+            positionMotionProfile = new TrapezoidProfile(
+                    new TrapezoidProfile.Constraints(
+                            configuration.profiledMaxVelocity,
+                            configuration.profiledTargetAcceleration
+                    ));
         }
 
         if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
-            final TrapezoidProfile.Constraints velocityMotionConstraints = new TrapezoidProfile.Constraints(
-                    configuration.profiledTargetAcceleration,
-                    configuration.profiledJerk
-            );
-
-            velocityMotionProfile = new TrapezoidProfile(velocityMotionConstraints);
+            velocityMotionProfile = new TrapezoidProfile(
+                    new TrapezoidProfile.Constraints(
+                            configuration.profiledTargetAcceleration,
+                            configuration.profiledJerk
+                    ));
         }
     }
 
     private void configureFeedForward() {
         final MotorProperties.Slot currentSlot = getCurrentSlot();
 
-        if (currentSlot.gravityType() == null) feedforward = Feedforward.Type.SIMPLE;
+        feedforward = Feedforward.Type.SIMPLE;
 
-        if (currentSlot.gravityType() == GravityTypeValue.Arm_Cosine) feedforward = Feedforward.Type.ARM;
-
-        if (currentSlot.gravityType() == GravityTypeValue.Elevator_Static) feedforward = Feedforward.Type.ELEVATOR;
+        feedforward = switch (currentSlot.gravityType()) {
+            case Arm_Cosine -> Feedforward.Type.ARM;
+            case Elevator_Static -> Feedforward.Type.ELEVATOR;
+        };
 
         feedforward.setFeedforwardConstants(
                 currentSlot.kS(),
@@ -195,25 +195,9 @@ public class GenericSpark extends Motor {
             feedback.enableContinuousInput(-0.5, 0.5);
     }
 
-    /**
-     * Set all other status to basically never(10sec) to optimize bus usage
-     * Only call this ONCE at the beginning.
-     */
-    private void optimizeBusUsage() {
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
-    }
-
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
-        double feedbackOutput, acceleration;
+        double feedbackOutput, feedforwardOutput, acceleration;
 
-        double feedforwardOutput;
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
             if (goalState == null) return;
 
@@ -243,17 +227,17 @@ public class GenericSpark extends Motor {
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
         }
 
-        controller.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
+        sparkController.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
 
     private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
-        if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY) return 0;
-
         if (mode == MotorProperties.ControlMode.POSITION) {
             return feedback.calculate(getEffectivePosition(), goal.position);
+        } else if (mode == MotorProperties.ControlMode.VELOCITY) {
+            return feedback.calculate(getEffectiveVelocity(), goal.velocity);
         }
 
-        return feedback.calculate(getEffectiveVelocity(), goal.velocity);
+        return 0;
     }
 
     private void setGoal(MotorProperties.ControlMode controlMode, double goal) {
@@ -262,7 +246,6 @@ public class GenericSpark extends Motor {
         if (!shouldResetProfile(new TrapezoidProfile.State(goal, 0))) return;
 
         hasStoppedOccurred = false;
-
         feedback.reset();
 
         if (controlMode == MotorProperties.ControlMode.POSITION)
@@ -299,8 +282,7 @@ public class GenericSpark extends Motor {
         signalsToLog[signal.getId()] = true;
 
         switch (signal) {
-            case VELOCITY, CURRENT, TEMPERATURE ->
-                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
@@ -363,5 +345,20 @@ public class GenericSpark extends Motor {
                 || !goalState.equals(newGoal)
                 || hasStoppedOccurred
                 || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) > 100000; //(0.1 sec has passed)
+    }
+
+    /**
+     * Set all other status to basically never(10sec) to optimize bus usage
+     * Only call this ONCE at the beginning.
+     */
+    private void optimizeBusUsage() {
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
+        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
     }
 }
