@@ -94,9 +94,9 @@ public class RobotContainer {
 //        );
 
         driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setSCurvePosition(Rotation2d.fromDegrees(30)));
-//        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-//        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-//        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
+        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
+        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());

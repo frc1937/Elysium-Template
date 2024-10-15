@@ -11,6 +11,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
@@ -26,7 +27,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 
-public class GenericSparkMax extends GenericSparkBase {
+public class GenericSparkMax extends Motor {
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
     private final SparkPIDController sparkController;
@@ -53,7 +54,7 @@ public class GenericSparkMax extends GenericSparkBase {
     private double lastProfileCalculationTimestamp;
 
     public GenericSparkMax(String name, int deviceId) {
-        super(name, deviceId);
+        super(name);
 
         spark = new CANSparkMax(deviceId, CANSparkFlex.MotorType.kBrushless);
         encoder = spark.getEncoder();
@@ -168,10 +169,13 @@ public class GenericSparkMax extends GenericSparkBase {
 
         feedforward = Feedforward.Type.SIMPLE;
 
-        feedforward = switch (currentSlot.gravityType()) {
-            case Arm_Cosine -> Feedforward.Type.ARM;
-            case Elevator_Static -> Feedforward.Type.ELEVATOR;
-        };
+        if (currentSlot.gravityType() == MotorProperties.GravityType.ARM) {
+            feedforward = Feedforward.Type.ARM;
+        }
+
+        if (currentSlot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
+            feedforward = Feedforward.Type.ELEVATOR;
+        }
 
         feedforward.setFeedforwardConstants(
                 currentSlot.kS(),

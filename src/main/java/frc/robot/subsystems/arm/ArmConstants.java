@@ -1,19 +1,31 @@
 package frc.robot.subsystems.arm;
 
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.lib.generic.hardware.encoder.*;
-import frc.lib.generic.hardware.motor.*;
+import frc.lib.generic.hardware.encoder.Encoder;
+import frc.lib.generic.hardware.encoder.EncoderConfiguration;
+import frc.lib.generic.hardware.encoder.EncoderFactory;
+import frc.lib.generic.hardware.encoder.EncoderProperties;
+import frc.lib.generic.hardware.encoder.EncoderSignal;
+import frc.lib.generic.hardware.motor.Motor;
+import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.MotorFactory;
+import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.simulation.SimulationProperties;
 import frc.lib.generic.simulation.mechanisms.SingleJointedArmMechanism2d;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.lib.generic.hardware.motor.MotorSignal.*;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.lib.generic.hardware.motor.MotorSignal.ACCELERATION;
+import static frc.lib.generic.hardware.motor.MotorSignal.CLOSED_LOOP_TARGET;
+import static frc.lib.generic.hardware.motor.MotorSignal.POSITION;
+import static frc.lib.generic.hardware.motor.MotorSignal.VELOCITY;
+import static frc.lib.generic.hardware.motor.MotorSignal.VOLTAGE;
 
 public class ArmConstants {
     static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
@@ -27,7 +39,7 @@ public class ArmConstants {
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
 
-    static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",1, MotorProperties.SparkType.FLEX);
+    static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",62, MotorProperties.SparkType.FLEX);
     static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("Arm Encoder", 22);
 
     static final double PITCH_GEAR_RATIO = 149;
@@ -71,7 +83,7 @@ public class ArmConstants {
         motorConfiguration.slot0 = new MotorProperties.Slot(
                 0, 0, 0,
                 15.625, 0.85843, 0.097736, 0.21308,
-                GravityTypeValue.Arm_Cosine
+                MotorProperties.GravityType.ARM
         );
 
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
@@ -95,8 +107,8 @@ public class ArmConstants {
                 0,
                 0.2,
                 0.2,
-                GravityTypeValue.Arm_Cosine
-        );
+                    MotorProperties.GravityType.ARM
+                );
 
         ARM_MOTOR.configure(motorConfiguration);
 

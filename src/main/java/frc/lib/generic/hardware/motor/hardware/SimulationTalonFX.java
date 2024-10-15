@@ -6,11 +6,14 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
+
+import static frc.lib.generic.hardware.motor.MotorProperties.GravityType.ARM;
 
 public class SimulationTalonFX extends Motor {
     private final TalonFX talonFX;
@@ -133,7 +136,7 @@ public class SimulationTalonFX extends Motor {
         talonConfig.Slot0.kG = currentConfiguration.slot0.kG();
 
         if (currentConfiguration.slot0.gravityType() != null)
-            talonConfig.Slot0.GravityType = currentConfiguration.slot0.gravityType();
+            talonConfig.Slot0.GravityType = currentConfiguration.slot0.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
     private void setConfig1() {
@@ -146,7 +149,7 @@ public class SimulationTalonFX extends Motor {
         talonConfig.Slot1.kG = currentConfiguration.slot1.kG();
 
         if (currentConfiguration.slot1.gravityType() != null)
-            talonConfig.Slot1.GravityType = currentConfiguration.slot1.gravityType();
+            talonConfig.Slot1.GravityType = currentConfiguration.slot1.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
     private void setConfig2() {
@@ -159,7 +162,7 @@ public class SimulationTalonFX extends Motor {
         talonConfig.Slot2.kG = currentConfiguration.slot2.kG();
 
         if (currentConfiguration.slot2.gravityType() != null)
-            talonConfig.Slot2.GravityType = currentConfiguration.slot2.gravityType();
+            talonConfig.Slot2.GravityType = currentConfiguration.slot2.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
     private boolean applyConfig() {

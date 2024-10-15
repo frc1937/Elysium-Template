@@ -11,6 +11,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorInputs;
 import frc.lib.generic.hardware.motor.MotorProperties;
@@ -26,7 +27,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 
-public class GenericSparkFlex extends GenericSparkBase {
+public class GenericSparkFlex extends Motor {
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
     private final SparkPIDController sparkController;
@@ -54,7 +55,7 @@ public class GenericSparkFlex extends GenericSparkBase {
     private final Timer timer = new Timer();
 
     public GenericSparkFlex(String name, int deviceId) {
-        super(name, deviceId);
+        super(name);
 
         spark = new CANSparkFlex(deviceId, CANSparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
@@ -81,11 +82,6 @@ public class GenericSparkFlex extends GenericSparkBase {
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
-    }
-
-    @Override
-    public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        spark.setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? CANSparkBase.IdleMode.kCoast : CANSparkBase.IdleMode.kBrake);
     }
 
     @Override
@@ -123,6 +119,11 @@ public class GenericSparkFlex extends GenericSparkBase {
     public void setFollowerOf(String name, int masterPort) {
         spark.follow(new CANSparkMax(masterPort, CANSparkLowLevel.MotorType.kBrushless));
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
+    }
+
+    @Override
+    public void setIdleMode(MotorProperties.IdleMode idleMode) {
+        spark.setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? CANSparkBase.IdleMode.kCoast : CANSparkBase.IdleMode.kBrake);
     }
 
     @Override
@@ -179,10 +180,13 @@ public class GenericSparkFlex extends GenericSparkBase {
 
         feedforward = Feedforward.Type.SIMPLE;
 
-        feedforward = switch (currentSlot.gravityType()) {
-            case Arm_Cosine -> Feedforward.Type.ARM;
-            case Elevator_Static -> Feedforward.Type.ELEVATOR;
-        };
+        if (currentSlot.gravityType() == MotorProperties.GravityType.ARM) {
+            feedforward = Feedforward.Type.ARM;
+        }
+
+        if (currentSlot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
+            feedforward = Feedforward.Type.ELEVATOR;
+        }
 
         feedforward.setFeedforwardConstants(
                 currentSlot.kS(),
