@@ -95,6 +95,7 @@ public class SimulatedMotor extends Motor {
         inputs.target = simulation.getTarget();
         inputs.systemPosition = simulation.getPositionRotations();
         inputs.systemVelocity = simulation.getVelocityRotationsPerSecond();
+        inputs.systemAcceleration = simulation.getAccelerationRotationsPerSecondSquared();
 
         inputs.threadVoltage = new double[]{inputs.voltage};
         inputs.threadCurrent = new double[]{inputs.current};
@@ -102,5 +103,6 @@ public class SimulatedMotor extends Motor {
         inputs.threadTarget = new double[]{inputs.target};
         inputs.threadSystemPosition = new double[]{inputs.systemPosition};
         inputs.threadSystemVelocity = new double[]{inputs.systemVelocity};
+        inputs.threadSystemAcceleration = new double[]{inputs.systemAcceleration};
     }
 }

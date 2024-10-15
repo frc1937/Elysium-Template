@@ -2,15 +2,15 @@ package frc.lib.generic.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
+import frc.lib.generic.simulation.extensions.ExtendedDCMotorSim;
 
 import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
 
 public class SimpleMotorSimulation extends GenericSimulation {
-    private final DCMotorSim motorSimulation;
+    private final ExtendedDCMotorSim motorSimulation;
 
     public SimpleMotorSimulation(DCMotor gearbox, double gearRatio, double momentOfInertia) {
-        motorSimulation = new DCMotorSim(gearbox, gearRatio, momentOfInertia);
+        motorSimulation = new ExtendedDCMotorSim(gearbox, gearRatio, momentOfInertia);
     }
 
     @Override
@@ -26,6 +26,11 @@ public class SimpleMotorSimulation extends GenericSimulation {
     @Override
     public double getVelocityRotationsPerSecond() {
         return Units.radiansToRotations(motorSimulation.getAngularVelocityRadPerSec());
+    }
+
+    @Override
+    public double getAccelerationRotationsPerSecondSquared() {
+        return Units.radiansToRotations(motorSimulation.getAccelerationRadiansPerSecondSquared());
     }
 
     @Override

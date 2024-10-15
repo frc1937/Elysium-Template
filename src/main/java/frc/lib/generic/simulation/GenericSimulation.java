@@ -78,6 +78,8 @@ public abstract class GenericSimulation {
 
     public abstract double getVelocityRotationsPerSecond();
 
+    public abstract double getAccelerationRotationsPerSecondSquared();
+
     public abstract double getCurrent();
 
     //These have weaker access because they're used in this package only.

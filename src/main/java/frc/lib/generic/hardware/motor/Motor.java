@@ -240,6 +240,16 @@ public class Motor implements LoggableHardware {
         return inputs.systemVelocity;
     }
 
+    /**
+     * Gearing applied
+     *
+     * @Units In rotations per second
+     */
+    public double getSystemAcceleration() {
+        if (!getSignalsToLog()[6]) printSignalError("ACCELERATION");
+        return inputs.systemAcceleration;
+    }
+
     public void setFollowerOf(String name, int masterPort) { }
 
     /** Signals are lazily loaded - only these explicitly called will be updated. Thus you must call this method. when using a signal.*/

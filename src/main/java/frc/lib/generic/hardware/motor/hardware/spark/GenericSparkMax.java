@@ -324,6 +324,7 @@ public class GenericSparkMax extends GenericSparkBase {
         if (signalsToLog[3]) inputs.target = closedLoopTarget;
         if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
         if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
+        if (signalsToLog[6]) inputs.systemAcceleration = getEffectiveAcceleration();
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList);
     }

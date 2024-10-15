@@ -4,14 +4,15 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.lib.generic.simulation.extensions.ExtendedSingleJointedArmSim;
 
 import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
 
 public class SingleJointedArmSimulation extends GenericSimulation {
-    private final SingleJointedArmSim armSimulation;
+    private final ExtendedSingleJointedArmSim armSimulation;
 
     public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMomentOfInertia, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity, boolean simulateInertia) {
-        armSimulation = new SingleJointedArmSim(
+        armSimulation = new ExtendedSingleJointedArmSim(
                 gearbox,
                 gearRatio,
                 armMomentOfInertia,
@@ -24,7 +25,7 @@ public class SingleJointedArmSimulation extends GenericSimulation {
     }
 
     public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMassKilograms, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity) {
-        armSimulation = new SingleJointedArmSim(
+        armSimulation = new ExtendedSingleJointedArmSim(
                 gearbox,
                 gearRatio,
                 SingleJointedArmSim.estimateMOI(armLengthMeters, armMassKilograms),
@@ -59,5 +60,10 @@ public class SingleJointedArmSimulation extends GenericSimulation {
     @Override
     public double getVelocityRotationsPerSecond() {
         return Units.radiansToRotations(armSimulation.getVelocityRadPerSec());
+    }
+
+    @Override
+    public double getAccelerationRotationsPerSecondSquared() {
+        return Units.radiansToRotations(armSimulation.getAccelerationRadiansPerSecondSquared());
     }
 }

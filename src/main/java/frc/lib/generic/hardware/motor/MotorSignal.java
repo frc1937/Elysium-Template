@@ -1,7 +1,7 @@
 package frc.lib.generic.hardware.motor;
 
 public enum MotorSignal {
-    CURRENT(1), POSITION(4), VELOCITY(5), VOLTAGE(0), TEMPERATURE(2), CLOSED_LOOP_TARGET(3);
+    CURRENT(1), POSITION(4), VELOCITY(5), VOLTAGE(0), TEMPERATURE(2), CLOSED_LOOP_TARGET(3), ACCELERATION(6);
 
     final int id;
 

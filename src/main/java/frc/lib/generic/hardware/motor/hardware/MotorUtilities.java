@@ -13,6 +13,8 @@ public class MotorUtilities {
             inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
         if (signalQueueList.get("velocity") != null)
             inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
+        if (signalQueueList.get("acceleration") != null)
+            inputs.threadSystemAcceleration = signalQueueList.get("acceleration").stream().mapToDouble(Double::doubleValue).toArray();
         if (signalQueueList.get("voltage") != null)
             inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
         if (signalQueueList.get("current") != null)
