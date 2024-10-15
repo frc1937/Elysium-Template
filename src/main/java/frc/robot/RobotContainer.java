@@ -81,11 +81,11 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-        driveController.getButton(Controller.Inputs.A)
-                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
-                                BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 20))
-                );
+//        driveController.getButton(Controller.Inputs.A)
+//                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+//                                BLUE_SPEAKER.toPose2d(), () -> false)
+//                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 20))
+//                );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(
 //                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
@@ -93,10 +93,12 @@ public class RobotContainer {
 //                )
 //        );
 
+//        StaticFrictionCharacterization characterization = new StaticFrictionCharacterization();
+//        driveController.getButton(Controller.Inputs.B).whileTrue(characterization);
         driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setSCurvePosition(Rotation2d.fromDegrees(30)));
-        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setSCurvePosition(Rotation2d.fromDegrees(60)));
+        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setSCurvePosition(Rotation2d.fromDegrees(90)));
+        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setSCurvePosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());

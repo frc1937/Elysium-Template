@@ -14,9 +14,14 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.RobotContainer.RUCKIG;
-import static frc.robot.subsystems.arm.ArmConstants.*;
+import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
 
 public class Arm extends GenericSubsystem {
     public Arm() {
@@ -28,6 +33,14 @@ public class Arm extends GenericSubsystem {
         Logger.recordOutput("IsArmReady: ", ARM_MOTOR.isAtPositionSetpoint());
 
         return ARM_MOTOR.isAtPositionSetpoint();
+    }
+
+    public double getVelocity() {
+        return ARM_MOTOR.getSystemVelocity();
+    }
+
+    public void UNSAFE_setVoltage(double voltage) {
+        ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
     public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
@@ -68,18 +81,36 @@ public class Arm extends GenericSubsystem {
                     input[0] = result[0].input_parameter;
                     output[0] = result[0].output_parameter;
 
-                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, output[0].new_position);
+                    double kG = 0.25408;
+                    double kS = 0.1205;
+
+                    double pidOutput = 48 * (output[0].new_position - ARM_MOTOR.getSystemPosition());
+
+                    if (pidOutput < kS && pidOutput > -kS) {
+                        pidOutput = kS * Math.signum(pidOutput);
+                    }
+
+                    double ff = kS * Math.signum(output[0].new_velocity) +
+                            15.625 * output[0].new_velocity +
+                            0.85843 * output[0].new_acceleration +
+                            kG * Math.cos(ARM_MOTOR.getSystemPosition() * 2 * Math.PI);
+
+                    Logger.recordOutput("ARM_PID_OUTPUT", pidOutput);
+                    Logger.recordOutput("ARM_FF_OUTPUT", ff);
+
+                    Logger.recordOutput("ARM_TARGET", output[0].new_position);
+                    Logger.recordOutput("ARM_ERROR_DEG", 360*(output[0].new_position - ARM_MOTOR.getSystemPosition()));
+
+                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, pidOutput + ff);
 
                     t[0]+=0.02;
                 },
                 interrupted -> {
-                    System.out.println("DONE: " + result[0].result);
-                    ARM_MOTOR.stopMotor();
+//                    ARM_MOTOR.stopMotor();
                 },
                 () -> {
-                    System.out.println("DONE: " + result[0].result + "DIFF: " + (targetPosition.getRotations() - ARM_MOTOR.getSystemPosition()));
+//                    System.out.println("DONE: " + result[0].result + "DIFF: " + (targetPosition.getRotations() - ARM_MOTOR.getSystemPosition()));
                     return false;
-//                    return targetPosition.getRotations() - ARM_MOTOR.getSystemPosition() < TOLERANCE_ROTATIONS;
                 },
                 this
         );
@@ -92,8 +123,8 @@ public class Arm extends GenericSubsystem {
                 ARM_MOTOR.getSystemAcceleration(),
                 targetPosition,
                 0.5,
-                1,
-                10
+                0.5,
+                1.3
         );
     }
 
