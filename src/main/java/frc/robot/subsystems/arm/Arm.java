@@ -7,17 +7,16 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.ruckig.InputParameter;
+import frc.lib.ruckig.OutputParameter;
+import frc.lib.ruckig.UpdateResult;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
-import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.RobotContainer.RUCKIG;
+import static frc.robot.subsystems.arm.ArmConstants.*;
 
 public class Arm extends GenericSubsystem {
     public Arm() {
@@ -48,6 +47,53 @@ public class Arm extends GenericSubsystem {
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
+        );
+    }
+
+    public Command setSCurvePosition(Rotation2d targetPosition) {
+        InputParameter[] input = new InputParameter[]{resetProfile(targetPosition.getRotations())};
+        OutputParameter[] output = new OutputParameter[]{new OutputParameter()};
+        UpdateResult[] result = new UpdateResult[1];
+
+        double[] t = {0};
+
+        return new FunctionalCommand(
+                () -> {
+                    input[0] = resetProfile(targetPosition.getRotations());
+                    output[0] = new OutputParameter();
+                },
+                () -> {
+                    result[0] = RUCKIG.update(input[0], output[0]);
+
+                    input[0] = result[0].input_parameter;
+                    output[0] = result[0].output_parameter;
+
+                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, output[0].new_position);
+
+                    t[0]+=0.02;
+                },
+                interrupted -> {
+                    System.out.println("DONE: " + result[0].result);
+                    ARM_MOTOR.stopMotor();
+                },
+                () -> {
+                    System.out.println("DONE: " + result[0].result + "DIFF: " + (targetPosition.getRotations() - ARM_MOTOR.getSystemPosition()));
+                    return false;
+//                    return targetPosition.getRotations() - ARM_MOTOR.getSystemPosition() < TOLERANCE_ROTATIONS;
+                },
+                this
+        );
+    }
+
+    private InputParameter resetProfile(double targetPosition) {
+        return new InputParameter(
+                ARM_MOTOR.getSystemPosition(),
+                ARM_MOTOR.getSystemVelocity(),
+                ARM_MOTOR.getSystemAcceleration(),
+                targetPosition,
+                1,
+                1,
+                10
         );
     }
 

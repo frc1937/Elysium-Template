@@ -88,7 +88,7 @@ public class ArmConstants {
         );
 
         motorConfiguration.simulationSlot = new MotorProperties.Slot(
-                130,
+                150,
                 0,
                 0,
                 32,
@@ -104,6 +104,7 @@ public class ArmConstants {
         ARM_MOTOR.setupSignalUpdates(VELOCITY);
         ARM_MOTOR.setupSignalUpdates(VOLTAGE);
         ARM_MOTOR.setupSignalUpdates(CLOSED_LOOP_TARGET);
+        ARM_MOTOR.setupSignalUpdates(ACCELERATION);
 
         ARM_MOTOR.setExternalPositionSupplier(ABSOLUTE_ARM_ENCODER::getEncoderPosition);
         ARM_MOTOR.setExternalVelocitySupplier(ABSOLUTE_ARM_ENCODER::getEncoderVelocity);
