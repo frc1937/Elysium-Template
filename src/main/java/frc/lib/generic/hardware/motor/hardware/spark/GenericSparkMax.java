@@ -170,11 +170,11 @@ public class GenericSparkMax extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
+        if (goalState == null) return;
+
         double feedbackOutput, feedforwardOutput, acceleration;
 
         if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
-            if (goalState == null) return;
-
             final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
@@ -185,8 +185,6 @@ public class GenericSparkMax extends Motor {
             previousSetpoint = currentSetpoint;
             lastProfileCalculationTimestamp = Logger.getTimestamp();
         } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
-            if (goalState == null) return;
-
             final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
 
             feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
@@ -195,8 +193,6 @@ public class GenericSparkMax extends Motor {
             previousSetpoint = currentSetpoint;
             lastProfileCalculationTimestamp = Logger.getRealTimestamp();
         } else {
-            if (goalState == null) return;
-
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
         }
