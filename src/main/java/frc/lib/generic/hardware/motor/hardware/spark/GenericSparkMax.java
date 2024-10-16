@@ -1,21 +1,11 @@
 package frc.lib.generic.hardware.motor.hardware.spark;
 
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkFlex;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.*;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.OdometryThread;
-import frc.lib.generic.hardware.motor.Motor;
-import frc.lib.generic.hardware.motor.MotorConfiguration;
-import frc.lib.generic.hardware.motor.MotorInputs;
-import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.math.Conversions;
 import org.littletonrobotics.junction.Logger;
@@ -56,11 +46,11 @@ public class GenericSparkMax extends Motor {
     public GenericSparkMax(String name, int deviceId) {
         super(name);
 
-        spark = new CANSparkMax(deviceId, CANSparkFlex.MotorType.kBrushless);
+        spark = new CANSparkMax(deviceId, CANSparkLowLevel.MotorType.kBrushless);
         encoder = spark.getEncoder();
         sparkController = spark.getPIDController();
 
-        optimizeBusUsage();
+        SparkCommon.optimizeBusUsage(spark);
     }
 
     @Override
@@ -71,7 +61,7 @@ public class GenericSparkMax extends Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
-        setGoal(mode, output);
+        setNewGoal(mode, output);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -141,7 +131,8 @@ public class GenericSparkMax extends Motor {
 
         configureProfile(configuration);
         configurePID(configuration);
-        configureFeedForward();
+
+        feedforward = SparkCommon.configureFeedforward(getCurrentSlot());
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -162,27 +153,6 @@ public class GenericSparkMax extends Motor {
                             configuration.profiledJerk
                     ));
         }
-    }
-
-    private void configureFeedForward() {
-        final MotorProperties.Slot currentSlot = getCurrentSlot();
-
-        feedforward = Feedforward.Type.SIMPLE;
-
-        if (currentSlot.gravityType() == MotorProperties.GravityType.ARM) {
-            feedforward = Feedforward.Type.ARM;
-        }
-
-        if (currentSlot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
-            feedforward = Feedforward.Type.ELEVATOR;
-        }
-
-        feedforward.setFeedforwardConstants(
-                currentSlot.kS(),
-                currentSlot.kV(),
-                currentSlot.kA(),
-                currentSlot.kG()
-        );
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -244,10 +214,8 @@ public class GenericSparkMax extends Motor {
         return 0;
     }
 
-    private void setGoal(MotorProperties.ControlMode controlMode, double goal) {
-        System.out.println("SHOULD RESET PROFILE " + getName() + "I: " + shouldResetProfile(new TrapezoidProfile.State(goal, 0)));
-
-        if (!shouldResetProfile(new TrapezoidProfile.State(goal, 0))) return;
+    private void setNewGoal(MotorProperties.ControlMode controlMode, double goal) {
+        if (SparkCommon.hasNoNewGoal(new TrapezoidProfile.State(goal, 0), goalState, hasStoppedOccurred, lastProfileCalculationTimestamp)) return;
 
         hasStoppedOccurred = false;
         feedback.reset();
@@ -296,18 +264,12 @@ public class GenericSparkMax extends Motor {
         signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
-            case POSITION ->
-                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VELOCITY ->
-                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
-            case CURRENT ->
-                    signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
-            case VOLTAGE ->
-                    signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
-            case TEMPERATURE ->
-                    signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
-            case CLOSED_LOOP_TARGET ->
-                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
+            case POSITION -> signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
+            case VELOCITY -> signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
+            case CURRENT -> signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
+            case VOLTAGE -> signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
+            case TEMPERATURE -> signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
+            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
         }
     }
 
@@ -343,27 +305,5 @@ public class GenericSparkMax extends Motor {
 
     private double getSystemVelocityPrivate() {
         return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
-    }
-
-    private boolean shouldResetProfile(TrapezoidProfile.State newGoal) {
-        return goalState == null
-                || !goalState.equals(newGoal)
-                || hasStoppedOccurred
-                || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) > 100000; //(0.1 sec has passed)
-    }
-
-    /**
-     * Set all other status to basically never(10sec) to optimize bus usage
-     * Only call this ONCE at the beginning.
-     */
-    private void optimizeBusUsage() {
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
     }
 }

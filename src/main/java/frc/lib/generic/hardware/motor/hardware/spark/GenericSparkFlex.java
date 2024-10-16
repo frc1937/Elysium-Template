@@ -61,7 +61,7 @@ public class GenericSparkFlex extends Motor {
         encoder = spark.getEncoder();
         sparkController = spark.getPIDController();
 
-        optimizeBusUsage();
+        SparkCommon.optimizeBusUsage(spark);
 
         timer.start();
     }
@@ -74,7 +74,7 @@ public class GenericSparkFlex extends Motor {
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         closedLoopTarget = output;
-        setGoal(mode, output);
+        setNewGoal(mode, output);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -148,7 +148,7 @@ public class GenericSparkFlex extends Motor {
         configureProfile(configuration);
         configurePID(configuration);
 
-        configureFeedForward();
+        feedforward = SparkCommon.configureFeedforward(getCurrentSlot());
 
         encoder.setPosition(getEffectivePosition());
 
@@ -173,27 +173,6 @@ public class GenericSparkFlex extends Motor {
                     )
             );
         }
-    }
-
-    private void configureFeedForward() {
-        final MotorProperties.Slot currentSlot = getCurrentSlot();
-
-        feedforward = Feedforward.Type.SIMPLE;
-
-        if (currentSlot.gravityType() == MotorProperties.GravityType.ARM) {
-            feedforward = Feedforward.Type.ARM;
-        }
-
-        if (currentSlot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
-            feedforward = Feedforward.Type.ELEVATOR;
-        }
-
-        feedforward.setFeedforwardConstants(
-                currentSlot.kS(),
-                currentSlot.kV(),
-                currentSlot.kA(),
-                currentSlot.kG()
-        );
     }
 
     private void configurePID(MotorConfiguration configuration) {
@@ -259,8 +238,8 @@ public class GenericSparkFlex extends Motor {
         }
     }
 
-    private void setGoal(MotorProperties.ControlMode controlMode, double goal) {
-        if (!shouldResetProfile(new TrapezoidProfile.State(goal, 0))) return;
+    private void setNewGoal(MotorProperties.ControlMode controlMode, double goal) {
+        if (SparkCommon.hasNoNewGoal(new TrapezoidProfile.State(goal, 0), goalState, hasStoppedOccurred, lastProfileCalculationTimestamp)) return;
 
         hasStoppedOccurred = false;
 
@@ -359,27 +338,5 @@ public class GenericSparkFlex extends Motor {
 
     private double getSystemVelocityPrivate() {
         return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
-    }
-
-    private boolean shouldResetProfile(TrapezoidProfile.State newGoal) {
-        return goalState == null
-                || !goalState.equals(newGoal)
-                || hasStoppedOccurred
-                || (Logger.getRealTimestamp() - lastProfileCalculationTimestamp) > 100000; //(0.1 sec has passed)
-    }
-
-    /**
-     * Set all other status to basically never(10sec) to optimize bus usage
-     * Only call this ONCE at the beginning.
-     */
-    private void optimizeBusUsage() {
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
     }
 }

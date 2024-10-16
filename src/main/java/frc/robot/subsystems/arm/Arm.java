@@ -106,10 +106,8 @@ public class Arm extends GenericSubsystem {
                     t[0]+=0.02;
                 },
                 interrupted -> {
-//                    ARM_MOTOR.stopMotor();
                 },
                 () -> {
-//                    System.out.println("DONE: " + result[0].result + "DIFF: " + (targetPosition.getRotations() - ARM_MOTOR.getSystemPosition()));
                     return false;
                 },
                 this
