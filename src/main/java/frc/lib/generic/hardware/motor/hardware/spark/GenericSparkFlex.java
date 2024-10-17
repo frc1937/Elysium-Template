@@ -9,7 +9,6 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
-import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
 public class GenericSparkFlex extends GenericSparkBase {
@@ -93,16 +92,29 @@ public class GenericSparkFlex extends GenericSparkBase {
         //check if works, and if theres a default
     }
 
-    protected void handleSmoothMotion(MotorProperties.ControlMode controlMode, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
+    protected void handleSmoothMotion(SparkCommon.MotionType motionType,
+                                      TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
         if (goalState == null) return;
 
         double feedforwardOutput, acceleration;
-        final CANSparkBase.ControlType controlType = controlMode == MotorProperties.ControlMode.POSITION ? CANSparkBase.ControlType.kPosition : CANSparkBase.ControlType.kVelocity;
 
-        if (motionProfile != null) {
-            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+        switch (motionType) {
+            case POSITION_SIMPLE -> {
+                sparkController.setReference(goalState.position,
+                        CANSparkBase.ControlType.kPosition, slotToUse,
+                        0,
+                        SparkPIDController.ArbFFUnits.kVoltage);
+            }
 
-            if (controlMode == MotorProperties.ControlMode.POSITION) {
+            case VELOCITY_SIMPLE -> {
+                sparkController.setReference(goalState.position * 60,
+                        CANSparkBase.ControlType.kVelocity, slotToUse, feedforward.calculate(goalState.position, goalState.velocity, 0),
+                        SparkPIDController.ArbFFUnits.kVoltage);
+            }
+
+            case POSITION_TRAPEZOIDAL -> {
+                final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+
                 acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
                 feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
 
@@ -110,28 +122,25 @@ public class GenericSparkFlex extends GenericSparkBase {
                         CANSparkBase.ControlType.kPosition,
                         slotToUse, feedforwardOutput,
                         SparkPIDController.ArbFFUnits.kVoltage);
+
+                previousSetpoint = currentSetpoint;
+                lastProfileCalculationTimestamp = Logger.getRealTimestamp();
             }
 
-            if (controlMode == MotorProperties.ControlMode.VELOCITY) {
+            case VELOCITY_TRAPEZOIDAL -> {
+                final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+
                 feedforwardOutput = feedforward.calculate(0, currentSetpoint.position, currentSetpoint.velocity);
 
                 sparkController.setReference(currentSetpoint.position * 60,
                         CANSparkBase.ControlType.kVelocity,
                         slotToUse, feedforwardOutput,
                         SparkPIDController.ArbFFUnits.kVoltage);
+
+
+                previousSetpoint = currentSetpoint;
+                lastProfileCalculationTimestamp = Logger.getRealTimestamp();
             }
-
-
-            previousSetpoint = currentSetpoint;
-            lastProfileCalculationTimestamp = Logger.getRealTimestamp();
-        } else {
-            feedforwardOutput = feedforward.calculate(goalState.position, goalState.velocity, 0);
-
-            final double goal = controlType == CANSparkBase.ControlType.kPosition ? goalState.position : 60 * goalState.position;
-
-            sparkController.setReference(goal,
-                    controlType, slotToUse, feedforwardOutput,
-                    SparkPIDController.ArbFFUnits.kVoltage);
         }
     }
 }

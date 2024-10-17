@@ -8,7 +8,12 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
 public class SparkCommon {
-    private SparkCommon() {}
+    private SparkCommon() {
+    }
+
+    public enum MotionType {
+        POSITION_S_CURVE, POSITION_TRAPEZOIDAL, VELOCITY_SIMPLE, VELOCITY_TRAPEZOIDAL, POSITION_SIMPLE
+    }
 
     /**
      * Set all other status to basically never(10sec) to optimize bus usage

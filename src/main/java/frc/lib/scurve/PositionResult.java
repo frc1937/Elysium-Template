@@ -1,4 +1,4 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
 public class PositionResult {
     public Profile profile;

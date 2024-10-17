@@ -1,7 +1,7 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
-import static frc.lib.ruckig.Utilities.back;
-import static frc.lib.ruckig.Utilities.integrate;
+import static frc.lib.scurve.Utilities.back;
+import static frc.lib.scurve.Utilities.integrate;
 
 public class Trajectory {
     Profile profile = new Profile();

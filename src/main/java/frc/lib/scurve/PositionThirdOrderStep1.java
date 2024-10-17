@@ -1,4 +1,4 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
 class PositionThirdOrderStep1 {
     public static final double DBL_EPSILON = Math.ulp(1.0);

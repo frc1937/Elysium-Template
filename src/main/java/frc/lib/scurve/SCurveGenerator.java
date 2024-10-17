@@ -1,12 +1,15 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
-import static frc.lib.ruckig.Result.Finished;
-import static frc.lib.ruckig.Result.Working;
+import static frc.lib.scurve.Result.Finished;
+import static frc.lib.scurve.Result.Working;
 
-//! Main interface for the Ruckig algorithm
-public class Ruckig {
+//! Main interface for the SCurve algorithm
+public class SCurveGenerator {
     //! Current input, only for comparison for recalculation
     private InputParameter current_input;
+
+    //! Kinematic constraints
+    public double max_velocity, max_acceleration, max_jerk;
 
     //! Flag that indicates if the current_input was properly initialized
     private boolean current_input_initialized = false;
@@ -17,8 +20,12 @@ public class Ruckig {
     //! Time step between updates (cycle time) in [s]
     public double delta_time;
 
-    public Ruckig( double delta_time) {
+    public SCurveGenerator(double delta_time, double max_velocity, double max_acceleration, double max_jerk) {
         this.delta_time = delta_time ;
+
+        this.max_velocity =  max_velocity;
+        this.max_acceleration = max_acceleration;
+        this.max_jerk = max_jerk;
     }
 
     //! Reset the instance (e.g. to force a new calculation in the next update)
@@ -28,7 +35,7 @@ public class Ruckig {
 
     //! Calculate a new trajectory for the given input and check for interruption
     private UpdateResult calculate(InputParameter input, OutputParameter output) {
-        return calculator.calculate(input, output);
+        return calculator.calculate(input, output, max_velocity, max_acceleration, max_jerk);
     }
 
     //! Get the next output state (with step delta_time) along the calculated trajectory for the given input

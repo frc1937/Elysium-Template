@@ -9,7 +9,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
-import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
 
 public class GenericSparkMax extends GenericSparkBase {
@@ -82,43 +81,44 @@ public class GenericSparkMax extends GenericSparkBase {
             feedback.enableContinuousInput(-0.5, 0.5);
     }
 
-    protected void handleSmoothMotion(MotorProperties.ControlMode controlMode, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
+    protected void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
         if (goalState == null) return;
 
         double feedbackOutput = 0, feedforwardOutput = 0, acceleration;
 
-        if (motionProfile != null) {
-            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+        switch (motionType) {
+            case POSITION_TRAPEZOIDAL -> {
+                final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
-            if (controlMode ==MotorProperties.ControlMode.POSITION) {
                 acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
                 feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
                 feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
+
+                previousSetpoint = currentSetpoint;
+                lastProfileCalculationTimestamp = Logger.getTimestamp();
             }
 
-            if (controlMode == MotorProperties.ControlMode.VELOCITY) {
+            case VELOCITY_TRAPEZOIDAL -> {
+                final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
+
                 feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
                 feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
+
+                previousSetpoint = currentSetpoint;
+                lastProfileCalculationTimestamp = Logger.getTimestamp();
             }
 
-            previousSetpoint = currentSetpoint;
-            lastProfileCalculationTimestamp = Logger.getTimestamp();
-        } else {
-            feedbackOutput = getModeBasedFeedback(controlMode, goalState);
-            feedforwardOutput = feedforward.calculate(goalState.position, goalState.velocity, 0);
+            case VELOCITY_SIMPLE -> {
+                feedforwardOutput = feedforward.calculate(goalState.position, goalState.velocity);
+                feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), goalState.position);
+            }
+
+            case POSITION_SIMPLE -> {
+                feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
+            }
         }
 
         sparkController.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
-    }
-
-    private double getModeBasedFeedback(MotorProperties.ControlMode mode, TrapezoidProfile.State goal) {
-        if (mode == MotorProperties.ControlMode.POSITION) {
-            return feedback.calculate(getEffectivePosition(), goal.position);
-        } else if (mode == MotorProperties.ControlMode.VELOCITY) {
-            return feedback.calculate(getEffectiveVelocity(), goal.velocity);
-        }
-
-        return 0;
     }
 }

@@ -1,6 +1,6 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
-import static frc.lib.ruckig.Utilities.back;
+import static frc.lib.scurve.Utilities.back;
 
 class Profile {
     static double v_eps = 1e-12;

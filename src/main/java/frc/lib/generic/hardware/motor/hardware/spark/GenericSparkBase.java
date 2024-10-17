@@ -16,6 +16,7 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.math.Conversions;
+import frc.lib.scurve.SCurveGenerator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,8 +24,10 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
-
+//todo: possible problem when doing PID only velocity control.
 public abstract class GenericSparkBase extends Motor {
+    private SparkCommon.MotionType motionType;
+
     private final CANSparkBase spark;
     private final RelativeEncoder encoder;
     private final SparkPIDController sparkController;
@@ -38,6 +41,7 @@ public abstract class GenericSparkBase extends Motor {
 
     private double previousVelocity = 0;
 
+    private SCurveGenerator scurveGenerator;
     private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State goalState;
 
@@ -57,6 +61,8 @@ public abstract class GenericSparkBase extends Motor {
         spark = getSpark();
         encoder = getEncoder();
         sparkController = getSparkController();
+
+        SparkCommon.optimizeBusUsage(spark);
     }
 
     @Override
@@ -81,7 +87,7 @@ public abstract class GenericSparkBase extends Motor {
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
-            case POSITION, VELOCITY -> handleSmoothMotion(mode, goalState, motionProfile, this.feedforward, slotToUse);
+            case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
@@ -105,11 +111,11 @@ public abstract class GenericSparkBase extends Motor {
         if (configuration.statorCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
+        feedforward = SparkCommon.configureFeedforward(getCurrentSlot());
+
         configureProfile(configuration);
         configurePID(configuration);
         configureExtras(configuration);
-
-        feedforward = SparkCommon.configureFeedforward(getCurrentSlot());
 
         return spark.burnFlash() == REVLibError.kOk;
     }
@@ -148,7 +154,8 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     private void setNewGoal(MotorProperties.ControlMode controlMode, double goal) {
-        if (SparkCommon.hasNoNewGoal(new TrapezoidProfile.State(goal, 0), goalState, hasStoppedOccurred, getLastProfileCalculationTimestamp())) return;
+        if (SparkCommon.hasNoNewGoal(new TrapezoidProfile.State(goal, 0), goalState, hasStoppedOccurred, getLastProfileCalculationTimestamp()))
+            return;
 
         hasStoppedOccurred = false;
         setNewGoalExtras();
@@ -171,7 +178,8 @@ public abstract class GenericSparkBase extends Motor {
         signalsToLog[signal.getId()] = true;
 
         switch (signal) {
-            case VELOCITY, CURRENT, TEMPERATURE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            case VELOCITY, CURRENT, TEMPERATURE ->
+                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
         }
@@ -250,37 +258,58 @@ public abstract class GenericSparkBase extends Motor {
 
     private void configureProfile(MotorConfiguration configuration) {
         if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration != 0) {
-            motionProfile = new TrapezoidProfile(
-                    new TrapezoidProfile.Constraints(
-                            configuration.profiledMaxVelocity,
-                            configuration.profiledTargetAcceleration
-                    )
-            );
-        }
+            if (configuration.profiledJerk != 0) {
+                scurveGenerator = new SCurveGenerator(0.02,
+                        configuration.profiledMaxVelocity,
+                        configuration.profiledTargetAcceleration,
+                        configuration.profiledJerk);
 
-        if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
+                motionType = SparkCommon.MotionType.POSITION_S_CURVE;
+            } else {
+                motionProfile = new TrapezoidProfile(
+                        new TrapezoidProfile.Constraints(
+                                configuration.profiledMaxVelocity,
+                                configuration.profiledTargetAcceleration
+                        )
+                );
+
+                motionType = SparkCommon.MotionType.POSITION_TRAPEZOIDAL;
+            }
+        } else if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
             motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledTargetAcceleration,
                             configuration.profiledJerk
                     )
             );
+
+            motionType = SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL;
+        } else if (feedforward == null) {
+            motionType = SparkCommon.MotionType.POSITION_SIMPLE;
+        } else {
+            motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
         }
     }
 
 
     protected abstract CANSparkBase getSpark();
+
     protected abstract RelativeEncoder getEncoder();
+
     protected abstract SparkPIDController getSparkController();
 
     protected abstract void refreshExtras();
 
     protected abstract void setNewGoalExtras();
+
     protected abstract void configureExtras(MotorConfiguration configuration);
 
-    protected abstract void handleSmoothMotion(MotorProperties.ControlMode controlMode, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse);
+    protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse);
+
+
     protected abstract void configurePID(MotorConfiguration configuration);
 
     protected abstract double getLastProfileCalculationTimestamp();
+
     protected abstract void setPreviousSetpoint(TrapezoidProfile.State previousSetpoint);
 }

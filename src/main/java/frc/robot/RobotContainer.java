@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.ruckig.Ruckig;
+import frc.lib.scurve.SCurveGenerator;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
@@ -34,7 +34,8 @@ import static frc.lib.util.Controller.Axis.LEFT_Y;
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 
 public class RobotContainer {
-    public static final Ruckig RUCKIG = new Ruckig(0.02);
+    public static final SCurveGenerator S_CURVE_GENERATOR = new SCurveGenerator(0.02,
+            0.5, 0.5, 5);
 
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
 //            FRONT_CAMERA

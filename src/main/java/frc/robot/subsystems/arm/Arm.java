@@ -7,9 +7,9 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.ruckig.InputParameter;
-import frc.lib.ruckig.OutputParameter;
-import frc.lib.ruckig.UpdateResult;
+import frc.lib.scurve.InputParameter;
+import frc.lib.scurve.OutputParameter;
+import frc.lib.scurve.UpdateResult;
 import org.littletonrobotics.junction.Logger;
 
 import java.util.function.DoubleSupplier;
@@ -17,7 +17,7 @@ import java.util.function.DoubleSupplier;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotContainer.RUCKIG;
+import static frc.robot.RobotContainer.S_CURVE_GENERATOR;
 import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
@@ -76,7 +76,7 @@ public class Arm extends GenericSubsystem {
                     output[0] = new OutputParameter();
                 },
                 () -> {
-                    result[0] = RUCKIG.update(input[0], output[0]);
+                    result[0] = S_CURVE_GENERATOR.update(input[0], output[0]);
 
                     input[0] = result[0].input_parameter;
                     output[0] = result[0].output_parameter;

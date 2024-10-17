@@ -1,4 +1,4 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
 import java.util.TreeSet;
 

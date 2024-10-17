@@ -1,6 +1,6 @@
-package frc.lib.ruckig;
+package frc.lib.scurve;
 
-//! Output of the Ruckig algorithm
+//! Output of the Scurve algorithm
 public class OutputParameter {
     //! Current trajectory
     public Trajectory trajectory = new Trajectory();
