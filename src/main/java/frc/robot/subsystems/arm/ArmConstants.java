@@ -75,8 +75,9 @@ public class ArmConstants {
         motorConfiguration.idleMode = MotorProperties.IdleMode.BRAKE;
         motorConfiguration.supplyCurrentLimit = 40;
 
-        motorConfiguration.profiledTargetAcceleration = 0.35;
         motorConfiguration.profiledMaxVelocity = 0.5;
+        motorConfiguration.profiledTargetAcceleration = 0.35;
+        motorConfiguration.profiledJerk = 3.5;
 
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
