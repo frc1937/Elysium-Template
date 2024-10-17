@@ -45,7 +45,7 @@ public class GenericSparkFlex extends Motor {
 
     private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
 
-    private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
+    private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
 
     private double previousVelocity = 0;
@@ -157,7 +157,7 @@ public class GenericSparkFlex extends Motor {
 
     private void configureProfile(MotorConfiguration configuration) {
         if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration != 0) {
-            positionMotionProfile = new TrapezoidProfile(
+            motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledMaxVelocity,
                             configuration.profiledTargetAcceleration
@@ -166,7 +166,7 @@ public class GenericSparkFlex extends Motor {
         }
 
         if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
-            velocityMotionProfile = new TrapezoidProfile(
+            motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledTargetAcceleration,
                             configuration.profiledJerk
@@ -196,39 +196,38 @@ public class GenericSparkFlex extends Motor {
     }
 
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
+        if (goalState == null) return;
+
         double feedforwardOutput, acceleration;
         final CANSparkBase.ControlType controlType = controlMode == MotorProperties.ControlMode.POSITION ? CANSparkBase.ControlType.kPosition : CANSparkBase.ControlType.kVelocity;
 
-        if (goalState == null) return;
+        if (motionProfile != null) {
+            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
-        if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
-            final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
+            if (controlMode == MotorProperties.ControlMode.POSITION) {
+                acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
+                feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
 
-            acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
+                sparkController.setReference(currentSetpoint.position,
+                        CANSparkBase.ControlType.kPosition,
+                        slotToUse, feedforwardOutput,
+                        SparkPIDController.ArbFFUnits.kVoltage);
+            }
 
-            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
-            //set the pos of sparkController getEffectivePosition
+            if (controlMode == MotorProperties.ControlMode.VELOCITY) {
+                feedforwardOutput = feedforward.calculate(0, currentSetpoint.position, currentSetpoint.velocity);
 
-            previousSetpoint = currentSetpoint;
-            lastProfileCalculationTimestamp = Logger.getTimestamp();
+                sparkController.setReference(currentSetpoint.position * 60,
+                        CANSparkBase.ControlType.kVelocity,
+                        slotToUse, feedforwardOutput,
+                        SparkPIDController.ArbFFUnits.kVoltage);
+            }
 
-            sparkController.setReference(currentSetpoint.position,
-                    controlType, slotToUse, feedforwardOutput,
-                    SparkPIDController.ArbFFUnits.kVoltage);
-        } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
-            final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
-
-            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
-            //set the vel of sparkController getEffectiveVelocity
 
             previousSetpoint = currentSetpoint;
             lastProfileCalculationTimestamp = Logger.getRealTimestamp();
-
-            //this is position because pos is velocity on upgraded
-            sparkController.setReference(currentSetpoint.position * 60, controlType, slotToUse, feedforwardOutput,
-                    SparkPIDController.ArbFFUnits.kVoltage);
         } else {
-            feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
+            feedforwardOutput = feedforward.calculate(goalState.position, goalState.velocity, 0);
 
             final double goal = controlType == CANSparkBase.ControlType.kPosition ? goalState.position : 60 * goalState.position;
 

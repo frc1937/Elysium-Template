@@ -36,7 +36,7 @@ public class GenericSparkMax extends Motor {
 
     private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
 
-    private TrapezoidProfile positionMotionProfile, velocityMotionProfile;
+    private TrapezoidProfile motionProfile;
     private TrapezoidProfile.State previousSetpoint, goalState;
 
     private double previousVelocity = 0;
@@ -139,7 +139,7 @@ public class GenericSparkMax extends Motor {
 
     private void configureProfile(MotorConfiguration configuration) {
         if (configuration.profiledMaxVelocity != 0 && configuration.profiledTargetAcceleration != 0) {
-            positionMotionProfile = new TrapezoidProfile(
+            motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledMaxVelocity,
                             configuration.profiledTargetAcceleration
@@ -147,7 +147,7 @@ public class GenericSparkMax extends Motor {
         }
 
         if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
-            velocityMotionProfile = new TrapezoidProfile(
+            motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledTargetAcceleration,
                             configuration.profiledJerk
@@ -172,26 +172,25 @@ public class GenericSparkMax extends Motor {
     private void handleSmoothMotion(MotorProperties.ControlMode controlMode) {
         if (goalState == null) return;
 
-        double feedbackOutput, feedforwardOutput, acceleration;
+        double feedbackOutput = 0, feedforwardOutput = 0, acceleration;
 
-        if (positionMotionProfile != null && controlMode == MotorProperties.ControlMode.POSITION) {
-            final TrapezoidProfile.State currentSetpoint = positionMotionProfile.calculate(0.02, previousSetpoint, goalState);
+        if (motionProfile != null) {
+            final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
-            acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
+            if (controlMode ==MotorProperties.ControlMode.POSITION) {
+                acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
-            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
-            feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
+                feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
+                feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
+            }
+
+            if (controlMode == MotorProperties.ControlMode.VELOCITY) {
+                feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
+                feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
+            }
 
             previousSetpoint = currentSetpoint;
             lastProfileCalculationTimestamp = Logger.getTimestamp();
-        } else if (velocityMotionProfile != null && controlMode == MotorProperties.ControlMode.VELOCITY) {
-            final TrapezoidProfile.State currentSetpoint = velocityMotionProfile.calculate(0.02, previousSetpoint, goalState);
-
-            feedforwardOutput = this.feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity);
-            feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), currentSetpoint.position);
-
-            previousSetpoint = currentSetpoint;
-            lastProfileCalculationTimestamp = Logger.getRealTimestamp();
         } else {
             feedbackOutput = getModeBasedFeedback(controlMode, goalState);
             feedforwardOutput = this.feedforward.calculate(goalState.position, goalState.velocity, 0);
