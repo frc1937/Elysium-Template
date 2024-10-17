@@ -9,12 +9,19 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.scurve.InputParameter;
+import frc.lib.scurve.OutputParameter;
+import frc.lib.scurve.UpdateResult;
 import org.littletonrobotics.junction.Logger;
 
 public class GenericSparkFlex extends GenericSparkBase {
     private CANSparkBase spark;
     private RelativeEncoder encoder;
     private SparkPIDController sparkController;
+
+    private InputParameter scurveInputs;
+    private OutputParameter scurveOutput;
+    private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;
     private TrapezoidProfile.State previousSetpoint;
@@ -141,6 +148,32 @@ public class GenericSparkFlex extends GenericSparkBase {
                 previousSetpoint = currentSetpoint;
                 lastProfileCalculationTimestamp = Logger.getRealTimestamp();
             }
+
+            case POSITION_S_CURVE -> {
+                result = getSCurveGenerator().update(scurveInputs, scurveOutput);
+
+                scurveInputs = result.input_parameter;
+                scurveOutput = result.output_parameter;
+
+                feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
+
+                sparkController.setReference(scurveOutput.new_position,
+                        CANSparkBase.ControlType.kPosition,
+                        slotToUse, feedforwardOutput,
+                        SparkPIDController.ArbFFUnits.kVoltage);
+//todo: test. maybe this will work :D
+                lastProfileCalculationTimestamp = Logger.getRealTimestamp();
+            }
         }
     }
+
+    protected void setSCurveInputs(InputParameter scurveInputs) {
+        this.scurveInputs = scurveInputs;
+    }
+
+    protected void setSCurveOutputs(OutputParameter scurveOutput) {
+        this.scurveOutput = scurveOutput;
+    }
+
+
 }

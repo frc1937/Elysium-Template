@@ -119,10 +119,7 @@ public class Arm extends GenericSubsystem {
                 ARM_MOTOR.getSystemPosition(),
                 ARM_MOTOR.getSystemVelocity(),
                 ARM_MOTOR.getSystemAcceleration(),
-                targetPosition,
-                0.5,
-                0.5,
-                1.3
+                targetPosition
         );
     }
 

@@ -9,6 +9,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.scurve.InputParameter;
+import frc.lib.scurve.OutputParameter;
+import frc.lib.scurve.UpdateResult;
 import org.littletonrobotics.junction.Logger;
 
 public class GenericSparkMax extends GenericSparkBase {
@@ -17,6 +20,10 @@ public class GenericSparkMax extends GenericSparkBase {
     private SparkPIDController sparkController;
 
     private PIDController feedback;
+
+    private InputParameter scurveInputs;
+    private OutputParameter scurveOutput;
+    private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;
     private TrapezoidProfile.State previousSetpoint;
@@ -117,8 +124,57 @@ public class GenericSparkMax extends GenericSparkBase {
             case POSITION_SIMPLE -> {
                 feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
             }
+
+            case POSITION_S_CURVE -> {
+                result = getSCurveGenerator().update(scurveInputs, scurveOutput);
+
+                scurveInputs = result.input_parameter;
+                scurveOutput = result.output_parameter;
+
+                feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
+                feedbackOutput = feedback.calculate(getEffectivePosition(), scurveOutput.new_position);
+            }
         }
 
         sparkController.setReference(feedforwardOutput + feedbackOutput, CANSparkBase.ControlType.kVoltage);
     }
+
+    @Override
+    protected void setSCurveInputs(InputParameter scurveInputs) {
+        this.scurveInputs = scurveInputs;
+    }
+
+    @Override
+    protected void setSCurveOutputs(OutputParameter outputParameter) {
+        this.scurveOutput = outputParameter;
+    }
+
+    /*
+       result[0] = S_CURVE_GENERATOR.update(input[0], output[0]);
+
+                    input[0] = result[0].input_parameter;
+                    output[0] = result[0].output_parameter;
+
+                    double kG = 0.25408;
+                    double kS = 0.1205;
+
+                    double pidOutput = 48 * (output[0].new_position - ARM_MOTOR.getSystemPosition());
+
+                    if (pidOutput < kS && pidOutput > -kS) {
+                        pidOutput = kS * Math.signum(pidOutput);
+                    }
+
+                    double ff = kS * Math.signum(output[0].new_velocity) +
+                            15.625 * output[0].new_velocity +
+                            0.85843 * output[0].new_acceleration +
+                            kG * Math.cos(ARM_MOTOR.getSystemPosition() * 2 * Math.PI);
+
+                    Logger.recordOutput("ARM_PID_OUTPUT", pidOutput);
+                    Logger.recordOutput("ARM_FF_OUTPUT", ff);
+
+                    Logger.recordOutput("ARM_TARGET", output[0].new_position);
+                    Logger.recordOutput("ARM_ERROR_DEG", 360*(output[0].new_position - ARM_MOTOR.getSystemPosition()));
+
+                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, pidOutput + ff);
+     */
 }

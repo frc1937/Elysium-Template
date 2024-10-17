@@ -16,6 +16,8 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.hardware.motor.MotorSignal;
 import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.math.Conversions;
+import frc.lib.scurve.InputParameter;
+import frc.lib.scurve.OutputParameter;
 import frc.lib.scurve.SCurveGenerator;
 
 import java.util.HashMap;
@@ -164,6 +166,16 @@ public abstract class GenericSparkBase extends Motor {
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity()));
         else if (controlMode == MotorProperties.ControlMode.VELOCITY)
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration()));
+        else if (motionType == SparkCommon.MotionType.POSITION_S_CURVE) {
+            setSCurveInputs(new InputParameter(
+                    getEffectivePosition(),
+                    getEffectiveVelocity(),
+                    getEffectiveAcceleration(),
+                    goal
+            ));
+
+            setSCurveOutputs(new OutputParameter());
+        }
 
         goalState = new TrapezoidProfile.State(goal, 0);
     }
@@ -290,6 +302,14 @@ public abstract class GenericSparkBase extends Motor {
             motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
         }
     }
+
+    protected SCurveGenerator getSCurveGenerator() {
+        return scurveGenerator;
+    }
+
+    protected abstract void setSCurveInputs(InputParameter scurveInputs);
+
+    protected abstract void setSCurveOutputs(OutputParameter outputParameter);
 
 
     protected abstract CANSparkBase getSpark();

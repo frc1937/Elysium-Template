@@ -7,12 +7,12 @@ public class InputParameter {
     }
 
     //! Current state
-    public double current_position, current_velocity, current_acceleration;
+    public double current_position, current_velocity = 0, current_acceleration = 0;
 
     //! Target state
     public double target_position;
 
-    public InputParameter(double current_position, double current_velocity, double current_acceleration, double target_position, double max_velocity, double max_acceleration, double max_jerk) {
+    public InputParameter(double current_position, double current_velocity, double current_acceleration, double target_position) {
         this.current_position = current_position;
         this.current_velocity = current_velocity;
         this.current_acceleration = current_acceleration;
