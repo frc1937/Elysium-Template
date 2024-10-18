@@ -58,7 +58,7 @@ public class Swerve extends GenericSubsystem {
     public Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new InitExecuteCommand(
                 () -> initializeDrive(true),
-                () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
+                () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble() * 2, robotCentric.getAsBoolean()),
                 this
         );
     }

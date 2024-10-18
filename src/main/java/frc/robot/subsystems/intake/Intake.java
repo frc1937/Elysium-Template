@@ -4,12 +4,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.util.commands.ExecuteEndCommand;
 
 import static frc.robot.subsystems.intake.IntakeConstants.INTAKE_MOTOR;
 
 public class Intake extends GenericSubsystem {
     public Command setIntakeSpeed(double speed) {
-        return Commands.startEnd(
+        return new ExecuteEndCommand(
                 () -> setPercentageOutput(speed),
                 this::stop,
                 this

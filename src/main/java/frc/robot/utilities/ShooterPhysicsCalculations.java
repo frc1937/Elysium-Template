@@ -12,9 +12,9 @@ import static frc.robot.GlobalConstants.GRAVITY_FORCE;
 import static frc.robot.RobotContainer.ARM;
 
 public class ShooterPhysicsCalculations {
-    private static final double PIVOT_POINT_Z_OFFSET_METRES = 0.21;
+    private static final double PIVOT_POINT_Z_OFFSET_METRES = 0.2;
     private static final double PIVOT_POINT_X_OFFSET_METRES = -0.31;
-    private static final double SHOOTER_LENGTH_METRES = 0.485;
+    private static final double SHOOTER_LENGTH_METRES = 0.415;
 
     public double getOptimalShootingAngleRadians(final Pose2d robotPose, final Pose3d targetPose, final double tangentialVelocity) {
         final double optimalAngleNoMovement = getPhysicsShootingAngleRadians(robotPose, targetPose, tangentialVelocity);
@@ -59,7 +59,6 @@ public class ShooterPhysicsCalculations {
         SmartDashboard.putNumber("physics/distance", distance);
         SmartDashboard.putString("physics/robotPose", exitPose.toString());
         SmartDashboard.putNumber("physics/FunctionTheta Deg", Units.radiansToDegrees(theta));
-
 
         return theta;
     }

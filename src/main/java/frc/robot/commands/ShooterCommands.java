@@ -15,15 +15,14 @@ import static frc.robot.RobotContainer.ARM;
 import static frc.robot.RobotContainer.FLYWHEELS;
 import static frc.robot.RobotContainer.INTAKE;
 import static frc.robot.RobotContainer.KICKER;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
 
 public class ShooterCommands {
     public static Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setVoltage(-8),
-                        INTAKE.setIntakeSpeed(0.5),
+                        FLYWHEELS.setVoltage(-7),
+                        INTAKE.setIntakeSpeed(8),
                         KICKER.setKickerPercentageOutput(-0.5)
                 );
     }
@@ -45,15 +44,17 @@ public class ShooterCommands {
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
 //        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
-        final Command waitAndShoot = new WaitCommand(2).andThen(
+        final Command waitAndShoot = new WaitCommand(2.5).andThen(
                 KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
 
         final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
 
-        final Command setArmPosition = ARM.setContinousTargetPosition(
-                () -> calculations.getOptimalShootingAngleRadians(
-                        POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity
-                ));
+//        final Command setArmPosition = ARM.setContinousTargetPosition(
+//                () -> calculations.getOptimalShootingAngleRadians(
+//                        POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity
+//                ));
+
+        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(calculations, target, tangentialVelocity);
 
 //        final ConditionalCommand shootKicker = new ConditionalCommand(
 //                KICKER.setKickerPercentageOutput(1),

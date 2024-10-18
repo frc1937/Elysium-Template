@@ -46,7 +46,7 @@ public class SwerveConstants {
      */
     static final ProfiledPIDController ROTATION_CONTROLLER = new ProfiledPIDController(
 //            1.9, 0, 0.0011,
-            4, 0, 0.05,
+            3.9, 0, 0.05,
             new TrapezoidProfile.Constraints(360, 360)
     );
 

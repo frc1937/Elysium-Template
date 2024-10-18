@@ -5,7 +5,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -15,7 +14,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.scurve.SCurveGenerator;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
@@ -35,9 +33,6 @@ import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
-    public static final SCurveGenerator S_CURVE_GENERATOR = new SCurveGenerator(0.02,
-            0.5, 0.5, 5);
-
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
             FRONT_CAMERA
     );
@@ -97,10 +92,10 @@ public class RobotContainer {
 
 //        StaticFrictionCharacterization characterization = new StaticFrictionCharacterization();
 //        driveController.getButton(Controller.Inputs.B).whileTrue(characterization);
-        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
-        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
+//        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
+//        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
+//        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
+//        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());

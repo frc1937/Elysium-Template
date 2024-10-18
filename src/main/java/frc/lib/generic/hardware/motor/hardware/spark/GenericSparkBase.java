@@ -164,14 +164,10 @@ public abstract class GenericSparkBase extends Motor {
         hasStoppedOccurred = false;
         setNewGoalExtras();
 
-        System.out.println("SETTING SOME GOALS!" + motionType);
-
         if (motionType == SparkCommon.MotionType.POSITION_TRAPEZOIDAL) {
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity()));
-            System.out.println("POS for some reason ");
         } else if (motionType == SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL) {
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration()));
-            System.out.println("VEL?");
         } else if (motionType == SparkCommon.MotionType.POSITION_S_CURVE) {
             setSCurveInputs(new InputParameter(
                     getEffectivePosition(),
@@ -179,8 +175,6 @@ public abstract class GenericSparkBase extends Motor {
                     getEffectiveAcceleration(),
                     goal
             ));
-
-            System.out.println("has set input apram");
 
             setSCurveOutputs(new OutputParameter());
         }
@@ -285,8 +279,6 @@ public abstract class GenericSparkBase extends Motor {
                         configuration.profiledJerk);
 
                 motionType = SparkCommon.MotionType.POSITION_S_CURVE;
-
-                System.out.println("YEP!");
             } else {
                 motionProfile = new TrapezoidProfile(
                         new TrapezoidProfile.Constraints(
@@ -294,8 +286,6 @@ public abstract class GenericSparkBase extends Motor {
                                 configuration.profiledTargetAcceleration
                         )
                 );
-
-                System.out.println("NOEP!");
 
                 motionType = SparkCommon.MotionType.POSITION_TRAPEZOIDAL;
             }
@@ -313,8 +303,6 @@ public abstract class GenericSparkBase extends Motor {
         } else {
             motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
         }
-
-        System.out.println("Output " + motionType + " ID:  " + deviceId);
     }
 
     protected SCurveGenerator getSCurveGenerator() {

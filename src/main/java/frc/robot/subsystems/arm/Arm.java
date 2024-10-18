@@ -1,5 +1,6 @@
 package frc.robot.subsystems.arm;
 
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -7,17 +8,13 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.scurve.InputParameter;
-import frc.lib.scurve.OutputParameter;
-import frc.lib.scurve.UpdateResult;
+import frc.robot.utilities.ShooterPhysicsCalculations;
 import org.littletonrobotics.junction.Logger;
-
-import java.util.function.DoubleSupplier;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotContainer.S_CURVE_GENERATOR;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
@@ -43,10 +40,12 @@ public class Arm extends GenericSubsystem {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
-    public Command setContinousTargetPosition(DoubleSupplier targetRadians) {
+    public Command setTargetPhysicsBasedPosition(ShooterPhysicsCalculations calculations, Pose3d targetPose, double tangentialVelocity) {
+        double[] target = new double[1];
+
         return new FunctionalCommand(
-                () -> {},//resetMotor(Units.radiansToRotations(targetRadians.getAsDouble())),
-                () -> setMotorTargetPosition(Rotation2d.fromRadians(targetRadians.getAsDouble())),
+                () -> target[0] = calculations.getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), targetPose, tangentialVelocity),
+                () -> setMotorTargetPosition(Rotation2d.fromRadians(target[0]).plus(Rotation2d.fromDegrees(6))),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
@@ -60,66 +59,6 @@ public class Arm extends GenericSubsystem {
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
-        );
-    }
-
-    public Command setSCurvePosition(Rotation2d targetPosition) {
-        InputParameter[] input = new InputParameter[]{resetProfile(targetPosition.getRotations())};
-        OutputParameter[] output = new OutputParameter[]{new OutputParameter()};
-        UpdateResult[] result = new UpdateResult[1];
-
-        double[] t = {0};
-
-        return new FunctionalCommand(
-                () -> {
-                    input[0] = resetProfile(targetPosition.getRotations());
-                    output[0] = new OutputParameter();
-                },
-                () -> {
-                    result[0] = S_CURVE_GENERATOR.update(input[0], output[0]);
-
-                    input[0] = result[0].input_parameter;
-                    output[0] = result[0].output_parameter;
-
-                    double kG = 0.25408;
-                    double kS = 0.1205;
-
-                    double pidOutput = 48 * (output[0].new_position - ARM_MOTOR.getSystemPosition());
-
-                    if (pidOutput < kS && pidOutput > -kS) {
-                        pidOutput = kS * Math.signum(pidOutput);
-                    }
-
-                    double ff = kS * Math.signum(output[0].new_velocity) +
-                            15.625 * output[0].new_velocity +
-                            0.85843 * output[0].new_acceleration +
-                            kG * Math.cos(ARM_MOTOR.getSystemPosition() * 2 * Math.PI);
-
-                    Logger.recordOutput("ARM_PID_OUTPUT", pidOutput);
-                    Logger.recordOutput("ARM_FF_OUTPUT", ff);
-
-                    Logger.recordOutput("ARM_TARGET", output[0].new_position);
-                    Logger.recordOutput("ARM_ERROR_DEG", 360*(output[0].new_position - ARM_MOTOR.getSystemPosition()));
-
-                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, pidOutput + ff);
-
-                    t[0]+=0.02;
-                },
-                interrupted -> {
-                },
-                () -> {
-                    return false;
-                },
-                this
-        );
-    }
-
-    private InputParameter resetProfile(double targetPosition) {
-        return new InputParameter(
-                ARM_MOTOR.getSystemPosition(),
-                ARM_MOTOR.getSystemVelocity(),
-                ARM_MOTOR.getSystemAcceleration(),
-                targetPosition
         );
     }
 
@@ -159,6 +98,7 @@ public class Arm extends GenericSubsystem {
     }
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
+        System.out.println("SETting arm position to " + targetPosition.getDegrees());
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
         ARM_MECHANISM.setTargetAngle(targetPosition);
     }

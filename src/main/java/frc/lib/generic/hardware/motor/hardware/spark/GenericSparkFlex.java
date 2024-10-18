@@ -157,7 +157,7 @@ public class GenericSparkFlex extends GenericSparkBase {
 
                 feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
 
-                System.out.println("SEtting some powa " + scurveOutput.new_position);
+                System.out.println("SEtting the target pos to (DEG) " + scurveOutput.new_position * 360);
                 sparkController.setReference(scurveOutput.new_position,
                         CANSparkBase.ControlType.kPosition,
                         slotToUse, feedforwardOutput,
@@ -170,7 +170,6 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     protected void setSCurveInputs(InputParameter scurveInputs) {
         this.scurveInputs = scurveInputs;
-        System.out.println("Literally set inputs wym");
     }
 
     protected void setSCurveOutputs(OutputParameter scurveOutput) {
