@@ -71,7 +71,7 @@ public class RobotContainer {
                         translationSupplier,
                         strafeSupplier,
 
-                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X),
+                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X) * 6,
                         () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
                 ));
 

@@ -7,7 +7,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.SimulateShootingCommand;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
@@ -43,10 +43,10 @@ public class ShooterCommands {
     }
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-//        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
-        final Command waitAndShoot = new WaitCommand(2.5).andThen(
-                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
-
+        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
+//        final Command waitAndShoot = isReadyToShoot.andThen(
+//                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
+//new WaitCommand(2.5)
         final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
 
 //        final Command setArmPosition = ARM.setContinousTargetPosition(
@@ -56,17 +56,17 @@ public class ShooterCommands {
 
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(calculations, target, tangentialVelocity);
 
-//        final ConditionalCommand shootKicker = new ConditionalCommand(
-//                KICKER.setKickerPercentageOutput(1),
-//                KICKER.setKickerPercentageOutput(0.0),
-//                isReadyToShoot
-//        );
+        final ConditionalCommand shootKicker = new ConditionalCommand(
+                KICKER.setKickerPercentageOutput(1),
+                KICKER.setKickerPercentageOutput(0.0),
+                isReadyToShoot
+        );
 
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
-                waitAndShoot
+                shootKicker
         );
     }
 

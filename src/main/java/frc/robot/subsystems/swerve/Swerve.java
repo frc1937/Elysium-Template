@@ -58,7 +58,7 @@ public class Swerve extends GenericSubsystem {
     public Command driveOpenLoop(DoubleSupplier x, DoubleSupplier y, DoubleSupplier rotation, BooleanSupplier robotCentric) {
         return new InitExecuteCommand(
                 () -> initializeDrive(true),
-                () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble() * 2, robotCentric.getAsBoolean()),
+                () -> driveOrientationBased(x.getAsDouble(), y.getAsDouble(), rotation.getAsDouble(), robotCentric.getAsBoolean()),
                 this
         );
     }
@@ -142,7 +142,7 @@ public class Swerve extends GenericSubsystem {
 
     private void driveFieldRelative(double xPower, double yPower, double thetaPower) {
         ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
-        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().minus(Rotation2d.fromDegrees(180)));
 
         driveSelfRelative(speeds);
     }
