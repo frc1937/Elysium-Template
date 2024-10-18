@@ -32,13 +32,14 @@ import java.util.function.DoubleSupplier;
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
     public static final SCurveGenerator S_CURVE_GENERATOR = new SCurveGenerator(0.02,
             0.5, 0.5, 5);
 
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
-//            FRONT_CAMERA
+            FRONT_CAMERA
     );
 
     public static final Swerve SWERVE = new Swerve();
@@ -82,11 +83,11 @@ public class RobotContainer {
         driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
         driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
 
-//        driveController.getButton(Controller.Inputs.A)
-//                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
-//                                BLUE_SPEAKER.toPose2d(), () -> false)
-//                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 20))
-//                );
+        driveController.getButton(Controller.Inputs.A)
+                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+                                BLUE_SPEAKER.toPose2d(), () -> false)
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 20))
+                );
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(
 //                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))

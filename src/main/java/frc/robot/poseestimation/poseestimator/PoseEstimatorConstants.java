@@ -20,11 +20,11 @@ import java.util.Map;
 
 public class PoseEstimatorConstants {
     static final Transform3d ROBOT_TO_FRONT_CAMERA = new Transform3d(
-            0.5, 0.175245, 0.46,
-            new Rotation3d(0, Units.degreesToRadians(-25), 0)
+            0.27, 0.37, 0.19,
+            new Rotation3d(0, Units.degreesToRadians(-28.125), Units.degreesToRadians(30))
     );
 
-    public static final PhotonCameraIO FRONT_CAMERA = CameraFactory.generateCamera("Front1937", ROBOT_TO_FRONT_CAMERA);
+    public static final PhotonCameraIO FRONT_CAMERA = CameraFactory.generateCamera("FrontLeft1937", ROBOT_TO_FRONT_CAMERA);
 
     /**
      * The vector represents how ambiguous each value is.

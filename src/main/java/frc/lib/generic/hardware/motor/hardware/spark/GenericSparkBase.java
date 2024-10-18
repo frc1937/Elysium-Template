@@ -299,7 +299,7 @@ public abstract class GenericSparkBase extends Motor {
 
                 motionType = SparkCommon.MotionType.POSITION_TRAPEZOIDAL;
             }
-        } else if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0 && configuration.profiledMaxVelocity == 0) {
+        } else if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
             motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledTargetAcceleration,
@@ -308,13 +308,13 @@ public abstract class GenericSparkBase extends Motor {
             );
 
             motionType = SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL;
-        } else if (feedforward == null) {
+        } else if (feedforward.konstants.kS() == 0 && feedforward.konstants.kG() == 0 && feedforward.konstants.kV() == 0 && feedforward.konstants.kA() == 0) {
             motionType = SparkCommon.MotionType.POSITION_SIMPLE;
         } else {
             motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
         }
 
-        System.out.println("Output " + motionType);
+        System.out.println("Output " + motionType + " ID:  " + deviceId);
     }
 
     protected SCurveGenerator getSCurveGenerator() {
