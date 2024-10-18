@@ -22,7 +22,7 @@ public class GenericSparkMax extends GenericSparkBase {
     private PIDController feedback;
 
     private InputParameter scurveInputs;
-    private OutputParameter scurveOutput;
+    private OutputParameter scurveOutput = new OutputParameter();
     private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;

@@ -26,6 +26,7 @@ import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
+
 //todo: possible problem when doing PID only velocity control.
 public abstract class GenericSparkBase extends Motor {
     private SparkCommon.MotionType motionType;
@@ -89,7 +90,8 @@ public abstract class GenericSparkBase extends Motor {
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
-            case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
+            case POSITION, VELOCITY ->
+                    handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
@@ -162,17 +164,23 @@ public abstract class GenericSparkBase extends Motor {
         hasStoppedOccurred = false;
         setNewGoalExtras();
 
-        if (controlMode == MotorProperties.ControlMode.POSITION)
+        System.out.println("SETTING SOME GOALS!" + motionType);
+
+        if (motionType == SparkCommon.MotionType.POSITION_TRAPEZOIDAL) {
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectivePosition(), getEffectiveVelocity()));
-        else if (controlMode == MotorProperties.ControlMode.VELOCITY)
+            System.out.println("POS for some reason ");
+        } else if (motionType == SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL) {
             setPreviousSetpoint(new TrapezoidProfile.State(getEffectiveVelocity(), getEffectiveAcceleration()));
-        else if (motionType == SparkCommon.MotionType.POSITION_S_CURVE) {
+            System.out.println("VEL?");
+        } else if (motionType == SparkCommon.MotionType.POSITION_S_CURVE) {
             setSCurveInputs(new InputParameter(
                     getEffectivePosition(),
                     getEffectiveVelocity(),
                     getEffectiveAcceleration(),
                     goal
             ));
+
+            System.out.println("has set input apram");
 
             setSCurveOutputs(new OutputParameter());
         }
@@ -277,6 +285,8 @@ public abstract class GenericSparkBase extends Motor {
                         configuration.profiledJerk);
 
                 motionType = SparkCommon.MotionType.POSITION_S_CURVE;
+
+                System.out.println("YEP!");
             } else {
                 motionProfile = new TrapezoidProfile(
                         new TrapezoidProfile.Constraints(
@@ -285,9 +295,11 @@ public abstract class GenericSparkBase extends Motor {
                         )
                 );
 
+                System.out.println("NOEP!");
+
                 motionType = SparkCommon.MotionType.POSITION_TRAPEZOIDAL;
             }
-        } else if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0) {
+        } else if (configuration.profiledTargetAcceleration != 0 && configuration.profiledJerk != 0 && configuration.profiledMaxVelocity == 0) {
             motionProfile = new TrapezoidProfile(
                     new TrapezoidProfile.Constraints(
                             configuration.profiledTargetAcceleration,
@@ -301,6 +313,8 @@ public abstract class GenericSparkBase extends Motor {
         } else {
             motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
         }
+
+        System.out.println("Output " + motionType);
     }
 
     protected SCurveGenerator getSCurveGenerator() {

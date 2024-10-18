@@ -82,8 +82,8 @@ public class ArmConstants {
         motorConfiguration.closedLoopTolerance = TOLERANCE_ROTATIONS;
 
         motorConfiguration.slot0 = new MotorProperties.Slot(
-                0, 0, 0,
-                15.625, 0.85843, 0.097736, 0.21308,
+                5, 0, 0,
+                15.625, 0.85843, 0.1205, 0.21308,
                 MotorProperties.GravityType.ARM
         );
 

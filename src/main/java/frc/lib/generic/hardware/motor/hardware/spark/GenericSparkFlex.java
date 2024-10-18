@@ -1,8 +1,8 @@
 package frc.lib.generic.hardware.motor.hardware.spark;
 
 import com.revrobotics.CANSparkBase;
+import com.revrobotics.CANSparkFlex;
 import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkPIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -20,7 +20,7 @@ public class GenericSparkFlex extends GenericSparkBase {
     private SparkPIDController sparkController;
 
     private InputParameter scurveInputs;
-    private OutputParameter scurveOutput;
+    private OutputParameter scurveOutput = new OutputParameter();
     private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;
@@ -46,7 +46,7 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     @Override
     protected CANSparkBase getSpark() {
-        if (spark == null) spark = new CANSparkMax(getDeviceID(), CANSparkLowLevel.MotorType.kBrushless);
+        if (spark == null) spark = new CANSparkFlex(getDeviceID(), CANSparkLowLevel.MotorType.kBrushless);
         return spark;
     }
 
@@ -157,6 +157,7 @@ public class GenericSparkFlex extends GenericSparkBase {
 
                 feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
 
+                System.out.println("SEtting some powa " + scurveOutput.new_position);
                 sparkController.setReference(scurveOutput.new_position,
                         CANSparkBase.ControlType.kPosition,
                         slotToUse, feedforwardOutput,
@@ -169,6 +170,7 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     protected void setSCurveInputs(InputParameter scurveInputs) {
         this.scurveInputs = scurveInputs;
+        System.out.println("Literally set inputs wym");
     }
 
     protected void setSCurveOutputs(OutputParameter scurveOutput) {
