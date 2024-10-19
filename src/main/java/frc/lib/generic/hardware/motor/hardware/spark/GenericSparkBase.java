@@ -320,7 +320,6 @@ public abstract class GenericSparkBase extends Motor {
 
     protected abstract void setSCurveOutputs(OutputParameter outputParameter);
 
-
     protected abstract CANSparkBase getSpark();
 
     protected abstract RelativeEncoder getEncoder();

@@ -122,7 +122,7 @@ public class GenericSparkFlex extends GenericSparkBase {
                 final TrapezoidProfile.State currentSetpoint = motionProfile.calculate(0.02, previousSetpoint, goalState);
 
                 acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
-                feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
+                feedforwardOutput = feedforward.calculate(getEffectivePosition(), currentSetpoint.velocity, acceleration);
 
                 sparkController.setReference(currentSetpoint.position,
                         CANSparkBase.ControlType.kPosition,
@@ -154,7 +154,7 @@ public class GenericSparkFlex extends GenericSparkBase {
                 scurveInputs = result.input_parameter;
                 scurveOutput = result.output_parameter;
 
-                feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
+                feedforwardOutput = feedforward.calculate(getEffectivePosition(), scurveOutput.new_velocity, scurveOutput.new_acceleration);
 
                 sparkController.setReference(scurveOutput.new_position,
                         CANSparkBase.ControlType.kPosition,

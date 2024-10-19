@@ -3,22 +3,26 @@ package frc.lib.generic;
 import java.util.function.Function;
 
 public class Feedforward {
-    public record FeedForwardConstants(double kS, double kV, double kA, double kG) {}
-    public record FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {}
+    public record FeedForwardConstants(double kS, double kV, double kA, double kG) {
+    }
 
-    public record ClosedLoopValues(FeedForwardConstants constants, FeedForwardValues values) {}
+    public record FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {
+    }
+
+    public record ClosedLoopValues(FeedForwardConstants constants, FeedForwardValues values) {
+    }
 
     public enum Type {
         SIMPLE(closedLoopValues -> calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values)),
 
         ARM(closedLoopValues ->
                 calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
-                closedLoopValues.constants.kG * Math.cos(closedLoopValues.values.positionRotations * 2 * Math.PI)
+                        closedLoopValues.constants.kG * Math.cos(closedLoopValues.values.positionRotations * 2 * Math.PI)
         ),
 
         ELEVATOR(closedLoopValues ->
                 calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
-                closedLoopValues.constants.kG
+                        closedLoopValues.constants.kG
         );
 
         public final Function<ClosedLoopValues, Double> calculationFunction;
@@ -37,18 +41,18 @@ public class Feedforward {
         }
 
         /**
-         * @param positionRotations            For arm ONLY. This should be in rotations. For non-arms, this will be ignored.
-         * @param velocityRPS      unit-less, preferably in rotations per second
+         * @param currentPositionRotations For arm ONLY. This should be the CURRENT ARM POSITION in rotations. For non-arms, this will be ignored.
+         * @param velocityRPS       unit-less, preferably in rotations per second
          * @param accelerationRPSPS unit-less, preferably rotations per second squared
          * @return The input for the motor, in voltage
          */
-        public double calculate(double positionRotations, double velocityRPS, double accelerationRPSPS) {
+        public double calculate(double currentPositionRotations, double velocityRPS, double accelerationRPSPS) {
             return calculationFunction.apply(new ClosedLoopValues(konstants,
-                    new FeedForwardValues(positionRotations, velocityRPS, accelerationRPSPS)));
+                    new FeedForwardValues(currentPositionRotations, velocityRPS, accelerationRPSPS)));
         }
 
         /**
-         * @param velocityRPS      unit-less, preferably in rotations per second
+         * @param velocityRPS       unit-less, preferably in rotations per second
          * @param accelerationRPSPS unit-less, preferably rotations per second squared
          * @return The input for the motor, in voltage
          */

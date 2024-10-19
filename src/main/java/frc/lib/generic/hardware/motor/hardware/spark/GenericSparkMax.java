@@ -96,7 +96,7 @@ public class GenericSparkMax extends GenericSparkBase {
 
                 acceleration = (currentSetpoint.velocity - previousSetpoint.velocity) / 0.02;
 
-                feedforwardOutput = feedforward.calculate(currentSetpoint.position, currentSetpoint.velocity, acceleration);
+                feedforwardOutput = feedforward.calculate(getEffectivePosition(), currentSetpoint.velocity, acceleration);
                 feedbackOutput = feedback.calculate(getEffectivePosition(), currentSetpoint.position);
 
                 previousSetpoint = currentSetpoint;
@@ -126,7 +126,7 @@ public class GenericSparkMax extends GenericSparkBase {
                 scurveInputs = result.input_parameter;
                 scurveOutput = result.output_parameter;
 
-                feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
+                feedforwardOutput = feedforward.calculate(getEffectivePosition(), scurveOutput.new_velocity, scurveOutput.new_acceleration);
                 feedbackOutput = feedback.calculate(getEffectivePosition(), scurveOutput.new_position);
             }
         }
