@@ -19,6 +19,7 @@ import frc.lib.math.Conversions;
 import frc.lib.scurve.InputParameter;
 import frc.lib.scurve.OutputParameter;
 import frc.lib.scurve.SCurveGenerator;
+import org.littletonrobotics.junction.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,14 +50,13 @@ public abstract class GenericSparkBase extends Motor {
     private TrapezoidProfile.State goalState;
 
     private boolean hasStoppedOccurred = false;
-    private double closedLoopTarget;
 
     private MotorConfiguration currentConfiguration;
 
     private int slotToUse = 0;
     private double conversionFactor = 1;
 
-    public GenericSparkBase(String name, int deviceId) {
+    protected GenericSparkBase(String name, int deviceId) {
         super(name);
 
         this.deviceId = deviceId;
@@ -85,8 +85,7 @@ public abstract class GenericSparkBase extends Motor {
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
-        closedLoopTarget = output;
-        setNewGoal(mode, output);
+        setNewGoal(output);
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
@@ -157,9 +156,8 @@ public abstract class GenericSparkBase extends Motor {
         spark.setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? CANSparkBase.IdleMode.kCoast : CANSparkBase.IdleMode.kBrake);
     }
 
-    private void setNewGoal(MotorProperties.ControlMode controlMode, double goal) {
-        if (SparkCommon.hasNoNewGoal(new TrapezoidProfile.State(goal, 0), goalState, hasStoppedOccurred, getLastProfileCalculationTimestamp()))
-            return;
+    private void setNewGoal(double goal) {
+        if (hasNoNewGoal(new TrapezoidProfile.State(goal, 0))) return;
 
         hasStoppedOccurred = false;
         setNewGoalExtras();
@@ -192,7 +190,7 @@ public abstract class GenericSparkBase extends Motor {
         signalsToLog[signal.getId()] = true;
 
         switch (signal) {
-            case VELOCITY, CURRENT, TEMPERATURE ->
+            case VELOCITY, CURRENT, TEMPERATURE, ACCELERATION ->
                     spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
             case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
@@ -214,7 +212,9 @@ public abstract class GenericSparkBase extends Motor {
             case TEMPERATURE ->
                     signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
             case CLOSED_LOOP_TARGET ->
-                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> closedLoopTarget));
+                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> goalState.position));
+            case ACCELERATION ->
+                    signalQueueList.put("acceleration", OdometryThread.getInstance().registerSignal(this::getEffectiveAcceleration));
         }
     }
 
@@ -234,7 +234,7 @@ public abstract class GenericSparkBase extends Motor {
         if (signalsToLog[0]) inputs.voltage = getVoltagePrivate();
         if (signalsToLog[1]) inputs.current = spark.getOutputCurrent();
         if (signalsToLog[2]) inputs.temperature = spark.getMotorTemperature();
-        if (signalsToLog[3]) inputs.target = closedLoopTarget;
+        if (signalsToLog[3]) inputs.target = goalState.position;
         if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
         if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
         if (signalsToLog[6]) inputs.systemAcceleration = getEffectiveAcceleration();
@@ -299,10 +299,17 @@ public abstract class GenericSparkBase extends Motor {
 
             motionType = SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL;
         } else if (feedforward.konstants.kS() == 0 && feedforward.konstants.kG() == 0 && feedforward.konstants.kV() == 0 && feedforward.konstants.kA() == 0) {
-            motionType = SparkCommon.MotionType.POSITION_SIMPLE;
+            motionType = SparkCommon.MotionType.POSITION_PID;
         } else {
-            motionType = SparkCommon.MotionType.VELOCITY_SIMPLE;
+            motionType = SparkCommon.MotionType.VELOCITY_PID_FF;
         }
+    }
+
+    private boolean hasNoNewGoal(TrapezoidProfile.State newGoal) {
+        return goalState != null
+                && goalState.equals(newGoal)
+                && !hasStoppedOccurred
+                && (Logger.getRealTimestamp() - getLastProfileCalculationTimestamp() <= 100000); //(0.1 sec has passed)
     }
 
     protected SCurveGenerator getSCurveGenerator() {
@@ -327,7 +334,6 @@ public abstract class GenericSparkBase extends Motor {
     protected abstract void configureExtras(MotorConfiguration configuration);
 
     protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse);
-
 
     protected abstract void configurePID(MotorConfiguration configuration);
 

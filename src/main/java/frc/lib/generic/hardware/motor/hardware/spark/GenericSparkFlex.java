@@ -21,7 +21,6 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     private InputParameter scurveInputs;
     private OutputParameter scurveOutput = new OutputParameter();
-    private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;
     private TrapezoidProfile.State previousSetpoint;
@@ -71,7 +70,6 @@ public class GenericSparkFlex extends GenericSparkBase {
 
     @Override
     protected void setNewGoalExtras() {
-
     }
 
     @Override
@@ -106,16 +104,17 @@ public class GenericSparkFlex extends GenericSparkBase {
         double feedforwardOutput, acceleration;
 
         switch (motionType) {
-            case POSITION_SIMPLE -> {
+            case POSITION_PID -> {
                 sparkController.setReference(goalState.position,
                         CANSparkBase.ControlType.kPosition, slotToUse,
                         0,
                         SparkPIDController.ArbFFUnits.kVoltage);
             }
 
-            case VELOCITY_SIMPLE -> {
+            case VELOCITY_PID_FF -> {
                 sparkController.setReference(goalState.position * 60,
-                        CANSparkBase.ControlType.kVelocity, slotToUse, feedforward.calculate(goalState.position, goalState.velocity, 0),
+                        CANSparkBase.ControlType.kVelocity, slotToUse,
+                        feedforward.calculate(goalState.position, goalState.velocity, 0),
                         SparkPIDController.ArbFFUnits.kVoltage);
             }
 
@@ -150,19 +149,18 @@ public class GenericSparkFlex extends GenericSparkBase {
             }
 
             case POSITION_S_CURVE -> {
-                result = getSCurveGenerator().update(scurveInputs, scurveOutput);
+                final UpdateResult result = getSCurveGenerator().update(scurveInputs, scurveOutput);
 
                 scurveInputs = result.input_parameter;
                 scurveOutput = result.output_parameter;
 
                 feedforwardOutput = feedforward.calculate(scurveOutput.new_position, scurveOutput.new_velocity, scurveOutput.new_acceleration);
 
-                System.out.println("SEtting the target pos to (DEG) " + scurveOutput.new_position * 360);
                 sparkController.setReference(scurveOutput.new_position,
                         CANSparkBase.ControlType.kPosition,
                         slotToUse, feedforwardOutput,
                         SparkPIDController.ArbFFUnits.kVoltage);
-//todo: test. maybe this will work :D
+
                 lastProfileCalculationTimestamp = Logger.getRealTimestamp();
             }
         }
@@ -175,6 +173,4 @@ public class GenericSparkFlex extends GenericSparkBase {
     protected void setSCurveOutputs(OutputParameter scurveOutput) {
         this.scurveOutput = scurveOutput;
     }
-
-
 }

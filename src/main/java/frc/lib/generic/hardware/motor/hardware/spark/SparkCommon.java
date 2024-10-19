@@ -2,17 +2,15 @@ package frc.lib.generic.hardware.motor.hardware.spark;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import org.littletonrobotics.junction.Logger;
 
 public class SparkCommon {
     private SparkCommon() {
     }
 
     public enum MotionType {
-        POSITION_S_CURVE, POSITION_TRAPEZOIDAL, VELOCITY_SIMPLE, VELOCITY_TRAPEZOIDAL, POSITION_SIMPLE
+        POSITION_PID, POSITION_S_CURVE, POSITION_TRAPEZOIDAL, VELOCITY_PID_FF, VELOCITY_TRAPEZOIDAL
     }
 
     /**
@@ -49,12 +47,5 @@ public class SparkCommon {
         );
 
         return feedforwardType;
-    }
-
-    protected static boolean hasNoNewGoal(TrapezoidProfile.State newGoal, TrapezoidProfile.State goalState, boolean hasStoppedOccurred, double lastProfileCalculationTimestamp) {
-        return goalState != null
-                && goalState.equals(newGoal)
-                && !hasStoppedOccurred
-                && (Logger.getRealTimestamp() - lastProfileCalculationTimestamp <= 100000); //(0.1 sec has passed)
     }
 }

@@ -23,7 +23,6 @@ public class GenericSparkMax extends GenericSparkBase {
 
     private InputParameter scurveInputs;
     private OutputParameter scurveOutput = new OutputParameter();
-    private UpdateResult result;
 
     private double lastProfileCalculationTimestamp;
     private TrapezoidProfile.State previousSetpoint;
@@ -62,7 +61,6 @@ public class GenericSparkMax extends GenericSparkBase {
 
     @Override
     protected void refreshExtras() {
-
     }
 
 
@@ -73,7 +71,6 @@ public class GenericSparkMax extends GenericSparkBase {
 
     @Override
     protected void configureExtras(MotorConfiguration configuration) {
-
     }
 
     protected void configurePID(MotorConfiguration configuration) {
@@ -116,17 +113,15 @@ public class GenericSparkMax extends GenericSparkBase {
                 lastProfileCalculationTimestamp = Logger.getTimestamp();
             }
 
-            case VELOCITY_SIMPLE -> {
+            case VELOCITY_PID_FF -> {
                 feedforwardOutput = feedforward.calculate(goalState.position, goalState.velocity);
                 feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), goalState.position);
             }
 
-            case POSITION_SIMPLE -> {
-                feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
-            }
+            case POSITION_PID -> feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
 
             case POSITION_S_CURVE -> {
-                result = getSCurveGenerator().update(scurveInputs, scurveOutput);
+                final UpdateResult result = getSCurveGenerator().update(scurveInputs, scurveOutput);
 
                 scurveInputs = result.input_parameter;
                 scurveOutput = result.output_parameter;
@@ -148,33 +143,4 @@ public class GenericSparkMax extends GenericSparkBase {
     protected void setSCurveOutputs(OutputParameter outputParameter) {
         this.scurveOutput = outputParameter;
     }
-
-    /*
-       result[0] = S_CURVE_GENERATOR.update(input[0], output[0]);
-
-                    input[0] = result[0].input_parameter;
-                    output[0] = result[0].output_parameter;
-
-                    double kG = 0.25408;
-                    double kS = 0.1205;
-
-                    double pidOutput = 48 * (output[0].new_position - ARM_MOTOR.getSystemPosition());
-
-                    if (pidOutput < kS && pidOutput > -kS) {
-                        pidOutput = kS * Math.signum(pidOutput);
-                    }
-
-                    double ff = kS * Math.signum(output[0].new_velocity) +
-                            15.625 * output[0].new_velocity +
-                            0.85843 * output[0].new_acceleration +
-                            kG * Math.cos(ARM_MOTOR.getSystemPosition() * 2 * Math.PI);
-
-                    Logger.recordOutput("ARM_PID_OUTPUT", pidOutput);
-                    Logger.recordOutput("ARM_FF_OUTPUT", ff);
-
-                    Logger.recordOutput("ARM_TARGET", output[0].new_position);
-                    Logger.recordOutput("ARM_ERROR_DEG", 360*(output[0].new_position - ARM_MOTOR.getSystemPosition()));
-
-                    ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, pidOutput + ff);
-     */
 }
