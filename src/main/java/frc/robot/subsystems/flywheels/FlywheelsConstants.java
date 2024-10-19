@@ -34,12 +34,12 @@ public class FlywheelsConstants {
         configuration.supplyCurrentLimit = 40;
         configuration.statorCurrentLimit = 40;
 
-        configuration.profiledTargetAcceleration = 40;
-        configuration.profiledJerk = 30;
+        configuration.profiledTargetAcceleration = 90;
+//        configuration.profiledJerk = 30;
 
         configuration.slot0 = slot;
 
-        configuration.closedLoopTolerance = 5; //todo: fix
+        configuration.closedLoopTolerance = 200 / 60.0;
 
         configuration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.FLYWHEEL,

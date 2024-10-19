@@ -7,15 +7,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.SimulateShootingCommand;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 
-import static frc.robot.RobotContainer.ARM;
-import static frc.robot.RobotContainer.FLYWHEELS;
-import static frc.robot.RobotContainer.INTAKE;
-import static frc.robot.RobotContainer.KICKER;
-import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.RobotContainer.*;
 
 public class ShooterCommands {
     public static Command receiveFloorNote() {
@@ -43,31 +38,16 @@ public class ShooterCommands {
     }
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final Trigger isReadyFlywheel = new Trigger(FLYWHEELS::hasReachedTarget);
-        final Trigger isReadyArm = new Trigger(ARM::hasReachedTarget);
-//        final Command waitAndShoot = isReadyToShoot.andThen(
-//                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
-//new WaitCommand(2.5)
         final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
 
-//        final Command setArmPosition = ARM.setContinousTargetPosition(
-//                () -> calculations.getOptimalShootingAngleRadians(
-//                        POSE_ESTIMATOR.getCurrentPose(), target, tangentialVelocity
-//                ));
-
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(calculations, target, tangentialVelocity);
-
-        final ConditionalCommand shootKicker = new ConditionalCommand(
-                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()),
-                KICKER.setKickerPercentageOutput(0.0),
-                isReadyFlywheel.and(isReadyArm)
-        );
-
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
-                shootKicker
+                KICKER.setKickerPercentageOutput(0)
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget())
+                        .andThen(KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()))
         );
     }
 

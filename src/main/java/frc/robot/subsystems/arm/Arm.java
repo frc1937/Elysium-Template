@@ -100,6 +100,5 @@ public class Arm extends GenericSubsystem {
     private void setMotorTargetPosition(Rotation2d targetPosition) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
         ARM_MECHANISM.setTargetAngle(targetPosition);
-        Logger.recordOutput("ArmTargetPosition", targetPosition.getRotations());
     }
 }

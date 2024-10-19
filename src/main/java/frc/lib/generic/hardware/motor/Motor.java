@@ -290,7 +290,6 @@ public class Motor implements LoggableHardware {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
             new UnsupportedOperationException("You must set the tolerance before checking if the mechanism is at the setpoint.").printStackTrace();
 
-        System.out.println("getClosedLoopTarget() - getSystemPosition() = " + (getClosedLoopTarget() - getSystemPosition()));
         return Math.abs(getClosedLoopTarget() - getSystemPosition()) < getCurrentConfiguration().closedLoopTolerance;
     }
 
