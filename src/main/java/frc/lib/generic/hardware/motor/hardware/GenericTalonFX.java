@@ -10,8 +10,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import frc.lib.generic.hardware.motor.*;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.motor.*;
 
 import java.util.*;
 import java.util.function.DoubleSupplier;
@@ -207,6 +208,9 @@ public class GenericTalonFX extends Motor {
 
         if (currentConfiguration.slot0.gravityType() != null)
             talonConfig.Slot0.GravityType = currentConfiguration.slot0.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
+
+        if (currentConfiguration.slot0.kS() != 0)
+            talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     }
 
     private void setConfig1() {
@@ -220,6 +224,10 @@ public class GenericTalonFX extends Motor {
 
         if (currentConfiguration.slot1.gravityType() != null)
             talonConfig.Slot1.GravityType = currentConfiguration.slot1.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
+
+
+        if (currentConfiguration.slot0.kS() != 0)
+            talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     }
 
     private void setConfig2() {
@@ -233,6 +241,9 @@ public class GenericTalonFX extends Motor {
 
         if (currentConfiguration.slot2.gravityType() != null)
             talonConfig.Slot2.GravityType = currentConfiguration.slot2.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
+
+        if (currentConfiguration.slot0.kS() != 0)
+            talonConfig.Slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
     }
 
     private void applyCurrentLimits() {

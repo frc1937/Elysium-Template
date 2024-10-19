@@ -1,13 +1,9 @@
 package frc.lib.generic.hardware.motor.hardware.spark;
 
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
-import edu.wpi.first.math.controller.PIDController;
+import com.revrobotics.*;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
+import frc.lib.generic.PID;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.scurve.InputParameter;
 import frc.lib.scurve.OutputParameter;
@@ -19,7 +15,7 @@ public class GenericSparkMax extends GenericSparkBase {
     private RelativeEncoder encoder;
     private SparkPIDController sparkController;
 
-    private PIDController feedback;
+    private PID feedback;
 
     private InputParameter scurveInputs;
     private OutputParameter scurveOutput = new OutputParameter();
@@ -74,12 +70,12 @@ public class GenericSparkMax extends GenericSparkBase {
     }
 
     protected void configurePID(MotorConfiguration configuration) {
-        feedback = new PIDController(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD());
+        feedback = new PID(configuration.slot0.kP(), configuration.slot0.kI(), configuration.slot0.kD(), configuration.slot0.kS());
 
         if (configuration.slotToUse == 1)
-            feedback = new PIDController(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD());
+            feedback = new PID(configuration.slot1.kP(), configuration.slot1.kI(), configuration.slot1.kD(), configuration.slot1.kS());
         if (configuration.slotToUse == 2)
-            feedback = new PIDController(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD());
+            feedback = new PID(configuration.slot2.kP(), configuration.slot2.kI(), configuration.slot2.kD(), configuration.slot2.kS());
 
         if (configuration.closedLoopContinuousWrap)
             feedback.enableContinuousInput(-0.5, 0.5);
