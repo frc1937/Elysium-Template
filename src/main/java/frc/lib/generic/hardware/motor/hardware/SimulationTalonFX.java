@@ -18,7 +18,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.GravityType.ARM;
 public class SimulationTalonFX extends Motor {
     private final TalonFX talonFX;
 
-    private final StatusSignal<Double> positionSignal, velocitySignal, accelerationSignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
+    private final StatusSignal<Double> positionSignal, velocitySignal, accelerationSignal, voltageSignal, currentSignal, temperatureSignal;
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
@@ -36,6 +36,8 @@ public class SimulationTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
+    private double target = 0;
+
     public SimulationTalonFX(String name, int deviceId) {
         super(name);
 
@@ -49,11 +51,12 @@ public class SimulationTalonFX extends Motor {
         voltageSignal = talonFX.getMotorVoltage().clone();
         currentSignal = talonFX.getStatorCurrent().clone();
         temperatureSignal = talonFX.getDeviceTemp().clone();
-        closedLoopTarget = talonFX.getClosedLoopReference().clone();
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
+        target = output;
+
         switch (mode) {
             case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
@@ -86,7 +89,7 @@ public class SimulationTalonFX extends Motor {
 
     @Override
     public double getClosedLoopTarget() {
-        return closedLoopTarget.refresh().getValue();
+        return target;
     }
 
     @Override
@@ -187,7 +190,6 @@ public class SimulationTalonFX extends Motor {
             case VOLTAGE -> voltageSignal.setUpdateFrequency(1000);
             case CURRENT -> currentSignal.setUpdateFrequency(1000);
             case TEMPERATURE -> temperatureSignal.setUpdateFrequency(1000);
-            case CLOSED_LOOP_TARGET -> closedLoopTarget.setUpdateFrequency(1000);
         }
     }
 }

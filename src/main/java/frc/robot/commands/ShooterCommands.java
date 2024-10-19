@@ -43,7 +43,8 @@ public class ShooterCommands {
     }
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final Trigger isReadyToShoot = new Trigger(() -> (FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()));
+        final Trigger isReadyFlywheel = new Trigger(FLYWHEELS::hasReachedTarget);
+        final Trigger isReadyArm = new Trigger(ARM::hasReachedTarget);
 //        final Command waitAndShoot = isReadyToShoot.andThen(
 //                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()));
 //new WaitCommand(2.5)
@@ -59,7 +60,7 @@ public class ShooterCommands {
         final ConditionalCommand shootKicker = new ConditionalCommand(
                 KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()),
                 KICKER.setKickerPercentageOutput(0.0),
-                isReadyToShoot
+                isReadyFlywheel.and(isReadyArm)
         );
 
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);

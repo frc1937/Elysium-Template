@@ -1,11 +1,7 @@
 package frc.robot.subsystems.flywheels;
 
 import edu.wpi.first.math.system.plant.DCMotor;
-import frc.lib.generic.hardware.motor.Motor;
-import frc.lib.generic.hardware.motor.MotorConfiguration;
-import frc.lib.generic.hardware.motor.MotorFactory;
-import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
 
 public class FlywheelsConstants {
@@ -43,7 +39,7 @@ public class FlywheelsConstants {
 
         configuration.slot0 = slot;
 
-        configuration.closedLoopTolerance = 5000; //todo: WTHFHH!IU@UHFU
+        configuration.closedLoopTolerance = 5; //todo: fix
 
         configuration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.FLYWHEEL,
