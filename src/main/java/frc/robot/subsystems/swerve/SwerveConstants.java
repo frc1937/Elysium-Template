@@ -38,8 +38,8 @@ public class SwerveConstants {
     public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(moduleLocations);
 
     public static final double
-            DRIVE_NEUTRAL_DEADBAND = 0.2,
-            ROTATION_NEUTRAL_DEADBAND = 0.2;
+            DRIVE_NEUTRAL_DEADBAND = 0.15,
+            ROTATION_NEUTRAL_DEADBAND = 0.15;
 
     /**
      * Units of RADIANS for everything.

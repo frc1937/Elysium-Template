@@ -27,7 +27,7 @@ public class Arm extends GenericSubsystem {
     }
 
     public boolean hasReachedTarget() {
-        Logger.recordOutput("IsArmReady: ", ARM_MOTOR.isAtPositionSetpoint());
+        Logger.recordOutput("IsArmReady ", ARM_MOTOR.isAtPositionSetpoint());
 
         return ARM_MOTOR.isAtPositionSetpoint();
     }
@@ -98,8 +98,8 @@ public class Arm extends GenericSubsystem {
     }
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
-        System.out.println("SETting arm position to " + targetPosition.getDegrees());
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION,  targetPosition.getRotations());
         ARM_MECHANISM.setTargetAngle(targetPosition);
+        Logger.recordOutput("ArmTargetPosition", targetPosition.getRotations());
     }
 }

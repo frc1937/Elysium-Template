@@ -57,7 +57,7 @@ public class ShooterCommands {
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(calculations, target, tangentialVelocity);
 
         final ConditionalCommand shootKicker = new ConditionalCommand(
-                KICKER.setKickerPercentageOutput(1),
+                KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()),
                 KICKER.setKickerPercentageOutput(0.0),
                 isReadyToShoot
         );

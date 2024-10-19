@@ -31,10 +31,10 @@ public class ArmConstants {
     static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
             Volts.per(Second).of(0.5),
             Volts.of(2),
-            Seconds.of(10)
+            Seconds.of(7)
     );
 
-    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(2);
+    static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(1.3);
 
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
             new SingleJointedArmMechanism2d("ArmMechanism", new Color8Bit(Color.kRed));
@@ -68,7 +68,7 @@ public class ArmConstants {
     }
 
     private static void configureMotor() {
-        MotorConfiguration motorConfiguration = new MotorConfiguration();
+        final MotorConfiguration motorConfiguration = new MotorConfiguration();
 
         motorConfiguration.gearRatio = PITCH_GEAR_RATIO;
 
@@ -92,9 +92,9 @@ public class ArmConstants {
         motorConfiguration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.ARM,
                 DCMotor.getFalcon500Foc(2),
-                227.77777,
+                250,
+                0.3,
                 0.5,
-                11,
                 Rotation2d.fromDegrees(-10),
                 Rotation2d.fromDegrees(150),
                 true
@@ -104,10 +104,10 @@ public class ArmConstants {
                 150,
                 0,
                 0,
-                32,
+                29.887,
                 0,
-                0.2,
-                0.2,
+                0.1,
+                0.32,
                     MotorProperties.GravityType.ARM
                 );
 

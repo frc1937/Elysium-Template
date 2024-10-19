@@ -67,9 +67,8 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
                 () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
-                interrupt -> {
-                },
-                ROTATION_CONTROLLER::atGoal,
+                interrupt -> {},
+                () -> false,
                 this
         );
     }
@@ -142,13 +141,15 @@ public class Swerve extends GenericSubsystem {
 
     private void driveFieldRelative(double xPower, double yPower, double thetaPower) {
         ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
-        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation().minus(Rotation2d.fromDegrees(180)));
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
+//                .minus(Rotation2d.fromDegrees(180))
+        );
 
         driveSelfRelative(speeds);
     }
 
     private void driveSelfRelative(double xPower, double yPower, double thetaPower) {
-        ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
+        final ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
         driveSelfRelative(speeds);
     }
 

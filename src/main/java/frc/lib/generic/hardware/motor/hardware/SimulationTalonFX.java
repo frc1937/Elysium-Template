@@ -121,6 +121,7 @@ public class SimulationTalonFX extends Motor {
 
         talonConfig.MotionMagic.MotionMagicCruiseVelocity = currentConfiguration.profiledMaxVelocity;
         talonConfig.MotionMagic.MotionMagicAcceleration = currentConfiguration.profiledTargetAcceleration;
+        talonConfig.MotionMagic.MotionMagicJerk = currentConfiguration.profiledJerk;
 
         shouldUseProfile = true;
     }

@@ -103,7 +103,8 @@ public class RobotContainer {
         driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(
                 ShooterCommands.shootPhysics(BLUE_SPEAKER, 11));
 
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER).whileTrue(
+        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
+                .whileTrue(
                 SWERVE.driveWhilstRotatingToTarget(() -> 0, () -> 0,
                         BLUE_SPEAKER.toPose2d(), () -> false)
         );

@@ -15,8 +15,8 @@ public class GlobalConstants {
 
     public static final boolean IS_TUNING_MODE = true;
 
-    public static final boolean SHOULD_WRITE_LOGS = false; //for when the roborio doesn't have enough space...
-    public static final Mode CURRENT_MODE = Mode.REAL;
+    public static final boolean SHOULD_WRITE_LOGS = true; //for when the roborio doesn't have enough space...
+    public static final Mode CURRENT_MODE = Mode.SIMULATION;
 
     public enum Mode {
         REAL, SIMULATION, REPLAY
@@ -32,5 +32,4 @@ public class GlobalConstants {
 
     public static final Pose3d RED_SPEAKER = new Pose3d(new Translation3d(-0.0381+14.56,5.547868, 1.9), new Rotation3d());
     public static final Pose3d BLUE_SPEAKER = new Pose3d(new Translation3d(-0.0381,5.547868, 2.1), new Rotation3d());
-//            TAG_ID_TO_POSE.get(7).plus(new Transform3d(new Translation3d(0.2, 0.0, 1.3), new Rotation3d()));
 }

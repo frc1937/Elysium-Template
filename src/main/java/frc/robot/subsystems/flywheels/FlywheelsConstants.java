@@ -43,7 +43,7 @@ public class FlywheelsConstants {
 
         configuration.slot0 = slot;
 
-        configuration.closedLoopTolerance = 50;
+        configuration.closedLoopTolerance = 5000; //todo: WTHFHH!IU@UHFU
 
         configuration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.FLYWHEEL,
