@@ -18,7 +18,7 @@ import static frc.robot.subsystems.flywheels.FlywheelsConstants.RIGHT_FLYWHEEL_D
 import static frc.robot.subsystems.flywheels.FlywheelsConstants.flywheels;
 
 public class Flywheels extends GenericSubsystem {
-    private final int FLYWHEEL_INDEX_TO_LOG_SYSID = 0;
+    private final int FLYWHEEL_INDEX_TO_LOG_SYSID = 1;
 
     public Command setTargetVelocity(double velocityRPS) {
         return new FunctionalCommand(

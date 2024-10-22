@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.lib.SimulateShootingCommand;
-import frc.robot.utilities.ShooterPhysicsCalculations;
 
 import static frc.robot.RobotContainer.*;
 
@@ -38,9 +37,7 @@ public class ShooterCommands {
     }
 
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final ShooterPhysicsCalculations calculations = new ShooterPhysicsCalculations();
-
-        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(calculations, target, tangentialVelocity);
+        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, tangentialVelocity);
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
 
         return setArmPosition.alongWith(

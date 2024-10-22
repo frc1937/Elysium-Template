@@ -17,4 +17,12 @@ public class MathUtils {
                 differenceInXY.getY(),
                 differenceInXY.getX()));
     }
+
+    public static Rotation2d getAngleFromPoseToPose(Translation2d firstPose, Translation2d secondPose) {
+        final Translation2d differenceInXY = secondPose.minus(firstPose);
+
+        return Rotation2d.fromRadians(Math.atan2(
+                differenceInXY.getY(),
+                differenceInXY.getX()));
+    }
 }

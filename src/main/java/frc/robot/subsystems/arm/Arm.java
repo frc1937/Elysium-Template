@@ -11,14 +11,8 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.robot.utilities.ShooterPhysicsCalculations;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
-import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
-import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.arm.ArmConstants.*;
 
 public class Arm extends GenericSubsystem {
     public Arm() {
@@ -40,12 +34,21 @@ public class Arm extends GenericSubsystem {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
-    public Command setTargetPhysicsBasedPosition(ShooterPhysicsCalculations calculations, Pose3d targetPose, double tangentialVelocity) {
-        double[] target = new double[1];
+    public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double tangentialVelocity) {
+//        double[] target = new double[1];
 
         return new FunctionalCommand(
-                () -> target[0] = calculations.getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), targetPose, tangentialVelocity),
-                () -> setMotorTargetPosition(Rotation2d.fromRadians(target[0]).plus(Rotation2d.fromDegrees(6))),
+                () -> {
+//                    target[0] = calculations.getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), targetPose, tangentialVelocity);
+                },
+                () -> {
+                    Rotation2d targetAngle = ShooterPhysicsCalculations.getTargetShootingState().targetPitch();
+
+                    setMotorTargetPosition(targetAngle);
+
+                    ShooterPhysicsCalculations.updateCalculations(targetPose, tangentialVelocity);
+//                    setMotorTargetPosition(Rotation2d.fromRadians(target[0]).plus(Rotation2d.fromDegrees(6)));
+                },
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
