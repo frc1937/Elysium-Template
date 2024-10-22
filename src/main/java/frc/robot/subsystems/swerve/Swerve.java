@@ -102,10 +102,6 @@ public class Swerve extends GenericSubsystem {
         return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    public ChassisSpeeds getFieldRelativeVelocity() {
-        return ChassisSpeeds.fromRobotRelativeSpeeds(getSelfRelativeVelocity(), RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
-    }
-
     public void periodicallyUpdateFromOdometry() {
         final int odometryUpdates = GYRO.getInputs().threadGyroYawDegrees.length;
 
