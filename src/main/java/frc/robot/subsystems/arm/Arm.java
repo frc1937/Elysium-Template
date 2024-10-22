@@ -35,19 +35,11 @@ public class Arm extends GenericSubsystem {
     }
 
     public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double tangentialVelocity) {
-//        double[] target = new double[1];
-
         return new FunctionalCommand(
+                () -> {},
                 () -> {
-//                    target[0] = calculations.getOptimalShootingAngleRadians(POSE_ESTIMATOR.getCurrentPose(), targetPose, tangentialVelocity);
-                },
-                () -> {
-                    Rotation2d targetAngle = ShooterPhysicsCalculations.getTargetShootingState().targetPitch();
-
+                    Rotation2d targetAngle = ShooterPhysicsCalculations.calculateShootingAngle(targetPose, tangentialVelocity);
                     setMotorTargetPosition(targetAngle);
-
-                    ShooterPhysicsCalculations.updateCalculations(targetPose, tangentialVelocity);
-//                    setMotorTargetPosition(Rotation2d.fromRadians(target[0]).plus(Rotation2d.fromDegrees(6)));
                 },
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
