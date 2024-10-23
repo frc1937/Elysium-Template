@@ -3,10 +3,7 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.SimulateShootingCommand;
 
 import static frc.robot.RobotContainer.*;
@@ -39,11 +36,13 @@ public class ShooterCommands {
     public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, tangentialVelocity);
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
+        final Command timer = new WaitCommand(2);
 
         return setArmPosition.alongWith(
                 setFlywheelVelocity,
+                timer,
                 KICKER.setKickerPercentageOutput(0)
-                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget())
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() || timer.isFinished())
                         .andThen(KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()))
         );
     }

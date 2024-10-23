@@ -56,5 +56,4 @@ public class SimulateShootingCommand extends Command {
 
         return startingPose.plus(transform);
     }
-
 }
