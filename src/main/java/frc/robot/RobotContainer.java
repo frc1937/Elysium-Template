@@ -26,6 +26,7 @@ import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.kicker.Kicker;
 import frc.robot.subsystems.leds.Leds;
 import frc.robot.subsystems.swerve.Swerve;
+import frc.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import java.util.function.DoubleSupplier;
@@ -65,63 +66,6 @@ public class RobotContainer {
         DriverStation.silenceJoystickConnectionWarning(true);
 
         setupLEDs();
-
-        DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
-        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
-
-        SWERVE.setDefaultCommand(
-                SWERVE.driveOpenLoop(
-                        translationSupplier,
-                        strafeSupplier,
-
-                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X) * 6,
-                        () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
-                ));
-
-        driveController.getButton(Controller.Inputs.START).whileTrue(SWERVE.resetGyro());
-        driveController.getButton(Controller.Inputs.BACK).whileTrue(SWERVE.lockSwerve());
-
-        driveController.getButton(Controller.Inputs.A)
-                .whileTrue(SWERVE.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
-                                BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
-                );
-
-        driveController.getButton(Controller.Inputs.B).whileTrue(SWERVE.goToPoseBezier(new Pose2d(
-                new Translation2d(1.87, 7.8),
-                Rotation2d.fromDegrees(270)
-        )));
-
-        driveController.getButton(Controller.Inputs.X).whileTrue(SWERVE.goToPoseWithPID(new Pose2d(
-                new Translation2d(1.85, 7.8),
-                Rotation2d.fromDegrees(270)
-        )));
-
-//        driveController.getButton(Controller.Inputs.A).whileTrue(
-//                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))
-//                        .alongWith(new WaitCommand(3).andThen(KICKER.setKickerPercentageOutput(1))
-//                )
-//        );
-
-//        StaticFrictionCharacterization characterization = new StaticFrictionCharacterization();
-//        driveController.getButton(Controller.Inputs.B).whileTrue(characterization);
-//        driveController.getButton(Controller.Inputs.A).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(30)));
-//        driveController.getButton(Controller.Inputs.B).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(60)));
-//        driveController.getButton(Controller.Inputs.Y).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(90)));
-//        driveController.getButton(Controller.Inputs.X).whileTrue(ARM.setTargetPosition(Rotation2d.fromDegrees(-10)));
-
-        driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
-        driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
-
-        driveController.getStick(Controller.Stick.RIGHT_STICK).whileTrue(
-                ShooterCommands.shootPhysics(BLUE_SPEAKER, 11));
-
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .whileTrue(
-                SWERVE.driveWhilstRotatingToTarget(() -> 0, () -> 0,
-                        BLUE_SPEAKER.toPose2d(), () -> false)
-        );
-
         setupBrakeMode();
 
         configureButtons(ButtonLayout.TELEOP);
@@ -131,6 +75,7 @@ public class RobotContainer {
         switch (layout) {
             case CHARACTERIZE_ARM -> setupCharacterization(ARM);
             case CHARACTERIZE_FLYWHEEL -> setupCharacterization(FLYWHEELS);
+            case TELEOP -> configureButtonsTeleop();
         }
     }
 
@@ -159,23 +104,62 @@ public class RobotContainer {
 
         new Trigger(() -> {
             if (RobotController.getBatteryVoltage() < 11.7) lowBatteryCounter[0]++;
-
             return LOW_BATTERY_THRESHOLD < lowBatteryCounter[0];
-        }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 10));
+        }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 5));
 
-        new Trigger(KICKER::doesSeeNote).onTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
+        new Trigger(KICKER::doesSeeNote)
+                .whileTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_LOADED, 3))
+                .toggleOnFalse(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
     }
 
     private void setupBrakeMode() {
-        userButton.toggleOnTrue(Commands.startEnd(
-                () -> {
-                    ARM.setIdleMode(MotorProperties.IdleMode.COAST);
-                    LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 15);
-                },
-
+        final Command setIdleModes = Commands.startEnd(
+                () -> ARM.setIdleMode(MotorProperties.IdleMode.COAST),
                 () -> ARM.setIdleMode(MotorProperties.IdleMode.BRAKE),
+                ARM).ignoringDisable(true);
 
-                ARM, LEDS).ignoringDisable(true)
-        ).debounce(0.5);
+        final Command setLeds = LEDS.setLEDStatus(Leds.LEDMode.DEBUG_MODE, 15).ignoringDisable(true);
+
+        userButton.toggleOnTrue(setIdleModes.alongWith(setLeds)).debounce(0.5);
+    }
+
+    private void setupDriving(DoubleSupplier translationSupplier, DoubleSupplier strafeSupplier) {
+        SWERVE.setDefaultCommand(
+                SwerveCommands.driveOpenLoop(
+                        translationSupplier,
+                        strafeSupplier,
+
+                        () -> -driveController.getRawAxis(Controller.Axis.RIGHT_X) * 6,
+                        () -> driveController.getStick(Controller.Stick.RIGHT_STICK).getAsBoolean()
+                ));
+
+        driveController.getButton(Controller.Inputs.START).whileTrue(SwerveCommands.resetGyro());
+        driveController.getButton(Controller.Inputs.BACK).whileTrue(SwerveCommands.lockSwerve());
+    }
+
+    private void configureButtonsTeleop() {
+        DoubleSupplier translationSupplier = () -> -driveController.getRawAxis(LEFT_Y);
+        DoubleSupplier strafeSupplier = () -> -driveController.getRawAxis(LEFT_X);
+
+        setupDriving(translationSupplier, strafeSupplier);
+
+        driveController.getButton(Controller.Inputs.B).whileTrue(SwerveCommands.goToPoseBezier(new Pose2d(
+                new Translation2d(1.87, 7.8),
+                Rotation2d.fromDegrees(270)
+        )));
+
+        driveController.getButton(Controller.Inputs.X).whileTrue(SwerveCommands.goToPoseWithPID(new Pose2d(
+                new Translation2d(1.85, 7.8),
+                Rotation2d.fromDegrees(270)
+        )));
+
+        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
+                .whileTrue(SwerveCommands.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+                                BLUE_SPEAKER.toPose2d(), () -> false)
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
+                );
+
+        driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
+        driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
     }
 }

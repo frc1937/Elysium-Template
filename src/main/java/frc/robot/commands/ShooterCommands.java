@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.SimulateShootingCommand;
+import frc.robot.subsystems.swerve.SwerveCommands;
 
 import static frc.robot.RobotContainer.*;
 
@@ -27,7 +28,7 @@ public class ShooterCommands {
     }
 
     public static Command shootToTargetWithPhysics(Pose2d target, double tangentialVelocity) {
-        return SWERVE.rotateToTarget(target).alongWith(
+        return SwerveCommands.rotateToTarget(target).alongWith(
                 FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity),
                 ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
         );

@@ -1,8 +1,12 @@
 package frc.robot.subsystems.flywheels;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.SimulationProperties;
+
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Volts;
 
 public class FlywheelsConstants {
     private static final DCMotor FLYWHEEL_MOTOR_GEARBOX = DCMotor.getNeoVortex(1);
@@ -19,6 +23,12 @@ public class FlywheelsConstants {
     public static final double
             LEFT_FLYWHEEL_DIAMETER = 0.07,
             RIGHT_FLYWHEEL_DIAMETER = 0.1;
+
+    protected static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
+            Volts.per(Second).of(0.5),
+            Volts.of(2),
+            Second.of(9)
+    );
 
     static {
         configureMotor(LEFT_FLYWHEEL_MOTOR, false, LEFT_SLOT);

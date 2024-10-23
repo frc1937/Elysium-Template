@@ -9,21 +9,15 @@ import frc.lib.math.Conversions;
 import frc.lib.util.commands.ExecuteEndCommand;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.Rotations;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.LEFT_FLYWHEEL_DIAMETER;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER;
-import static frc.robot.subsystems.flywheels.FlywheelsConstants.flywheels;
+import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.flywheels.FlywheelsConstants.*;
 
 public class Flywheels extends GenericSubsystem {
     private final int FLYWHEEL_INDEX_TO_LOG_SYSID = 1;
 
     public Command setTargetVelocity(double velocityRPS) {
         return new FunctionalCommand(
-                () -> {
-                },
+                () -> {},
                 () -> setFlywheelsTargetVelocity(velocityRPS),
                 interrupted -> stop(),
                 () -> false,
@@ -41,8 +35,7 @@ public class Flywheels extends GenericSubsystem {
 
     public Command setTargetTangentialVelocity(double velocityMPS) {
         return new FunctionalCommand(
-                () -> {
-                },
+                () -> {},
                 () -> setFlywheelsTangentialVelocity(velocityMPS),
                 interrupted -> stop(),
                 () -> false,
@@ -72,11 +65,7 @@ public class Flywheels extends GenericSubsystem {
 
     @Override
     public SysIdRoutine.Config getSysIdConfig() {
-        return new SysIdRoutine.Config(
-                Volts.per(Second).of(0.5),
-                Volts.of(2),
-                Second.of(9)
-        );
+        return SYSID_CONFIG;
     }
 
     public boolean hasReachedTarget() {
@@ -86,6 +75,7 @@ public class Flywheels extends GenericSubsystem {
                 return false;
             }
         }
+
         Logger.recordOutput("AreFlywheelReady", true);
         return true;
     }

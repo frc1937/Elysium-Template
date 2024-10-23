@@ -85,6 +85,38 @@ public class CustomLEDPatterns {
         return buffer;
     }
 
+    /**
+     * Generates a loading animation with two moving directions.
+     * The animation moves from the center of the LED strip outwards in both directions.
+     * This should be called periodically to update the state of the animation.
+     *
+     * @param color1 - The colour for the first direction.
+     * @param color2 - The colour for the second direction.
+     * @return - The filled buffer.
+     */
+    public static Color8Bit[] generateLoadingAnimationBuffer(Color8Bit color1, Color8Bit color2) {
+        buffer = generateSingleColourBuffer(new Color8Bit(Color.kBlack)); // Clear the buffer
+
+        int midPoint = LEDS_COUNT / 2; // Find the middle of the LED strip
+        double time = timer.get() * 5; // Control the speed of the animation
+        int progress = (int) time % (LEDS_COUNT / 2); // Get the current progress
+
+        // Fill from the middle outwards with color1
+        for (int i = midPoint - progress; i <= midPoint; i++) {
+            if (i >= 0) {
+                buffer[i] = color1;
+            }
+        }
+
+        // Fill from the middle outwards in the opposite direction with color2
+        for (int i = midPoint + progress; i >= midPoint; i--) {
+            if (i < LEDS_COUNT) {
+                buffer[i] = color2;
+            }
+        }
+
+        return buffer;
+    }
 
     /**
      * Slowly switch between two colours, creating a breathing effect
