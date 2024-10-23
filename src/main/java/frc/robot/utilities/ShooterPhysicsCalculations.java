@@ -9,6 +9,10 @@ import static frc.robot.RobotContainer.ARM;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
 public class ShooterPhysicsCalculations {
+    private static final double PIVOT_POINT_Z_OFFSET_METRES = 0.2;
+    private static final double PIVOT_POINT_X_OFFSET_METRES = -0.31;
+    private static final double SHOOTER_LENGTH_METRES = 0.415;
+
     /**
      * @return the target angle of the robot to shoot at the provided target
      */
@@ -17,12 +21,11 @@ public class ShooterPhysicsCalculations {
     }
 
     /**
-     * Calculates the optimal pitch for the given parameters, using the Projectile Motion calculation.
+     * Calculates the optimal pitch for the given parameters, using Projectile Motion calculation.
      *
      * @param tangentialVelocity the exit velocity of the note, as tangential velocity
      * @param reachFromAbove     should we reach to point from above, with an arch, or from below, as fast as possible
-     *                           Shooting from above is useful for actions like delivery, whereas shooting from below is useful when we don't want to come from above, and in our case touch the upper speaker
-     * @param target             the point we want the note reach
+     * @param target             the pose we want the note reach
      * @return the pitch to reach in order to shoot to the target
      */
     private static double calculateOptimalShootingAngle(double tangentialVelocity, boolean reachFromAbove, Pose3d target) {
@@ -57,11 +60,11 @@ public class ShooterPhysicsCalculations {
 
 
     /**
-     * Calculates the shooter's note exit point's 3d pose on the field from the given parameters.
-     * The note exit point is the furthest point of the shooter from the pivot point,
+     * Calculates the note's exit pose relative to the field
+     * The note exit pose is the furthest point of the shooter from the pivot point,
      * and where the note leaves the shooter.
      *
-     * @return the shooter's note exit point's 3d pose on the field
+     * @return the shooter's note exit pose on the field
      */
     private static Pose3d getNoteExitPose() {
         final double pitchTargetAngleRotations = ARM.getTargetAngleRotations();
@@ -77,8 +80,4 @@ public class ShooterPhysicsCalculations {
 
         return currentPose.transformBy(robotToNoteExitPose);
     }
-
-    private static final double PIVOT_POINT_Z_OFFSET_METRES = 0.2;
-    private static final double PIVOT_POINT_X_OFFSET_METRES = -0.31;
-    private static final double SHOOTER_LENGTH_METRES = 0.415;
 }
