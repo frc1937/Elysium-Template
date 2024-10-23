@@ -51,8 +51,8 @@ public class SwerveConstants {
     );
 
     public static final HolonomicPathFollowerConfig HOLONOMIC_PATH_FOLLOWER_CONFIG = new HolonomicPathFollowerConfig(
+            new PIDConstants(10, 0, 0),
             new PIDConstants(1, 0, 0),
-            new PIDConstants(2, 0, 0),
             MAX_SPEED_MPS,
             DRIVE_BASE_RADIUS,
             new ReplanningConfig(true, false)

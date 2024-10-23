@@ -5,6 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -83,6 +86,16 @@ public class RobotContainer {
                                 BLUE_SPEAKER.toPose2d(), () -> false)
                         .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
                 );
+
+        driveController.getButton(Controller.Inputs.B).whileTrue(SWERVE.goToPoseBezier(new Pose2d(
+                new Translation2d(1.87, 7.8),
+                Rotation2d.fromDegrees(270)
+        )));
+
+        driveController.getButton(Controller.Inputs.X).whileTrue(SWERVE.goToPoseWithPID(new Pose2d(
+                new Translation2d(1.85, 7.8),
+                Rotation2d.fromDegrees(270)
+        )));
 
 //        driveController.getButton(Controller.Inputs.A).whileTrue(
 //                ARM.setTargetPosition(Rotation2d.fromDegrees(60)).alongWith(FLYWHEELS.setTargetVelocity(50))

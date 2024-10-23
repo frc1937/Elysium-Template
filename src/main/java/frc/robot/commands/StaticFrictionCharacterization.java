@@ -1,12 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.util.LoggedTunableNumber;
 
 import static frc.robot.RobotContainer.ARM;
 
 public class StaticFrictionCharacterization extends Command {
-    LoggedTunableNumber num = new LoggedTunableNumber("StaticFrictionCharacterization", 0);
     double rampingVoltage = 0.11;
 
     public StaticFrictionCharacterization() {

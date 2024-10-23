@@ -15,10 +15,10 @@ import java.util.Optional;
  * @param <T> the type of object to mirror
  */
 public abstract class Mirrorable<T> {
-    protected final static Rotation2d ROTATION_180 = new Rotation2d(Math.PI);
+    protected static final Rotation2d HALF_ROTATION = new Rotation2d(Math.PI);
 
-    private final static Timer UPDATE_ALLIANCE_TIMER = new Timer();
-    private final static Trigger UPDATE_ALLIANCE_TRIGGER = new Trigger(() -> UPDATE_ALLIANCE_TIMER.advanceIfElapsed(1.5));
+    private static final Timer UPDATE_ALLIANCE_TIMER;
+    private static final Trigger UPDATE_ALLIANCE_TRIGGER;
 
     protected final T nonMirroredObject;
     protected final boolean shouldMirrorOnRed;
@@ -26,6 +26,9 @@ public abstract class Mirrorable<T> {
     protected static boolean cachedIsRedAlliance;
 
     static {
+        UPDATE_ALLIANCE_TIMER = new Timer();
+        UPDATE_ALLIANCE_TRIGGER = new Trigger(() -> UPDATE_ALLIANCE_TIMER.advanceIfElapsed(1.5));
+
         UPDATE_ALLIANCE_TIMER.start();
         UPDATE_ALLIANCE_TRIGGER.onTrue(new InstantCommand(Mirrorable::updateAlliance));
     }

@@ -27,7 +27,7 @@ public class MirrorablePose2d extends Mirrorable<Pose2d> {
         return new Pose2d(
                 GlobalConstants.FIELD_LENGTH_METRES - pose.getX(),
                 pose.getY(),
-                ROTATION_180.minus(pose.getRotation())
+                HALF_ROTATION.minus(pose.getRotation())
         );
     }
 }

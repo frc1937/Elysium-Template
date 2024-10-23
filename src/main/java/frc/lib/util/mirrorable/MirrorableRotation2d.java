@@ -46,6 +46,6 @@ public class MirrorableRotation2d extends Mirrorable<Rotation2d> {
 
     @Override
     protected Rotation2d mirror(Rotation2d rotation) {
-        return ROTATION_180.minus(rotation);
+        return HALF_ROTATION.minus(rotation);
     }
 }

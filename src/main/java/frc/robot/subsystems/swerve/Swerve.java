@@ -1,7 +1,12 @@
 package frc.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.PID;
 import frc.lib.math.Optimizations;
 import frc.lib.util.commands.InitExecuteCommand;
 import frc.lib.util.mirrorable.Mirrorable;
@@ -29,6 +35,9 @@ import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
+    private static final PID translationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.translationConstants);
+    private static final PID rotationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.rotationConstants);
+
     private double lastTimestamp = Timer.getFPGATimestamp();
 
     public Swerve() {
@@ -51,6 +60,45 @@ public class Swerve extends GenericSubsystem {
         );
     }
 
+    public Command goToPoseBezier(Pose2d targetPose) {
+        return new FollowPathCommand(
+                new PathPlannerPath(
+                        PathPlannerPath.bezierFromPoses(POSE_ESTIMATOR.getCurrentPose(), targetPose),
+                        new PathConstraints(MAX_SPEED_MPS, MAX_SPEED_MPS * 2,
+                                MAX_ROTATION_RAD_PER_S, MAX_ROTATION_RAD_PER_S * 2),
+                        new GoalEndState(0, targetPose.getRotation(), true)
+                ),
+
+                POSE_ESTIMATOR::getCurrentPose,
+                this::getSelfRelativeVelocity,
+                this::driveSelfRelative,
+
+                new PPHolonomicDriveController(
+                        HOLONOMIC_PATH_FOLLOWER_CONFIG.translationConstants,
+                        HOLONOMIC_PATH_FOLLOWER_CONFIG.rotationConstants,
+                        MAX_SPEED_MPS,
+                        DRIVE_BASE_RADIUS),
+
+                HOLONOMIC_PATH_FOLLOWER_CONFIG.replanningConfig,
+                () -> true,
+                this
+        );
+    }
+
+
+    public Command goToPoseWithPID(Pose2d targetPose) {
+        final Pose2d fixedTargetPose = new Pose2d(targetPose.getTranslation(), Rotation2d.fromDegrees(MathUtil.inputModulus(targetPose.getRotation().getDegrees(), -180, 180)));
+
+        return new FunctionalCommand(
+                () -> initializeDrive(true),
+                () -> driveToPose(fixedTargetPose),
+                interrupt -> {
+                },
+                () -> false,
+                this
+        );
+    }
+
     public Command resetGyro() {
         return Commands.runOnce(() -> this.setGyroHeading(Rotation2d.fromDegrees(0)), this);
     }
@@ -67,7 +115,8 @@ public class Swerve extends GenericSubsystem {
         return new FunctionalCommand(
                 () -> initializeDrive(true),
                 () -> driveWithTarget(x.getAsDouble(), y.getAsDouble(), target, robotCentric.getAsBoolean()),
-                interrupt -> {},
+                interrupt -> {
+                },
                 () -> false,
                 this
         );
@@ -139,11 +188,28 @@ public class Swerve extends GenericSubsystem {
             driveFieldRelative(xPower, yPower, controllerOutput);
     }
 
+    private void driveToPose(Pose2d target) {
+        Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+
+        driveFieldRelative(
+                translationController.calculate(
+                        currentPose.getX(),
+                        target.getX()
+                ),
+                translationController.calculate(
+                        currentPose.getY(),
+                        target.getY()
+                ),
+                rotationController.calculate(
+                        currentPose.getRotation().getDegrees(),
+                        target.getRotation().getDegrees()
+                )
+        );
+    }
+
     private void driveFieldRelative(double xPower, double yPower, double thetaPower) {
         ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
-        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation()
-//                .minus(Rotation2d.fromDegrees(180))
-        );
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
 
         driveSelfRelative(speeds);
     }

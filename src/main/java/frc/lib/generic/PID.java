@@ -1,9 +1,10 @@
 package frc.lib.generic;
 
+import com.pathplanner.lib.util.PIDConstants;
 import edu.wpi.first.math.MathUtil;
 
 /** Implements a PID control loop. */
-public class PID {
+public class PID  {
     // Factor for "proportional" control
     private double kP;
 
@@ -51,6 +52,10 @@ public class PID {
 
     public PID(double kp, double ki, double kd) {
         this(kp, ki, kd, 0.0);
+    }
+
+    public PID(PIDConstants constants) {
+        this(constants.kP, constants.kI, constants.kD, 0);
     }
 
     public PID(double kp, double ki, double kd, double kS) {
