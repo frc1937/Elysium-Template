@@ -33,6 +33,16 @@ public class Flywheels extends GenericSubsystem {
         );
     }
 
+    public Command setTargetTangentialVelocityFromRPS(double velocityRPS) {
+        return new FunctionalCommand(
+                () -> {},
+                () -> setFlywheelsTangentialVelocity(Conversions.rpsToMps(velocityRPS, RIGHT_FLYWHEEL_DIAMETER)),
+                interrupted -> stop(),
+                () -> false,
+                this
+        );
+    }
+
     public Command setTargetTangentialVelocity(double velocityMPS) {
         return new FunctionalCommand(
                 () -> {},
@@ -90,6 +100,13 @@ public class Flywheels extends GenericSubsystem {
         for (SingleFlywheel flywheel : flywheels) {
             flywheel.setTargetTangentialVelocity(targetMPS);
         }
+    }
+
+    public double getFlywheelsTargetTangentialVelocity() {
+        return Math.min(
+                Conversions.rpsToMps(flywheels[0].getTargetVelocityRPS(), LEFT_FLYWHEEL_DIAMETER),
+                Conversions.rpsToMps(flywheels[1].getTargetVelocityRPS(), RIGHT_FLYWHEEL_DIAMETER)
+        );
     }
 
     public double getFlywheelTangentialVelocity() {

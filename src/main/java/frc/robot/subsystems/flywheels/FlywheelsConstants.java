@@ -15,8 +15,8 @@ public class FlywheelsConstants {
     private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
-            LEFT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10904, 0.025022, 0.22468),
-            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10457, 0.037788, 0.05658),
+            LEFT_SLOT = new MotorProperties.Slot(5, 0, 0,  0.10904, 0.025022, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(5, 0, 0,  0.10457, 0.037788, 0.05658),
 
     SIMULATION_SLOT = new MotorProperties.Slot(12+0.30681, 0, 0,  0.10432, 0.35682, 0.0019243);
 
@@ -44,12 +44,12 @@ public class FlywheelsConstants {
         configuration.supplyCurrentLimit = 40;
         configuration.statorCurrentLimit = 40;
 
-        configuration.profiledTargetAcceleration = 90;
+//        configuration.profiledTargetAcceleration = 40;
 //        configuration.profiledJerk = 30;
 
         configuration.slot0 = slot;
-
-        configuration.closedLoopTolerance = 200 / 60.0;
+//todo: flywheels are oscilating likec razy. insepct.
+        configuration.closedLoopTolerance = 0.5;
 
         configuration.simulationProperties = new SimulationProperties.Slot(
                 SimulationProperties.SimulationType.FLYWHEEL,

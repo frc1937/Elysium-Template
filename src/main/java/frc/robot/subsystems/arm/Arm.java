@@ -8,11 +8,17 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.robot.utilities.ShooterPhysicsCalculations;
 import org.littletonrobotics.junction.Logger;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.arm.ArmConstants.*;
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+import static frc.robot.RobotContainer.FLYWHEELS;
+import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
+import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
+import static frc.robot.subsystems.arm.ArmConstants.SYSID_CONFIG;
+import static frc.robot.utilities.ShooterPhysicsCalculations.calculateShootingAngle;
 
 public class Arm extends GenericSubsystem {
     public Arm() {
@@ -34,12 +40,14 @@ public class Arm extends GenericSubsystem {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
-    public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double tangentialVelocity) {
+    public Command setTargetPhysicsBasedPosition(Pose3d targetPose) {
+        double[] targetAngleRotations = new double[1];
+
         return new FunctionalCommand(
-                () -> {},
+                () -> targetAngleRotations[0] =
+                        calculateShootingAngle(targetPose, FLYWHEELS.getFlywheelsTargetTangentialVelocity()).getRotations(),
                 () -> {
-                    Rotation2d targetAngle = ShooterPhysicsCalculations.calculateShootingAngle(targetPose, tangentialVelocity);
-                    setMotorTargetPosition(targetAngle);
+                    setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0]));
                 },
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,

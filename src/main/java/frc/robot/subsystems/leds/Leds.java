@@ -46,6 +46,11 @@ public class Leds extends SubsystemBase {
                     new Color8Bit(Color.kWhite)
             ), timeout);
 
+            case NOT_AT_AUTO_PLACE -> getCommandFromColours(() -> generateBreathingBuffer(
+                    new Color8Bit(Color.kRed),
+                    new Color8Bit(Color.kGreen)
+            ), timeout);
+
             case BATTERY_LOW -> getCommandFromColours(() -> generateOutwardsPointsBuffer(new Color8Bit(Color.kRed)), timeout);
 
             default -> getCommandFromColours(CustomLEDPatterns::generateRainbowBuffer, 0);
@@ -69,6 +74,7 @@ public class Leds extends SubsystemBase {
         SHOOTER_EMPTY,
         DEBUG_MODE,
         BATTERY_LOW,
-        DEFAULT
+        DEFAULT,
+        NOT_AT_AUTO_PLACE
     }
 }

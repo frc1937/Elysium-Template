@@ -114,7 +114,9 @@ public class GenericSparkMax extends GenericSparkBase {
                 feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), goalState.position);
             }
 
-            case POSITION_PID -> feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
+            case POSITION_PID -> {
+                feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
+            }
 
             case POSITION_S_CURVE -> {
                 final UpdateResult result = getSCurveGenerator().update(scurveInputs, scurveOutput);

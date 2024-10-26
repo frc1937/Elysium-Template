@@ -34,16 +34,20 @@ public class ShooterCommands {
         );
     }
 
-    public static Command shootPhysics(final Pose3d target, final double tangentialVelocity) {
-        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, tangentialVelocity);
-        final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocity(tangentialVelocity);
-        final Command timer = new WaitCommand(2);
+    public static Command shootPhysics(Pose3d target, double targetVelocityRPS) {
+        final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(targetVelocityRPS);
+        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target);
+        final Command timer = new WaitCommand(40000);
 
-        return setArmPosition.alongWith(
-                setFlywheelVelocity,
+//        final Command setFlywheelVoltage = FLYWHEELS.setVoltage(-9);
+
+        return setFlywheelVelocity.alongWith(
+                setArmPosition,
                 timer,
                 KICKER.setKickerPercentageOutput(0)
-                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() || timer.isFinished())
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
+                                timer.isFinished())
+
                         .andThen(KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()))
         );
     }

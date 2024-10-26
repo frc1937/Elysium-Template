@@ -100,6 +100,16 @@ public class PoseEstimator implements AutoCloseable {
             return;
         }
 
+        if (swerveWheelPositions.length == 0) {
+            System.out.println("0!! Swerve Wheel Positions");
+            return;
+        }
+
+        if (gyroRotations.length == 0) {
+            System.out.println("0!! Gyro Rotations");
+            return;
+        }
+
         if (Optimizations.isColliding()) {
             DriverStation.reportWarning("The robot collided! Discarding odometry at timestamp", false);
             return;

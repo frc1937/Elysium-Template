@@ -7,7 +7,6 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -69,6 +68,8 @@ public class RobotContainer {
         setupBrakeMode();
 
         configureButtons(ButtonLayout.TELEOP);
+
+//        isAtPlaceForAuto();
     }
 
     private void configureButtons(ButtonLayout layout) {
@@ -143,23 +144,29 @@ public class RobotContainer {
 
         setupDriving(translationSupplier, strafeSupplier);
 
-        driveController.getButton(Controller.Inputs.B).whileTrue(SwerveCommands.goToPoseBezier(new Pose2d(
-                new Translation2d(1.87, 7.8),
-                Rotation2d.fromDegrees(270)
-        )));
-
-        driveController.getButton(Controller.Inputs.X).whileTrue(SwerveCommands.goToPoseWithPID(new Pose2d(
-                new Translation2d(1.85, 7.8),
-                Rotation2d.fromDegrees(270)
-        )));
-
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
+        driveController.getButton(Controller.Inputs.A)
                 .whileTrue(SwerveCommands.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
                                 BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 15))
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 35))
                 );
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
+    }
+
+    private void isAtPlaceForAuto() {
+        Pose2d autoPose = new Pose2d(5,5, Rotation2d.fromDegrees(36));
+
+        Trigger isAtAutonomousPose = new Trigger(() -> {
+//            System.out.println(POSE_ESTIMATOR.getCurrentPose().minus(autoPose).getTranslation().getNorm() + " is the diff in merhak, but in degs: " + POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+            return POSE_ESTIMATOR.getCurrentPose().minus(autoPose).getTranslation().getNorm() < 0.5 &&
+                    POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees() < 1;
+        });
+
+//        isAtAutonomousPose.toggleOnTrue(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5)
+//                .alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
+//        isAtAutonomousPose.whileFalse(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5).alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
+//        isAtAutonomousPose.whileTrue(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5).alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
+
     }
 }

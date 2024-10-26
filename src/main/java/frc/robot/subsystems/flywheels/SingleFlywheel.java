@@ -53,7 +53,6 @@ public class SingleFlywheel {
         motor.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
-
     public void stop() {
         motor.stopMotor();
     }

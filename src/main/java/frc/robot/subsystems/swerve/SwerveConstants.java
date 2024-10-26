@@ -72,6 +72,6 @@ public class SwerveConstants {
 
     private static void configureRotationController() {
         ROTATION_CONTROLLER.enableContinuousInput(-180, 180);
-        ROTATION_CONTROLLER.setTolerance(0.8);
+        ROTATION_CONTROLLER.setTolerance(1.5);
     }
 }
