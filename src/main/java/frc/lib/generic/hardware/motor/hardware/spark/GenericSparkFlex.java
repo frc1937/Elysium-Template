@@ -98,7 +98,8 @@ public class GenericSparkFlex extends GenericSparkBase {
     }
 
     protected void handleSmoothMotion(SparkCommon.MotionType motionType,
-                                      TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
+                                      TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
+                                      Feedforward feedforward, int slotToUse) {
         if (goalState == null) return;
 
         double feedforwardOutput, acceleration;

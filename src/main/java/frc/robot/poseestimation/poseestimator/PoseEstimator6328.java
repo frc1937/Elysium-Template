@@ -60,8 +60,6 @@ public class PoseEstimator6328 {
      * Add odometry observation
      */
     public void addOdometryObservation(OdometryObservation observation) {
-        if (observation.wheelPositions() == null) return;
-
         Twist2d twist = SWERVE_KINEMATICS.toTwist2d(lastWheelPositions, observation.wheelPositions());
         lastWheelPositions = observation.wheelPositions();
         // Check gyro connected

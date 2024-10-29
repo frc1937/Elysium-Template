@@ -81,7 +81,8 @@ public class GenericSparkMax extends GenericSparkBase {
             feedback.enableContinuousInput(-0.5, 0.5);
     }
 
-    protected void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse) {
+    protected void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
+                                      Feedforward feedforward, int slotToUse) {
         if (goalState == null) return;
 
         double feedbackOutput = 0, feedforwardOutput = 0, acceleration;
@@ -114,9 +115,7 @@ public class GenericSparkMax extends GenericSparkBase {
                 feedbackOutput = this.feedback.calculate(getEffectiveVelocity(), goalState.position);
             }
 
-            case POSITION_PID -> {
-                feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
-            }
+            case POSITION_PID -> feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
 
             case POSITION_S_CURVE -> {
                 final UpdateResult result = getSCurveGenerator().update(scurveInputs, scurveOutput);

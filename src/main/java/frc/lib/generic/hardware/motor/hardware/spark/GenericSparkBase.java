@@ -41,7 +41,7 @@ public abstract class GenericSparkBase extends Motor {
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
     private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
-    private Feedforward.Type feedforward;
+    private Feedforward feedforward;
 
     private double previousVelocity = 0;
 
@@ -93,8 +93,8 @@ public abstract class GenericSparkBase extends Motor {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
             case POSITION, VELOCITY -> {
                 if (getDeviceID() == 28) {
-                    this.feedforward = Feedforward.Type.SIMPLE;
-                    this.feedforward.setFeedforwardConstants(kS, kV, kA, kG);
+                    this.feedforward = new Feedforward(Feedforward.Type.SIMPLE, new Feedforward.FeedForwardConstants(kS, kV, kA, kG));
+//                    this.feedforward.setFeedforwardConstants(kS, kV, kA, kG);
                 }
                 //todo wtf.. change how you do FF so this doesn;t happen.
                 handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
@@ -138,22 +138,17 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     protected void configureFeedforward(MotorProperties.Slot slot) {
-        this.feedforward = Feedforward.Type.SIMPLE;
+        final Feedforward.FeedForwardConstants constants = new Feedforward.FeedForwardConstants(slot.kS(), slot.kV(), slot.kA(), slot.kG());
+
+        this.feedforward = new Feedforward(Feedforward.Type.SIMPLE, constants);
 
         if (slot.gravityType() == MotorProperties.GravityType.ARM) {
-            this.feedforward = Feedforward.Type.ARM;
+            this.feedforward = new Feedforward(Feedforward.Type.ARM, constants);
         }
 
         if (slot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
-            this.feedforward = Feedforward.Type.ELEVATOR;
+            this.feedforward = new Feedforward(Feedforward.Type.ELEVATOR, constants);
         }
-
-        this.feedforward.setFeedforwardConstants(
-                slot.kS(),
-                slot.kV(),
-                slot.kA(),
-                slot.kG()
-        );
 
         this.kS = slot.kS();
         this.kV = slot.kV();
@@ -336,7 +331,7 @@ public abstract class GenericSparkBase extends Motor {
             );
 
             motionType = SparkCommon.MotionType.VELOCITY_TRAPEZOIDAL;
-        } else if (feedforward.konstants.kS() == 0 && feedforward.konstants.kG() == 0 && feedforward.konstants.kV() == 0 && feedforward.konstants.kA() == 0) {
+        } else if (feedforward.getConstants().kS == 0 && feedforward.getConstants().kG == 0 && feedforward.getConstants().kV == 0 && feedforward.getConstants().kA == 0) {
             motionType = SparkCommon.MotionType.POSITION_PID;
         } else {
             motionType = SparkCommon.MotionType.VELOCITY_PID_FF;
@@ -370,7 +365,7 @@ public abstract class GenericSparkBase extends Motor {
 
     protected abstract void configureExtras(MotorConfiguration configuration);
 
-    protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, final Feedforward.Type feedforward, int slotToUse);
+    protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, final Feedforward feedforward, int slotToUse);
 
     protected abstract void configurePID(MotorConfiguration configuration);
 

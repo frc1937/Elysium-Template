@@ -1,68 +1,55 @@
 package frc.lib.generic;
 
-import java.util.function.Function;
-
 public class Feedforward {
-    public record FeedForwardConstants(double kS, double kV, double kA, double kG) {
+    public static class FeedForwardConstants {
+        public final double kS, kV, kA, kG;
+
+        public FeedForwardConstants(double kS, double kV, double kA, double kG) {
+            this.kS = kS;
+            this.kV = kV;
+            this.kA = kA;
+            this.kG = kG;
+        }
     }
 
-    public record FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {
-    }
+    public static class FeedForwardValues {
+        public final double positionRotations, velocityRPS, accelerationRPSPS;
 
-    public record ClosedLoopValues(FeedForwardConstants constants, FeedForwardValues values) {
+        public FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {
+            this.positionRotations = positionRotations;
+            this.velocityRPS = velocityRPS;
+            this.accelerationRPSPS = accelerationRPSPS;
+        }
     }
 
     public enum Type {
-        SIMPLE(closedLoopValues -> calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values)),
+        SIMPLE, ARM, ELEVATOR
+    }
 
-        ARM(closedLoopValues ->
-                calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
-                        closedLoopValues.constants.kG * Math.cos(closedLoopValues.values.positionRotations * 2 * Math.PI)
-        ),
+    private FeedForwardConstants constants;
+    private Type type;
 
-        ELEVATOR(closedLoopValues ->
-                calculateSimpleFeedforward(closedLoopValues.constants, closedLoopValues.values) +
-                        closedLoopValues.constants.kG
-        );
+    public Feedforward(Type type, FeedForwardConstants constants) {
+        this.type = type;
+        this.constants = constants;
+    }
 
-        public final Function<ClosedLoopValues, Double> calculationFunction;
-        public FeedForwardConstants konstants = new FeedForwardConstants(0, 0, 0, 0);
+    public FeedForwardConstants getConstants() {
+        return constants;
+    }
 
-        Type(Function<ClosedLoopValues, Double> calculationFunction) {
-            this.calculationFunction = calculationFunction;
+    public double calculate(double currentPositionRotations, double velocityRPS, double accelerationRPSPS) {
+        double feedforward = constants.kS * Math.signum(velocityRPS) + constants.kV * velocityRPS + constants.kA * accelerationRPSPS;
+        if (type == Type.ARM) {
+            feedforward += constants.kG * Math.cos(currentPositionRotations * 2 * Math.PI);
+        } else if (type == Type.ELEVATOR) {
+            feedforward += constants.kG;
         }
+        return feedforward;
+    }
 
-        public void setFeedforwardConstants(double kS, double kV, double kA, double kG) {
-            this.konstants = new FeedForwardConstants(kS, kV, kA, kG);
-        }
-
-        public void setFeedforwardConstants(double kS, double kV, double kA) {
-            this.konstants = new FeedForwardConstants(kS, kV, kA, 0);
-        }
-
-        /**
-         * @param currentPositionRotations For arm ONLY. This should be the CURRENT ARM POSITION in rotations. For non-arms, this will be ignored.
-         * @param velocityRPS       unit-less, preferably in rotations per second
-         * @param accelerationRPSPS unit-less, preferably rotations per second squared
-         * @return The input for the motor, in voltage
-         */
-        public double calculate(double currentPositionRotations, double velocityRPS, double accelerationRPSPS) {
-            return calculationFunction.apply(new ClosedLoopValues(konstants,
-                    new FeedForwardValues(currentPositionRotations, velocityRPS, accelerationRPSPS)));
-        }
-
-        /**
-         * @param velocityRPS       unit-less, preferably in rotations per second
-         * @param accelerationRPSPS unit-less, preferably rotations per second squared
-         * @return The input for the motor, in voltage
-         */
-        public double calculate(double velocityRPS, double accelerationRPSPS) {
-            return calculate(0, velocityRPS, accelerationRPSPS);
-        }
-
-        private static double calculateSimpleFeedforward(FeedForwardConstants constants, FeedForwardValues values) {
-            return constants.kS * Math.signum(values.velocityRPS) + constants.kV * values.velocityRPS + constants.kA * values.accelerationRPSPS;
-        }
+    public double calculate(double velocityRPS, double accelerationRPSPS) {
+        return calculate(0, velocityRPS, accelerationRPSPS);
     }
 
     // kS; Volts required to overcome the force of static friction
