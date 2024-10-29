@@ -99,14 +99,13 @@ public enum HardwareManager {
      * Call this periodically, preferably in the beginning of <code>robotPeriodic()</code> every loop
      */
     public static void update() {
-        //TODO: Only if hardware should use lock, USE LOCK
         FASTER_THREAD_LOCK.lock();
+
+        OdometryThread.getInstance().updateLatestTimestamps();
 
         for (LoggableHardware loggableHardware : hardware) {
             loggableHardware.periodic();
         }
-
-        OdometryThread.getInstance().updateLatestTimestamps();
 
         FASTER_THREAD_LOCK.unlock();
 

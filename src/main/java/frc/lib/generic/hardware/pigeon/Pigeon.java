@@ -1,8 +1,7 @@
 package frc.lib.generic.hardware.pigeon;
 
-import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.advantagekit.LoggableHardware;
-import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.Logger;
 
 public class Pigeon implements LoggableHardware {
@@ -12,7 +11,6 @@ public class Pigeon implements LoggableHardware {
     public Pigeon(String name) {
         this.name = name;
 
-        periodic();
         HardwareManager.addHardware(this);
     }
 
@@ -33,7 +31,6 @@ public class Pigeon implements LoggableHardware {
     public void periodic() {
         refreshInputs(inputs);
         Logger.processInputs("Pigeons/" + name, inputs);
-
     }
 
     @Override

@@ -24,7 +24,10 @@ import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.DoubleSupplier;
 
-import static frc.robot.GlobalConstants.*;
+import static frc.robot.GlobalConstants.CURRENT_MODE;
+import static frc.robot.GlobalConstants.FASTER_THREAD_LOCK;
+import static frc.robot.GlobalConstants.Mode;
+import static frc.robot.GlobalConstants.ODOMETRY_FREQUENCY_HERTZ;
 
 /**
  * Provides an interface for asynchronously reading high-frequency measurements to a set of queues.
@@ -35,7 +38,6 @@ import static frc.robot.GlobalConstants.*;
 public class OdometryThread extends Thread {
     private final List<DoubleSupplier> signals = new ArrayList<>();
     private final List<Queue<Double>> queues = new ArrayList<>();
-
     private final Queue<Double> timestamps = new ArrayBlockingQueue<>(100);
 
     private static OdometryThread INSTANCE = null;
@@ -54,7 +56,7 @@ public class OdometryThread extends Thread {
 
         Notifier notifier = new Notifier(this::periodic);
         notifier.setName("OdometryThread");
-        Timer.delay(1);
+        Timer.delay(5);
         notifier.startPeriodic(1.0 / ODOMETRY_FREQUENCY_HERTZ);
     }
 
@@ -101,6 +103,6 @@ public class OdometryThread extends Thread {
 
     @AutoLog
     public static class ThreadInputs {
-        public double[] timestamps;
+        public double[] timestamps = {0.0};
     }
 }

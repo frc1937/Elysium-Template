@@ -54,9 +54,9 @@ public class SwerveModuleConstants {
 
     static final double[] STEER_ENCODER_OFFSET = {0.677246, 0.282715, 0.533447, 0.313721};
 
-    static final Encoder[] STEER_ENCODER = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
-    static final Motor[] STEER_MOTOR = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
-    static final Motor[] DRIVE_MOTOR = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
+    static final Encoder[] STEER_ENCODERS = {FL_STEER_ENCODER, FR_STEER_ENCODER, RL_STEER_ENCODER, RR_STEER_ENCODER};
+    static final Motor[] STEER_MOTORS = {FL_STEER_MOTOR, FR_STEER_MOTOR, RL_STEER_MOTOR, RR_STEER_MOTOR};
+    static final Motor[] DRIVE_MOTORS = {FL_DRIVE_MOTOR, FR_DRIVE_MOTOR, RL_DRIVE_MOTOR, RR_DRIVE_MOTOR};
 
 
     static {
@@ -64,11 +64,11 @@ public class SwerveModuleConstants {
         configureDriveConfiguration();
 
         for (int i = 0; i < 4; i++) {
-            configureSteerEncoder(STEER_ENCODER[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
-            configureDriveMotor(DRIVE_MOTOR[i]);
-            configureSteerMotor(STEER_MOTOR[i], STEER_ENCODER[i]);
+            configureSteerEncoder(STEER_ENCODERS[i], Rotation2d.fromRotations(STEER_ENCODER_OFFSET[i]));
+            configureDriveMotor(DRIVE_MOTORS[i]);
+            configureSteerMotor(STEER_MOTORS[i], STEER_ENCODERS[i]);
 
-            setSimulatedEncoderSources(STEER_ENCODER[i], STEER_MOTOR[i]);
+            setSimulatedEncoderSources(STEER_ENCODERS[i], STEER_MOTORS[i]);
         }
     }
 
@@ -99,10 +99,10 @@ public class SwerveModuleConstants {
     private static void configureDriveMotor(Motor driveMotor) {
         driveMotor.setupSignalUpdates(POSITION, true);
 
+        driveMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
         driveMotor.setupSignalUpdates(VOLTAGE);
         driveMotor.setupSignalUpdates(VELOCITY);
         driveMotor.setupSignalUpdates(TEMPERATURE);
-        driveMotor.setupSignalUpdates(CLOSED_LOOP_TARGET);
 
         driveMotor.configure(driveMotorConfiguration);
     }

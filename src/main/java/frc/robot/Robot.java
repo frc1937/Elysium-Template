@@ -11,7 +11,6 @@ import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
 
 public class Robot extends LoggedRobot {
@@ -28,10 +27,9 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void robotPeriodic() {
-        commandScheduler.run();
         HardwareManager.update();
+        commandScheduler.run();
 
-        SWERVE.periodicallyUpdateFromOdometry();
         POSE_ESTIMATOR.periodic();
     }
 
@@ -86,7 +84,6 @@ public class Robot extends LoggedRobot {
     public void simulationPeriodic() {
         HardwareManager.updateSimulation();
 
-        SWERVE.periodicallyUpdateFromOdometry();
         VISION_SIMULATION.updateRobotPose(POSE_ESTIMATOR.getOdometryPose());
 
         final Field2d simulatedVisionField = VISION_SIMULATION.getDebugField();

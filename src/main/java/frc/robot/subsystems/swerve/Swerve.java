@@ -5,7 +5,11 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.GenericSubsystem;
@@ -19,7 +23,11 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.swerve.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
+import static frc.robot.subsystems.swerve.SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
+import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
@@ -50,18 +58,26 @@ public class Swerve extends GenericSubsystem {
         return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
     }
 
-    public void periodicallyUpdateFromOdometry() {
-        final int odometryUpdates = GYRO.getInputs().threadGyroYawDegrees.length;
+    @Override
+    public void periodic() {
+        final double[] odometryUpdatesYawDegrees = GYRO.getInputs().threadGyroYawDegrees;
+        final int odometryUpdates = odometryUpdatesYawDegrees.length;
+
+        if (OdometryThread.getInstance().getLatestTimestamps().length == 0) return;
 
         final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
         for (int i = 0; i < odometryUpdates; i++) {
             swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromDegrees(GYRO.getInputs().threadGyroYawDegrees[i]);
+            gyroRotations[i] = Rotation2d.fromDegrees(odometryUpdatesYawDegrees[i]);
         }
 
-        POSE_ESTIMATOR.addOdometryObservations(swerveWheelPositions, gyroRotations, OdometryThread.getInstance().getLatestTimestamps());
+        POSE_ESTIMATOR.addOdometryObservations(
+                        swerveWheelPositions,
+                        gyroRotations,
+                        OdometryThread.getInstance().getLatestTimestamps()
+                );
     }
 
     protected void driveOrientationBased(double xPower, double yPower, double thetaPower, boolean robotCentric) {
@@ -144,8 +160,10 @@ public class Swerve extends GenericSubsystem {
     protected SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
         final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[MODULES.length];
 
-        for (int i = 0; i < MODULES.length; i++)
+        for (int i = 0; i < MODULES.length; i++) {
             swerveModulePositions[i] = MODULES[i].getOdometryPosition(odometryUpdateIndex);
+            if (swerveModulePositions[i] == null) return null;
+        }
 
         return new SwerveDriveWheelPositions(swerveModulePositions);
     }

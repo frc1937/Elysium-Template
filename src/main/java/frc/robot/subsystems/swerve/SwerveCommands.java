@@ -35,7 +35,7 @@ public class SwerveCommands {
         return new FunctionalCommand(
                 () -> {},
                 () -> SWERVE.driveSelfRelative(translationSupplier.getAsDouble(), strafeSupplier.getAsDouble(),
-                        -controller.calculate(DETECTION_CAMERA.getYawToClosestTarget(), 0)),
+                        -controller.calculate(DETECTION_CAMERA.getYawToClosestTarget(), 9)),
                 (interrupt) -> {},
                 () -> false,
                 SWERVE

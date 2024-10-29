@@ -95,32 +95,20 @@ public class PoseEstimator implements AutoCloseable {
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
     public void addOdometryObservations(SwerveDriveWheelPositions[] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
-        if (timestamps.length == 0) {
-            System.out.println("0!! Timestamps");
-            return;
-        }
-
-        if (swerveWheelPositions.length == 0) {
-            System.out.println("0!! Swerve Wheel Positions");
-            return;
-        }
-
-        if (gyroRotations.length == 0) {
-            System.out.println("0!! Gyro Rotations");
-            return;
-        }
+        if (swerveWheelPositions == null) return;
 
         if (Optimizations.isColliding()) {
             DriverStation.reportWarning("The robot collided! Discarding odometry at timestamp", false);
             return;
         }
 
-        for (int i = 0; i < swerveWheelPositions.length; i++)
+        for (int i = 0; i < swerveWheelPositions.length; i++) {
             poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(
                     swerveWheelPositions[i],
                     gyroRotations[i],
                     timestamps[i])
             );
+        }
     }
 
     private void updateFromVision() {
