@@ -8,12 +8,13 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
+import frc.lib.math.Conversions;
+import frc.robot.subsystems.flywheels.FlywheelsConstants;
 import org.littletonrobotics.junction.Logger;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotContainer.FLYWHEELS;
 import static frc.robot.subsystems.arm.ArmConstants.ABSOLUTE_ARM_ENCODER;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MECHANISM;
 import static frc.robot.subsystems.arm.ArmConstants.ARM_MOTOR;
@@ -40,12 +41,14 @@ public class Arm extends GenericSubsystem {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
-    public Command setTargetPhysicsBasedPosition(Pose3d targetPose) {
+    public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double targetVelocityRPS) {
         double[] targetAngleRotations = new double[1];
 
         return new FunctionalCommand(
-                () -> targetAngleRotations[0] =
-                        calculateShootingAngle(targetPose, FLYWHEELS.getFlywheelsTargetTangentialVelocity()).getRotations(),
+                () -> {
+                    targetAngleRotations[0] =
+                            calculateShootingAngle(targetPose, Conversions.rpsToMps(targetVelocityRPS, FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER)).getRotations();
+                },
                 () -> {
                     setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0]));
                 },

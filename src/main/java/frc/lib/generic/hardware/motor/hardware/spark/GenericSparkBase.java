@@ -56,6 +56,8 @@ public abstract class GenericSparkBase extends Motor {
     private int slotToUse = 0;
     private double conversionFactor = 1;
 
+    private double kS, kV, kA, kG;
+
     protected GenericSparkBase(String name, int deviceId) {
         super(name);
 
@@ -89,8 +91,14 @@ public abstract class GenericSparkBase extends Motor {
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
-            case POSITION, VELOCITY ->
-                    handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
+            case POSITION, VELOCITY -> {
+                if (getDeviceID() == 28) {
+                    this.feedforward = Feedforward.Type.SIMPLE;
+                    this.feedforward.setFeedforwardConstants(kS, kV, kA, kG);
+                }
+                //todo wtf.. change how you do FF so this doesn;t happen.
+                handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
+            }
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
@@ -114,13 +122,43 @@ public abstract class GenericSparkBase extends Motor {
         if (configuration.statorCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
-        feedforward = SparkCommon.configureFeedforward(getCurrentSlot());
+        configureFeedforward(getCurrentSlot());
 
         configureProfile(configuration);
         configurePID(configuration);
         configureExtras(configuration);
 
+        int i = 0;
+
+        while (i <= 5 && spark.burnFlash() != REVLibError.kOk) {
+            i++;
+        }
+
         return spark.burnFlash() == REVLibError.kOk;
+    }
+
+    protected void configureFeedforward(MotorProperties.Slot slot) {
+        this.feedforward = Feedforward.Type.SIMPLE;
+
+        if (slot.gravityType() == MotorProperties.GravityType.ARM) {
+            this.feedforward = Feedforward.Type.ARM;
+        }
+
+        if (slot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
+            this.feedforward = Feedforward.Type.ELEVATOR;
+        }
+
+        this.feedforward.setFeedforwardConstants(
+                slot.kS(),
+                slot.kV(),
+                slot.kA(),
+                slot.kG()
+        );
+
+        this.kS = slot.kS();
+        this.kV = slot.kV();
+        this.kA = slot.kA();
+        this.kG = slot.kG();
     }
 
     @Override
@@ -332,7 +370,7 @@ public abstract class GenericSparkBase extends Motor {
 
     protected abstract void configureExtras(MotorConfiguration configuration);
 
-    protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, Feedforward.Type feedforward, int slotToUse);
+    protected abstract void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, final Feedforward.Type feedforward, int slotToUse);
 
     protected abstract void configurePID(MotorConfiguration configuration);
 

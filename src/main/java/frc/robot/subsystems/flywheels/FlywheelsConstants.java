@@ -15,8 +15,8 @@ public class FlywheelsConstants {
     private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
-            LEFT_SLOT = new MotorProperties.Slot(5, 0, 0,  0.10904, 0.025022, 0.22468),
-            RIGHT_SLOT = new MotorProperties.Slot(5, 0, 0,  0.10457, 0.037788, 0.05658),
+            LEFT_SLOT = new MotorProperties.Slot(0 /*0.0087812*/, 0, 0,  0.10464, 0, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10464, 0, 0.05658),
 
     SIMULATION_SLOT = new MotorProperties.Slot(12+0.30681, 0, 0,  0.10432, 0.35682, 0.0019243);
 
@@ -25,9 +25,9 @@ public class FlywheelsConstants {
             RIGHT_FLYWHEEL_DIAMETER = 0.1;
 
     protected static final SysIdRoutine.Config SYSID_CONFIG = new SysIdRoutine.Config(
-            Volts.per(Second).of(0.5),
-            Volts.of(2),
-            Second.of(9)
+            Volts.per(Second).of(1),
+            Volts.of(5),
+            Second.of(10)
     );
 
     static {
@@ -48,7 +48,7 @@ public class FlywheelsConstants {
 //        configuration.profiledJerk = 30;
 
         configuration.slot0 = slot;
-//todo: flywheels are oscilating likec razy. insepct.
+
         configuration.closedLoopTolerance = 0.5;
 
         configuration.simulationProperties = new SimulationProperties.Slot(
@@ -63,7 +63,6 @@ public class FlywheelsConstants {
         motor.configure(configuration);
 
         motor.setupSignalUpdates(MotorSignal.VOLTAGE);
-        motor.setupSignalUpdates(MotorSignal.TEMPERATURE);
         motor.setupSignalUpdates(MotorSignal.VELOCITY);
         motor.setupSignalUpdates(MotorSignal.CLOSED_LOOP_TARGET);
     }

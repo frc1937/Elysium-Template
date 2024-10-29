@@ -13,7 +13,7 @@ public class ShooterCommands {
     public static Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setVoltage(-7),
+                        FLYWHEELS.setVoltage(-4),
                         INTAKE.setIntakeSpeed(8),
                         KICKER.setKickerPercentageOutput(-0.5)
                 );
@@ -36,10 +36,8 @@ public class ShooterCommands {
 
     public static Command shootPhysics(Pose3d target, double targetVelocityRPS) {
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(targetVelocityRPS);
-        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target);
-        final Command timer = new WaitCommand(40000);
-
-//        final Command setFlywheelVoltage = FLYWHEELS.setVoltage(-9);
+        final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, targetVelocityRPS);
+        final Command timer = new WaitCommand(2.5);
 
         return setFlywheelVelocity.alongWith(
                 setArmPosition,

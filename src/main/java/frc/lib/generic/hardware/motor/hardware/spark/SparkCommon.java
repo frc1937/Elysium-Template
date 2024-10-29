@@ -2,8 +2,6 @@ package frc.lib.generic.hardware.motor.hardware.spark;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkLowLevel;
-import frc.lib.generic.Feedforward;
-import frc.lib.generic.hardware.motor.MotorProperties;
 
 public class SparkCommon {
     private SparkCommon() {
@@ -26,26 +24,5 @@ public class SparkCommon {
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
         spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
-    }
-
-    protected static Feedforward.Type configureFeedforward(MotorProperties.Slot slot) {
-        Feedforward.Type feedforwardType = Feedforward.Type.SIMPLE;
-
-        if (slot.gravityType() == MotorProperties.GravityType.ARM) {
-            feedforwardType = Feedforward.Type.ARM;
-        }
-
-        if (slot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
-            feedforwardType = Feedforward.Type.ELEVATOR;
-        }
-
-        feedforwardType.setFeedforwardConstants(
-                slot.kS(),
-                slot.kV(),
-                slot.kA(),
-                slot.kG()
-        );
-
-        return feedforwardType;
     }
 }
