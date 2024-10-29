@@ -25,7 +25,7 @@ public class GenericTalonFX extends Motor {
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
     private final boolean[] signalsToLog = new boolean[MotorInputs.MOTOR_INPUTS_LENGTH];
-    private final StatusSignal<Double> positionSignal, velocitySignal, accelerationSignal, voltageSignal, currentSignal, temperatureSignal, closedLoopTarget;
+    private final StatusSignal<Double> positionSignal, velocitySignal, accelerationSignal, voltageSignal, currentSignal, temperatureSignal;
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
 
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
@@ -45,6 +45,8 @@ public class GenericTalonFX extends Motor {
     private boolean shouldUseProfile = false;
     private int slotToUse = 0;
 
+    private double target;
+
     public GenericTalonFX(String name, int deviceId) {
         super(name);
 
@@ -58,11 +60,12 @@ public class GenericTalonFX extends Motor {
         voltageSignal = talonFX.getMotorVoltage().clone();
         currentSignal = talonFX.getStatorCurrent().clone();
         temperatureSignal = talonFX.getDeviceTemp().clone();
-        closedLoopTarget = talonFX.getClosedLoopReference().clone();
     }
 
     @Override
     public void setOutput(MotorProperties.ControlMode mode, double output) {
+        target = output;
+
         switch (mode) {
             case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
@@ -91,6 +94,8 @@ public class GenericTalonFX extends Motor {
     public void setOutput(MotorProperties.ControlMode mode, double output, double feedforward) {
         if (mode != MotorProperties.ControlMode.POSITION && mode != MotorProperties.ControlMode.VELOCITY)
             setOutput(mode, output);
+
+        target = output;
 
         switch (mode) {
             case POSITION -> {
@@ -286,7 +291,6 @@ public class GenericTalonFX extends Motor {
             case VOLTAGE -> setupSignal(voltageSignal, updateFrequency);
             case CURRENT -> setupSignal(currentSignal, updateFrequency);
             case TEMPERATURE -> setupSignal(temperatureSignal, updateFrequency);
-            case CLOSED_LOOP_TARGET -> setupSignal(closedLoopTarget, updateFrequency);
         }
 
         if (!useFasterThread) return;
@@ -300,7 +304,6 @@ public class GenericTalonFX extends Motor {
             case VOLTAGE -> signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
             case CURRENT -> signalQueueList.put("current", OdometryThread.getInstance().registerSignal(this::getCurrentPrivate));
             case TEMPERATURE -> signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(this::getTemperaturePrivate));
-            case CLOSED_LOOP_TARGET -> signalQueueList.put("target", OdometryThread.getInstance().registerSignal(this::getClosedLoopTargetPrivate));
         }
     }
 
@@ -320,7 +323,7 @@ public class GenericTalonFX extends Motor {
         inputs.voltage = getVoltagePrivate();
         inputs.current = getCurrentPrivate();
         inputs.temperature = getTemperaturePrivate();
-        inputs.target = getClosedLoopTargetPrivate();
+        inputs.target = target;
         inputs.systemPosition = getSystemPositionPrivate();
         inputs.systemVelocity = getSystemVelocityPrivate();
         inputs.systemAcceleration = getSystemAccelerationPrivate();
@@ -342,10 +345,6 @@ public class GenericTalonFX extends Motor {
         return voltageSignal.getValue();
     }
 
-    private double getClosedLoopTargetPrivate() {
-        return closedLoopTarget.getValue();
-    }
-
     private double getTemperaturePrivate() {
         return temperatureSignal.getValue();
     }
@@ -355,7 +354,7 @@ public class GenericTalonFX extends Motor {
     }
 
     private void setupSignal(final StatusSignal<Double> correspondingSignal, final int updateFrequency) {
-        signalsToUpdateList.add(correspondingSignal);
         correspondingSignal.setUpdateFrequency(updateFrequency);
+        signalsToUpdateList.add(correspondingSignal);
     }
 }
