@@ -12,18 +12,36 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import frc.lib.generic.PID;
 import frc.lib.util.commands.InitExecuteCommand;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import static frc.robot.RobotContainer.DETECTION_CAMERA;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.SWERVE;
-import static frc.robot.subsystems.swerve.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.DRIVE_BASE_RADIUS;
+import static frc.robot.subsystems.swerve.SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_ROTATION_RAD_PER_S;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
 import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class SwerveCommands {
+    public static Command driveAndRotateToClosestNote(DoubleSupplier translationSupplier, DoubleSupplier strafeSupplier) {
+        final PID controller = new PID(0.07, 0, 0.001);
+
+        return new FunctionalCommand(
+                () -> {},
+                () -> SWERVE.driveSelfRelative(translationSupplier.getAsDouble(), strafeSupplier.getAsDouble(),
+                        -controller.calculate(DETECTION_CAMERA.getYawToClosestTarget(), 0)),
+                (interrupt) -> {},
+                () -> false,
+                SWERVE
+        );
+    }
+
     public static Command lockSwerve() {
         return Commands.run(
                 () -> {
