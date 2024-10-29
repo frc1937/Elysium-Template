@@ -18,6 +18,8 @@ import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.util.Controller;
 import frc.robot.commands.ShooterCommands;
+import frc.robot.poseestimation.objectdetection.DetectionCameraFactory;
+import frc.robot.poseestimation.objectdetection.DetectionCameraIO;
 import frc.robot.poseestimation.poseestimator.PoseEstimator;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.flywheels.Flywheels;
@@ -39,6 +41,8 @@ public class RobotContainer {
     public static final PoseEstimator POSE_ESTIMATOR = new PoseEstimator(
             FRONT_CAMERA
     );
+
+    public static final DetectionCameraIO DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("NotesCamera");
 
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
@@ -144,11 +148,13 @@ public class RobotContainer {
 
         setupDriving(translationSupplier, strafeSupplier);
 
-        driveController.getButton(Controller.Inputs.A)
+        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
                 .whileTrue(SwerveCommands.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
                                 BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 35))
+                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 32))
                 );
+
+        driveController.getButton(Controller.Inputs.A).whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
