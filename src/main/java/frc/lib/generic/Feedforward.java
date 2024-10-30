@@ -12,22 +12,12 @@ public class Feedforward {
         }
     }
 
-    public static class FeedForwardValues {
-        public final double positionRotations, velocityRPS, accelerationRPSPS;
-
-        public FeedForwardValues(double positionRotations, double velocityRPS, double accelerationRPSPS) {
-            this.positionRotations = positionRotations;
-            this.velocityRPS = velocityRPS;
-            this.accelerationRPSPS = accelerationRPSPS;
-        }
-    }
-
     public enum Type {
         SIMPLE, ARM, ELEVATOR
     }
 
-    private FeedForwardConstants constants;
-    private Type type;
+    private final FeedForwardConstants constants;
+    private final Type type;
 
     public Feedforward(Type type, FeedForwardConstants constants) {
         this.type = type;
