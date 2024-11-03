@@ -1,10 +1,10 @@
 package frc.lib.generic.hardware.motor;
 
-import frc.lib.generic.hardware.motor.hardware.spark.GenericSparkFlex;
-import frc.lib.generic.hardware.motor.hardware.spark.GenericSparkMax;
-import frc.lib.generic.hardware.motor.hardware.GenericTalonFX;
-import frc.lib.generic.hardware.motor.hardware.GenericTalonSRX;
-import frc.lib.generic.hardware.motor.hardware.SimulatedMotor;
+import frc.lib.generic.hardware.motor.hardware.rev.GenericSparkFlex;
+import frc.lib.generic.hardware.motor.hardware.rev.GenericSparkMax;
+import frc.lib.generic.hardware.motor.hardware.ctre.GenericTalonFX;
+import frc.lib.generic.hardware.motor.hardware.ctre.GenericTalonSRX;
+import frc.lib.generic.hardware.motor.hardware.simulated.SimulatedMotor;
 import frc.robot.GlobalConstants;
 
 import static frc.robot.GlobalConstants.CURRENT_MODE;

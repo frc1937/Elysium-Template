@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware;
+package frc.lib.generic.hardware.motor.hardware.simulated;
 
 import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;

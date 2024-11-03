@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware;
+package frc.lib.generic.hardware.motor.hardware.simulated;
 
 import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.simulation.GenericSimulation;

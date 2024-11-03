@@ -1,9 +1,10 @@
-package frc.robot.commands;
+package frc.lib.generic.characterization;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.generic.GenericSubsystem;
+import frc.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
 import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
@@ -52,6 +53,8 @@ public class WheelRadiusCharacterization extends Command {
 
     @Override
     public void initialize() {
+        SwerveCommands.driveOpenLoop(() -> 0, () -> 0, () -> 0.1, () -> true);
+
         gyroStartingYawRadians = gyroYawRadiansSupplier.getAsDouble();
         startingWheelPositions = wheelPositionsRadiansSupplier.get();
         accumulatedYawRadians = 0.0;

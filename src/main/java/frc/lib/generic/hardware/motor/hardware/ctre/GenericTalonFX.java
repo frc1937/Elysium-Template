@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware;
+package frc.lib.generic.hardware.motor.hardware.ctre;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;
@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.hardware.motor.*;
+import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 
 import java.util.*;
 import java.util.function.DoubleSupplier;

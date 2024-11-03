@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware;
+package frc.lib.generic.hardware.motor.hardware.ctre;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;

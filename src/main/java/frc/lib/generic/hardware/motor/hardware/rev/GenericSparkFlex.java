@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware.spark;
+package frc.lib.generic.hardware.motor.hardware.rev;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkFlex;

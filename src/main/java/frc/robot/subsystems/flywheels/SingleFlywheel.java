@@ -14,7 +14,7 @@ public class SingleFlywheel {
         this.motor = motor;
         this.flywheelDiameter = flywheelDiameter;
 
-        speedMechanism2d =  new SpeedMechanism2d(motor.getName(), flywheelDiameter, 0.001, motor.getCurrentConfiguration().inverted);
+        speedMechanism2d = new SpeedMechanism2d(motor.getName(), flywheelDiameter, 0.001, motor.getCurrentConfiguration().inverted);
     }
 
     public void periodic() {

@@ -54,7 +54,6 @@ public class MotorProperties {
         VELOCITY();
 
         ControlMode() {
-
         }
     }
 

@@ -9,7 +9,16 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 import java.util.List;
 
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.BOTTOM_WING_DOWNWARDS_ANGLE;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.BOTTOM_WING_POINT_ANGLE;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.MECHANISM_LINE_WIDTH;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.NEGATIVE_VELOCITY_COLOUR;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.NO_VELOCITY_COLOUR;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.POSITIVE_VELOCITY_COLOUR;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.SPEED_ARROW_LENGTH_SCALAR;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.TARGET_COLOUR;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.TOP_WING_POINT_ANGLE;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.TOP_WING_UPWARDS_ANGLE;
 import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.generateArrowLigaments;
 
 /**
