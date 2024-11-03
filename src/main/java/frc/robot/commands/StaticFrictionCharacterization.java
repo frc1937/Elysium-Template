@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorProperties;
 
@@ -11,11 +12,12 @@ public class StaticFrictionCharacterization extends Command {
     private int movedCounter = 0;
     private double rampVoltage;
 
-    public StaticFrictionCharacterization(Motor motor, double startingRampVoltageValue) {
+    public StaticFrictionCharacterization(GenericSubsystem requirement, Motor motor, double startingRampVoltageValue) {
         this.rampVoltage = startingRampVoltageValue;
         this.motor = motor;
 
         startingIdleMode = motor.getCurrentConfiguration().idleMode;
+        addRequirements(requirement);
     }
 
     @Override
