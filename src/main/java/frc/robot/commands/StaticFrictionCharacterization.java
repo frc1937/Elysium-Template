@@ -1,38 +1,54 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-
-import static frc.robot.RobotContainer.ARM;
+import frc.lib.generic.hardware.motor.Motor;
+import frc.lib.generic.hardware.motor.MotorProperties;
 
 public class StaticFrictionCharacterization extends Command {
-    double rampingVoltage = 0.11;
+    private final Motor motor;
+    private final MotorProperties.IdleMode startingIdleMode;
 
-    public StaticFrictionCharacterization() {
+    private int movedCounter = 0;
+    private double rampVoltage;
+
+    public StaticFrictionCharacterization(Motor motor, double startingRampVoltageValue) {
+        this.rampVoltage = startingRampVoltageValue;
+        this.motor = motor;
+
+        startingIdleMode = motor.getCurrentConfiguration().idleMode;
     }
 
     @Override
     public void initialize() {
+        motor.stopMotor();
+        motor.setIdleMode(MotorProperties.IdleMode.BRAKE);
     }
 
     @Override
     public void execute() {
-        ARM.UNSAFE_setVoltage(rampingVoltage);
+        motor.setOutput(MotorProperties.ControlMode.VOLTAGE, rampVoltage);
 
-        if (ARM.getVelocity() != 0) {
-            System.out.println("MOVED AT VOLTAGE OF " + rampingVoltage + " WAS " + ARM.getVelocity());
+        if (motor.getSystemVelocity() != 0) {
+            System.out.print(
+                    "\n<~~~~~~~~~~~~~~>" +
+                    "\nMECHANISM " + motor.getName() + " MOVED AT " + rampVoltage + " with velocity of " + motor.getSystemVelocity() +
+                    "\n<~~~~~~~~~~~~~~>");
+
+            movedCounter++;
         } else {
-            rampingVoltage += 0.001;
-            System.out.println("ARM AIT MOVING speed: " + rampingVoltage);
+            rampVoltage += 0.001;
+            System.out.println("MECHANISM " + motor.getName() + "IS STILL NOT MOVING AT SPEED: " + rampVoltage);
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-
+        motor.stopMotor();
+        motor.setIdleMode(startingIdleMode);
     }
 
     @Override
     public boolean isFinished() {
-        return true;
+        return movedCounter > 3;
     }
 }

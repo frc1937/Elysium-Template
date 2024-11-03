@@ -37,10 +37,6 @@ public class Arm extends GenericSubsystem {
         return ARM_MOTOR.getSystemVelocity();
     }
 
-    public void UNSAFE_setVoltage(double voltage) {
-        ARM_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
-    }
-
     public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double targetVelocityRPS) {
         double[] targetAngleRotations = new double[1];
 

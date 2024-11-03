@@ -89,6 +89,7 @@ public class PoseEstimator6328 {
         } catch (NoSuchElementException ex) {
             return;
         }
+
         // Get odometry based pose at timestamp
         final var sample = poseBuffer.getSample(observation.timestamp);
 
@@ -106,6 +107,7 @@ public class PoseEstimator6328 {
         for (int i = 0; i < 3; ++i) {
             r[i] = observation.stdDevs.get(i, 0) * observation.stdDevs.get(i, 0);
         }
+
         // Solve for closed form Kalman gain for continuous Kalman filter with A = 0
         // and C = I. See wpimath/algorithms.md.
         final Matrix<N3, N3> visionK = new Matrix<>(Nat.N3(), Nat.N3());
@@ -143,7 +145,6 @@ public class PoseEstimator6328 {
 
         return estimatedPose.plus(odometryToSampleTransform);
     }
-
 
     /**
      * Reset estimated pose and odometry pose to pose <br>
