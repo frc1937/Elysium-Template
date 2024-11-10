@@ -115,7 +115,7 @@ public class GenericSparkFlex extends GenericSparkBase {
             case VELOCITY_PID_FF -> {
                 sparkController.setReference(goalState.position * 60,
                         CANSparkBase.ControlType.kVelocity, slotToUse,
-                        feedforward.calculate(goalState.position, goalState.velocity, 0),
+                        feedforward.calculate(goalState.position, goalState.velocity),
                         SparkPIDController.ArbFFUnits.kVoltage);
             }
 

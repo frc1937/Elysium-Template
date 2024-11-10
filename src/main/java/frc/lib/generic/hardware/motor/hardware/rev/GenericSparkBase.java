@@ -56,8 +56,6 @@ public abstract class GenericSparkBase extends Motor {
     private int slotToUse = 0;
     private double conversionFactor = 1;
 
-    private double kS, kV, kA, kG;
-
     protected GenericSparkBase(String name, int deviceId) {
         super(name);
 
@@ -92,11 +90,6 @@ public abstract class GenericSparkBase extends Motor {
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
             case POSITION, VELOCITY -> {
-                if (getDeviceID() == 28) {
-                    this.feedforward = new Feedforward(Feedforward.Type.SIMPLE, new Feedforward.FeedForwardConstants(kS, kV, kA, kG));
-//                    this.feedforward.setFeedforwardConstants(kS, kV, kA, kG);
-                }
-                //todo wtf.. change how you do FF so this doesn;t happen.
                 handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
             }
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
@@ -149,11 +142,6 @@ public abstract class GenericSparkBase extends Motor {
         if (slot.gravityType() == MotorProperties.GravityType.ELEVATOR) {
             this.feedforward = new Feedforward(Feedforward.Type.ELEVATOR, constants);
         }
-
-        this.kS = slot.kS();
-        this.kV = slot.kV();
-        this.kA = slot.kA();
-        this.kG = slot.kG();
     }
 
     @Override
