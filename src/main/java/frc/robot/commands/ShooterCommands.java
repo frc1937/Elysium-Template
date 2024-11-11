@@ -12,8 +12,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.SimulateShootingCommand;
 import frc.robot.subsystems.swerve.SwerveCommands;
 
-import java.util.function.BooleanSupplier;
-
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.RobotContainer.ARM;
 import static frc.robot.RobotContainer.DETECTION_CAMERA;
@@ -26,23 +24,23 @@ public class ShooterCommands {
     public static Command autoDetectAndShoot() {
         final Trigger isNoteVisible = new Trigger(DETECTION_CAMERA::hasResult);
 
-        final Command keepOnRotating = SwerveCommands.driveOpenLoop(() -> 0, () -> 0, () -> 1, () -> true);
+        final Command keepOnRotating = SwerveCommands.driveOpenLoop(() -> 0, () -> 0, () -> 1.8, () -> true);
         final Command gotoToClosestNote =
                 SwerveCommands.driveToClosestNote()
                 .until(isNoteInShooter);
 
-        final Command intakeFloorNote = receiveFloorNote().until(isNoteInShooter).andThen(receiveFloorNote()
-                .withTimeout(0.5));
+        final Command intakeFloorNote = receiveFloorNote().until(isNoteInShooter)
+                .andThen(receiveFloorNote().withTimeout(0.5));
 
         final Command rotateToSpeakerAndShoot = SwerveCommands.rotateToTarget(BLUE_SPEAKER.toPose2d())
                 .alongWith(shootPhysics(BLUE_SPEAKER, 32));
 
+        final Command pickupNoteAndShoot = gotoToClosestNote.alongWith(intakeFloorNote)
+                .andThen(rotateToSpeakerAndShoot);
+
         return new ConditionalCommand(
-                gotoToClosestNote.alongWith(intakeFloorNote)
-                        .andThen(
-                                rotateToSpeakerAndShoot
-                        ),
-                keepOnRotating,
+                pickupNoteAndShoot,
+                keepOnRotating.until(isNoteVisible).andThen(pickupNoteAndShoot),
 
                 isNoteVisible
         );
@@ -52,7 +50,7 @@ public class ShooterCommands {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
                         FLYWHEELS.setVoltage(-5),
-                        INTAKE.setIntakeSpeed(6),
+                        INTAKE.setIntakeSpeedPercentage(0.5),
                         KICKER.setKickerPercentageOutput(-0.6)
                 );
     }
@@ -60,7 +58,7 @@ public class ShooterCommands {
     public static Command outtakeNote() {
         return FLYWHEELS.setTargetVelocity(15)
                 .alongWith(
-                        INTAKE.setIntakeSpeed(-0.5),
+                        INTAKE.setIntakeSpeedPercentage(-0.5),
                         KICKER.setKickerPercentageOutput(0.5)
                 );
     }
@@ -98,8 +96,7 @@ public class ShooterCommands {
         return new ParallelCommandGroup(
                 ARM.setTargetPosition(armAngle),
                 FLYWHEELS.setTargetVelocity(targetRPS),
-//                Note.createAndShootNote(Conversions.rpsToMps(targetRPS, Units.inchesToMeters(4)),
-//                        () -> Rotation2d.fromRotations(ARM.getTargetAngleRotations())),
+                simulateNoteShooting(),
                 shootFromKicker
         );
     }
@@ -108,11 +105,5 @@ public class ShooterCommands {
         return new InstantCommand(
                 () -> new SimulateShootingCommand()
                         .schedule());
-    }
-
-    private BooleanSupplier waitCommand(double time) {
-        final Command command = new WaitCommand(time);
-        command.schedule();
-        return command::isFinished;
     }
 }

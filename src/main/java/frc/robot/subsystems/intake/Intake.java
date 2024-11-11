@@ -8,9 +8,9 @@ import frc.lib.util.commands.ExecuteEndCommand;
 import static frc.robot.subsystems.intake.IntakeConstants.INTAKE_MOTOR;
 
 public class Intake extends GenericSubsystem {
-    public Command setIntakeSpeed(double speed) {
+    public Command setIntakeSpeedPercentage(double speedPercentage) {
         return new ExecuteEndCommand(
-                () -> setPercentageOutput(speed),
+                () -> setPercentageOutput(speedPercentage),
                 this::stop,
                 this
         );
