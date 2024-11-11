@@ -1,6 +1,7 @@
 package frc.lib.math;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 
@@ -24,5 +25,12 @@ public class MathUtils {
         return Rotation2d.fromRadians(Math.atan2(
                 differenceInXY.getY(),
                 differenceInXY.getX()));
+    }
+
+    public static Rotation2d getPitchFromPoseToPose(Pose3d firstPose, Pose3d secondPose) {
+        return Rotation2d.fromRadians(
+                Math.atan2(
+                secondPose.getTranslation().getZ() - firstPose.getTranslation().getZ(),
+                secondPose.getTranslation().getDistance(firstPose.getTranslation())));
     }
 }

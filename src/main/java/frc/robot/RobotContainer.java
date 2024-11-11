@@ -7,6 +7,9 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
@@ -34,7 +37,6 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
-import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
@@ -42,7 +44,12 @@ public class RobotContainer {
             FRONT_CAMERA
     );
 
-    public static final DetectionCameraIO DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("NotesCamera");
+    public static final DetectionCameraIO DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("NotesCamera",
+            new Transform3d(
+                    new Translation3d(0.5, -0.1, 0.5),
+                    new Rotation3d()
+            //todo: put correct values here
+    ));
 
     public static final Swerve SWERVE = new Swerve();
     public static final Arm ARM = new Arm();
@@ -53,6 +60,7 @@ public class RobotContainer {
 
     public static final BuiltInAccelerometer ROBORIO_ACCELEROMETER = new BuiltInAccelerometer();
 
+    public static final Trigger isNoteInShooter = new Trigger(KICKER::doesSeeNote);
     private final Trigger userButton = new Trigger(RobotController::getUserButton);
 
     private final Controller driveController = new Controller(0);
@@ -112,8 +120,8 @@ public class RobotContainer {
             return LOW_BATTERY_THRESHOLD < lowBatteryCounter[0];
         }).onTrue(LEDS.setLEDStatus(Leds.LEDMode.BATTERY_LOW, 5));
 
-        new Trigger(KICKER::doesSeeNote)
-                .whileTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_LOADED, 3))
+        isNoteInShooter
+                .whileTrue(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_LOADED, 50))
                 .toggleOnFalse(LEDS.setLEDStatus(Leds.LEDMode.SHOOTER_EMPTY, 3));
     }
 
@@ -148,20 +156,34 @@ public class RobotContainer {
 
         setupDriving(translationSupplier, strafeSupplier);
 
-        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
-                .whileTrue(SwerveCommands.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
-                                BLUE_SPEAKER.toPose2d(), () -> false)
-                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 32))
-                );
+//        driveController.getButton(Controller.Inputs.RIGHT_BUMPER)
+//                .whileTrue(SwerveCommands.driveWhilstRotatingToTarget(translationSupplier, strafeSupplier,
+//                                BLUE_SPEAKER.toPose2d(), () -> false)
+//                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 32))
+//                );
 
-        driveController.getButton(Controller.Inputs.A).whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
+        driveController.getButton(Controller.Inputs.A)
+            .whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
+
+//        driveController.getButton(Controller.Inputs.B).whileTrue(
+//                new WheelRadiusCharacterization(
+//                        SWERVE,
+//                        MODULE_LOCATIONS,
+//                        SWERVE::getDriveWheelPositionsRadians,
+//                        () -> SWERVE.getGyroHeading().getRadians(),
+//                        SWERVE::runWheelCharacterization
+//                ));
+
+        driveController.getButton(Controller.Inputs.X).whileTrue(
+                ShooterCommands.autoDetectAndShoot()
+        );
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
     }
 
     private void isAtPlaceForAuto() {
-        Pose2d autoPose = new Pose2d(5,5, Rotation2d.fromDegrees(36));
+        Pose2d autoPose = new Pose2d(5, 5, Rotation2d.fromDegrees(36));
 
         Trigger isAtAutonomousPose = new Trigger(() -> {
 //            System.out.println(POSE_ESTIMATOR.getCurrentPose().minus(autoPose).getTranslation().getNorm() + " is the diff in merhak, but in degs: " + POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());

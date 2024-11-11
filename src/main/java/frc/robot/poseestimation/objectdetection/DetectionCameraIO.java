@@ -18,8 +18,16 @@ public class DetectionCameraIO implements LoggableHardware {
 
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) { }
 
+    public boolean hasResult() {
+        return inputs.yaws != null && inputs.yaws.length > 0;
+    }
+
     public double getYawToClosestTarget() {
         return inputs.closestTargetYaw;
+    }
+
+    public double getPitchToClosestTarget() {
+        return inputs.closestTargetPitch;
     }
 
     @Override
@@ -36,6 +44,7 @@ public class DetectionCameraIO implements LoggableHardware {
     @AutoLog
     public static class DetectionCameraInputs {
         public double closestTargetYaw;
+        public double closestTargetPitch;
         public double[] yaws;
     }
 }

@@ -41,8 +41,8 @@ public class FlywheelsConstants {
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.inverted = invert;
 
-        configuration.supplyCurrentLimit = 40;
-        configuration.statorCurrentLimit = 40;
+        configuration.supplyCurrentLimit = 55;
+        configuration.statorCurrentLimit = 55;
 
 //        configuration.profiledTargetAcceleration = 40;
 //        configuration.profiledJerk = 30;

@@ -74,7 +74,7 @@ public class ShooterPhysicsCalculations {
                 .plus(new Transform3d(SHOOTER_LENGTH_METRES, 0, 0, new Rotation3d()));
 
         Logger.recordOutput("ShootingCalculations/NoteExitPoint", noteExitPoseSelfRelative);
-        //todo: calibrate maybe
+        //todo: calibrate maybe - lol
         final Transform3d robotToNoteExitPose = noteExitPoseSelfRelative.minus(new Pose3d());
         final Pose3d currentPose = new Pose3d(POSE_ESTIMATOR.getCurrentPose());
 

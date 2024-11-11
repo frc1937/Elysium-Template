@@ -10,6 +10,11 @@ public class Feedforward {
             this.kA = kA;
             this.kG = kG;
         }
+
+        @Override
+        public String toString() {
+            return "kS: " + kS + " kG: " + kG + " kA" + kA  + " Kv " + kV;
+        }
     }
 
     public enum Type {
@@ -30,11 +35,13 @@ public class Feedforward {
 
     public double calculate(double currentPositionRotations, double velocityRPS, double accelerationRPSPS) {
         double feedforward = constants.kS * Math.signum(velocityRPS) + constants.kV * velocityRPS + constants.kA * accelerationRPSPS;
+
         if (type == Type.ARM) {
             feedforward += constants.kG * Math.cos(currentPositionRotations * 2 * Math.PI);
         } else if (type == Type.ELEVATOR) {
             feedforward += constants.kG;
         }
+        
         return feedforward;
     }
 

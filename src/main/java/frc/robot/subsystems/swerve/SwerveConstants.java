@@ -11,14 +11,12 @@ import frc.lib.generic.hardware.pigeon.Pigeon;
 import frc.lib.generic.hardware.pigeon.PigeonFactory;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
 
-import static edu.wpi.first.units.Units.Inch;
-import static edu.wpi.first.units.Units.Meters;
-
 public class SwerveConstants {
     public static final double DRIVE_GEAR_RATIO = (6.75);
     public static final double STEER_GEAR_RATIO = (150.0 / 7.0);
 
-    public static final double WHEEL_DIAMETER = Meters.convertFrom(4, Inch);
+    public static final double WHEEL_DIAMETER = 0.0465117190934167*2;
+//            Meters.convertFrom(4, Inch);
 
     static final double WHEEL_BASE = 0.565;
     static final double TRACK_WIDTH = 0.615;
@@ -28,14 +26,14 @@ public class SwerveConstants {
 
     public static final double DRIVE_BASE_RADIUS = new Translation2d(TRACK_WIDTH / 2, WHEEL_BASE / 2).getNorm();
     
-    private static final Translation2d[] moduleLocations = {
+    public static final Translation2d[] MODULE_LOCATIONS = {
             new Translation2d(WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0),
             new Translation2d(-WHEEL_BASE / 2.0, TRACK_WIDTH / 2.0),
             new Translation2d(-WHEEL_BASE / 2.0, -TRACK_WIDTH / 2.0)
     };
 
-    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(moduleLocations);
+    public static final SwerveDriveKinematics SWERVE_KINEMATICS = new SwerveDriveKinematics(MODULE_LOCATIONS);
 
     public static final double
             DRIVE_NEUTRAL_DEADBAND = 0.15,

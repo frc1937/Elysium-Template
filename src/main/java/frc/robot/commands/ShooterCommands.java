@@ -3,19 +3,57 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.SimulateShootingCommand;
 import frc.robot.subsystems.swerve.SwerveCommands;
 
-import static frc.robot.RobotContainer.*;
+import java.util.function.BooleanSupplier;
+
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
+import static frc.robot.RobotContainer.ARM;
+import static frc.robot.RobotContainer.DETECTION_CAMERA;
+import static frc.robot.RobotContainer.FLYWHEELS;
+import static frc.robot.RobotContainer.INTAKE;
+import static frc.robot.RobotContainer.KICKER;
+import static frc.robot.RobotContainer.isNoteInShooter;
 
 public class ShooterCommands {
+    public static Command autoDetectAndShoot() {
+        final Trigger isNoteVisible = new Trigger(DETECTION_CAMERA::hasResult);
+
+        final Command keepOnRotating = SwerveCommands.driveOpenLoop(() -> 0, () -> 0, () -> 1, () -> true);
+        final Command gotoToClosestNote =
+                SwerveCommands.driveToClosestNote()
+                .until(isNoteInShooter);
+
+        final Command intakeFloorNote = receiveFloorNote().until(isNoteInShooter).andThen(receiveFloorNote()
+                .withTimeout(0.5));
+
+        final Command rotateToSpeakerAndShoot = SwerveCommands.rotateToTarget(BLUE_SPEAKER.toPose2d())
+                .alongWith(shootPhysics(BLUE_SPEAKER, 32));
+
+        return new ConditionalCommand(
+                gotoToClosestNote.alongWith(intakeFloorNote)
+                        .andThen(
+                                rotateToSpeakerAndShoot
+                        ),
+                keepOnRotating,
+
+                isNoteVisible
+        );
+    }
+
     public static Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setVoltage(-4),
-                        INTAKE.setIntakeSpeed(8),
-                        KICKER.setKickerPercentageOutput(-0.5)
+                        FLYWHEELS.setVoltage(-5),
+                        INTAKE.setIntakeSpeed(6),
+                        KICKER.setKickerPercentageOutput(-0.6)
                 );
     }
 
@@ -37,7 +75,7 @@ public class ShooterCommands {
     public static Command shootPhysics(Pose3d target, double targetVelocityRPS) {
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(targetVelocityRPS);
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, targetVelocityRPS);
-        final Command timer = new WaitCommand(2.5);
+        final Command timer = new WaitCommand(2);
 
         return setFlywheelVelocity.alongWith(
                 setArmPosition,
@@ -46,7 +84,7 @@ public class ShooterCommands {
                         .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
                                 timer.isFinished())
 
-                        .andThen(KICKER.setKickerPercentageOutput(1).alongWith(simulateNoteShooting()))
+                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
         );
     }
 
@@ -70,5 +108,11 @@ public class ShooterCommands {
         return new InstantCommand(
                 () -> new SimulateShootingCommand()
                         .schedule());
+    }
+
+    private BooleanSupplier waitCommand(double time) {
+        final Command command = new WaitCommand(time);
+        command.schedule();
+        return command::isFinished;
     }
 }

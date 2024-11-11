@@ -256,7 +256,6 @@ class ButtonTest {
 // * Also, (https://github.com/Mechanical-Advantage/RobotCode2022/blob/main/src/main/java/frc/robot/RobotState.java)
 // * Great simulations tutorial. (https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2022-build-thread/398645/109?u=wihy)
 //TODO
-// * Get into simulations. seems very interesting.
 // * Log Match Time amount - perhaps you could make longer autons! (Latency cause of FMS, might add around 0.3s for each mode.)
 
 //TODO

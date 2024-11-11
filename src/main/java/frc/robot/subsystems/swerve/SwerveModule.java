@@ -15,7 +15,8 @@ import java.util.Arrays;
 
 import static frc.lib.math.Conversions.rotationsToMetres;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
-import static frc.robot.subsystems.swerve.SwerveConstants.*;
+import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
+import static frc.robot.subsystems.swerve.SwerveConstants.WHEEL_DIAMETER;
 
 public class SwerveModule {
     private final Motor steerMotor, driveMotor;
@@ -28,6 +29,11 @@ public class SwerveModule {
         this.steerMotor = steerMotor;
         this.driveMotor = driveMotor;
         this.steerEncoder = steerEncoder;
+    }
+
+    public double getDriveWheelPositionRadians() {
+        return 2 * Math.PI * getDriveMotorInputs().threadSystemPosition[
+                getDriveMotorInputs().threadSystemPosition.length - 1];
     }
 
     protected void setTargetState(SwerveModuleState state) {

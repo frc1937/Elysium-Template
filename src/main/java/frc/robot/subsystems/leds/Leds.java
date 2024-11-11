@@ -32,7 +32,7 @@ public class Leds extends SubsystemBase {
         return switch (mode) {
             case SHOOTER_LOADED -> getCommandFromColours(() -> generateFlashingBuffer(
                     new Color8Bit(Color.kOrange),
-                    new Color8Bit(Color.kBlue)
+                    new Color8Bit(Color.kRed)
             ), timeout);
 
             case SHOOTER_EMPTY -> getCommandFromColours(() -> generateCirclingBuffer(

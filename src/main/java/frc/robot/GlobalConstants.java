@@ -23,7 +23,7 @@ public class GlobalConstants {
 
     public static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 
-    public static final Pose3d RED_SPEAKER = new Pose3d(new Translation3d(-0.0381+14.56,5.547868, 1.9), new Rotation3d());
+    public static final Pose3d RED_SPEAKER = new Pose3d(new Translation3d(-0.0381+14.56,5.547868, 1.8), new Rotation3d());
     public static final Pose3d BLUE_SPEAKER = new Pose3d(new Translation3d(-0.0381,5.547868, 2), new Rotation3d());
 
     public static final boolean IS_REPLAY = false;

@@ -2,7 +2,6 @@ package frc.robot.subsystems.swerve;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -45,9 +44,27 @@ public class Swerve extends GenericSubsystem {
             currentModule.stop();
     }
 
+    public void runWheelCharacterization(double rotationSpeed) {
+        driveSelfRelative(0, 0, rotationSpeed);
+    }
+
     public Rotation2d getGyroHeading() {
-        final double inputtedHeading = MathUtil.inputModulus(GYRO.getYaw(), -180, 180);
+        final double inputtedHeading =
+//                MathUtil.inputModulus(
+                GYRO.getYaw()
+//                , -180, 180)
+                ;
         return Rotation2d.fromDegrees(inputtedHeading);
+    }
+
+    public double[] getDriveWheelPositionsRadians() {
+        double[] positions = new double[4];
+
+        for (int i = 0; i < MODULES.length; i++) {
+            positions[i] = MODULES[i].getDriveWheelPositionRadians();
+        }
+
+        return positions;
     }
 
     public void setGyroHeading(Rotation2d heading) {

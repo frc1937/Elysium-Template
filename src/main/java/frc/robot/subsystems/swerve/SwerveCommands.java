@@ -12,8 +12,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.generic.PID;
+import frc.lib.util.LoggedTunableNumber;
 import frc.lib.util.commands.InitExecuteCommand;
+import frc.robot.GlobalConstants;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -29,17 +32,53 @@ import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class SwerveCommands {
-    public static Command driveAndRotateToClosestNote(DoubleSupplier translationSupplier, DoubleSupplier strafeSupplier) {
-        final PID controller = new PID(0.07, 0, 0.001);
+    private static final PID YAW_TURN_CONTROLLER = new PID(0.07, 0, 0.001);
+    private static final PID PITCH_DRIVE_CONTROLLER = new PID(0.0095, 0, 0.0001);
 
+    public static Command driveAndRotateToClosestNote(DoubleSupplier translationSupplier, DoubleSupplier strafeSupplier) {
         return new FunctionalCommand(
                 () -> {},
-                () -> SWERVE.driveSelfRelative(translationSupplier.getAsDouble(), strafeSupplier.getAsDouble(),
-                        -controller.calculate(DETECTION_CAMERA.getYawToClosestTarget(), 9)),
+                () -> {
+                    SWERVE.driveSelfRelative(translationSupplier.getAsDouble(), strafeSupplier.getAsDouble(),
+                            YAW_TURN_CONTROLLER.calculate(DETECTION_CAMERA.getYawToClosestTarget(),
+GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION ? 0 : -8.5));
+                },
                 (interrupt) -> {},
                 () -> false,
                 SWERVE
         );
+    }
+
+    public static Command driveToClosestNote() {
+        LoggedTunableNumber number = new LoggedTunableNumber("FuckingPInDriveFOrward", 0.0075);
+
+        return new FunctionalCommand(
+                () -> {},
+                () -> {
+
+                    PITCH_DRIVE_CONTROLLER.setP(number.get());
+
+                    final double
+                            pitch = DETECTION_CAMERA.getPitchToClosestTarget(),
+                            yaw = DETECTION_CAMERA.getYawToClosestTarget();
+
+                    SWERVE.driveSelfRelative(
+                            Math.abs(PITCH_DRIVE_CONTROLLER.calculate(pitch, -12)) + 0.05,
+                            0,
+
+                            YAW_TURN_CONTROLLER.calculate(yaw,
+                                    GlobalConstants.CURRENT_MODE == GlobalConstants.Mode.SIMULATION
+                                            ? 0 : -8.5)
+                    );
+                },
+                (interrupt) -> {},
+                () -> false,
+                SWERVE
+        );
+    }
+
+    public static Command stopDriving() {
+        return new InstantCommand(SWERVE::stop);
     }
 
     public static Command lockSwerve() {
@@ -128,6 +167,6 @@ public class SwerveCommands {
                 },
                 ROTATION_CONTROLLER::atGoal,
                 SWERVE
-        ).withTimeout(5);
+        ).withTimeout(3);
     }
 }
