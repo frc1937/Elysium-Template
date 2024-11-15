@@ -44,6 +44,8 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
 
     @Override
     protected void refreshInputs(DetectionCameraInputsAutoLogged inputs) {
+        if (robotToCamera == null) return;
+
         final double[] closestObjectValues = getClosestVisibleObjectYaw(POSE_ESTIMATOR.getCurrentPose());
 
         if (closestObjectValues[0] != -10069 && closestObjectValues[1] != -10069) {
@@ -58,10 +60,12 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
         double closestDistance = Double.POSITIVE_INFINITY;
         double closestPitch = 0;
 
-        for (Translation2d objectPlacement : NOTES_ON_FIELD) {
-            final Rotation2d angleToObject = getAngleFromPoseToPose(objectPlacement, robotPose.getTranslation());
+        final Pose3d cameraPose = new Pose3d(robotPose).transformBy(robotToCamera);
 
-            if (!isWithinHorizontalFOV(angleToObject, robotPose) || !isWithinDistance(objectPlacement, robotPose))
+        for (Translation2d objectPlacement : NOTES_ON_FIELD) {
+            final Rotation2d angleToObject = getAngleFromPoseToPose(objectPlacement, cameraPose.toPose2d().getTranslation());
+
+            if (!isWithinHorizontalFOV(angleToObject, cameraPose.toPose2d()) || !isWithinDistance(objectPlacement, cameraPose.toPose2d()))
                 continue;
 
             final double distance = getObjectDistance(objectPlacement, robotPose);
@@ -69,8 +73,7 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
             if (distance < closestDistance) {
                 closestObjectYaw = angleToObject.minus(robotPose.getRotation());
 
-                final Pose3d cameraPose = new Pose3d(robotPose).transformBy(robotToCamera);
-                final Pose3d objectPose = new Pose3d(
+                 final Pose3d objectPose = new Pose3d(
                         new Translation3d(objectPlacement.getX(), objectPlacement.getY(), 0),
                         new Rotation3d()
                 );
@@ -85,17 +88,17 @@ public class SimulatedDetectionCamera extends DetectionCameraIO {
         return new double[]{closestObjectYaw.getDegrees(), closestPitch};
     }
 
-    private boolean isWithinHorizontalFOV(Rotation2d objectYaw, Pose2d robotPose) {
-        return Math.abs(objectYaw.minus(robotPose.getRotation()).getRadians()) <= HORIZONTAL_FOV.getRadians() / 2;
+    private boolean isWithinHorizontalFOV(Rotation2d objectYaw, Pose2d cameraPose) {
+        return Math.abs(objectYaw.minus(cameraPose.getRotation()).getRadians()) <= HORIZONTAL_FOV.getRadians() / 2;
     }
 
-    private boolean isWithinDistance(Translation2d objectPlacement, Pose2d robotPose) {
-        final double distance = getObjectDistance(objectPlacement, robotPose);
+    private boolean isWithinDistance(Translation2d objectPlacement, Pose2d cameraPose) {
+        final double distance = getObjectDistance(objectPlacement, cameraPose);
         return distance <= MAXIMUM_DISTANCE_METERS && distance >= MINIMUM_DISTANCE_METERS;
     }
 
-    private double getObjectDistance(Translation2d objectPlacement, Pose2d robotPose) {
-        final Translation2d difference = objectPlacement.minus(robotPose.getTranslation());
+    private double getObjectDistance(Translation2d objectPlacement, Pose2d cameraPose) {
+        final Translation2d difference = objectPlacement.minus(cameraPose.getTranslation());
         return difference.getNorm();
     }
 }
