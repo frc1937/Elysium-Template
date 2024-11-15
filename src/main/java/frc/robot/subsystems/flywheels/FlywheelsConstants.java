@@ -15,8 +15,8 @@ public class FlywheelsConstants {
     private static final Motor RIGHT_FLYWHEEL_MOTOR = MotorFactory.createSpark("RIGHT_FLYWHEEL", 15, MotorProperties.SparkType.FLEX);
 
     private static final MotorProperties.Slot
-            LEFT_SLOT = new MotorProperties.Slot(0 /*0.0087812*/, 0, 0,  0.10464, 0, 0.22468),
-            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10464, 0, 0.05658),
+            LEFT_SLOT = new MotorProperties.Slot(0 /*0.0087812*/, 0, 0,  0.10764, 0, 0.22468),
+            RIGHT_SLOT = new MotorProperties.Slot(0, 0, 0,  0.10764, 0, 0.05658),
 
     SIMULATION_SLOT = new MotorProperties.Slot(12+0.30681, 0, 0,  0.10432, 0.35682, 0.0019243);
 
@@ -41,8 +41,7 @@ public class FlywheelsConstants {
         configuration.idleMode = MotorProperties.IdleMode.COAST;
         configuration.inverted = invert;
 
-        configuration.supplyCurrentLimit = 55;
-        configuration.statorCurrentLimit = 55;
+        configuration.supplyCurrentLimit = 45;
 
 //        configuration.profiledTargetAcceleration = 40;
 //        configuration.profiledJerk = 30;
