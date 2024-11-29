@@ -23,6 +23,28 @@ public class CustomLEDPatterns {
         timer.start();
     }
 
+    public static Color8Bit[] reduceBrightness(Color8Bit[] colours, int brightnessPercentage) {
+        double brightnessFactor = brightnessPercentage / 100.0;
+
+        final Color8Bit[] adjustedColours = new Color8Bit[colours.length];
+
+        for (int i = 0; i < colours.length; i++) {
+            Color8Bit originalColor = colours[i];
+
+            int newRed = (int) (originalColor.red * brightnessFactor);
+            int newGreen = (int) (originalColor.green * brightnessFactor);
+            int newBlue = (int) (originalColor.blue * brightnessFactor);
+
+            newRed = Math.min(255, Math.max(0, newRed));
+            newGreen = Math.min(255, Math.max(0, newGreen));
+            newBlue = Math.min(255, Math.max(0, newBlue));
+
+            adjustedColours[i] = new Color8Bit(newRed, newGreen, newBlue);
+        }
+
+        return adjustedColours;
+    }
+
     /**
      * Generates a buffer with a single colour
      *
