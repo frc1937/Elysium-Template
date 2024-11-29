@@ -18,7 +18,10 @@ import static frc.robot.RobotContainer.DETECTION_CAMERA;
 import static frc.robot.RobotContainer.FLYWHEELS;
 import static frc.robot.RobotContainer.INTAKE;
 import static frc.robot.RobotContainer.KICKER;
+import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 import static frc.robot.RobotContainer.isNoteInShooter;
+import static frc.robot.subsystems.arm.ArmConstants.CURRENT_ANGLE_CALIB;
+import static frc.robot.subsystems.arm.ArmConstants.SHOOTING_ANGLES;
 
 public class ShooterCommands {
     public static Command autoDetectAndShoot() {
@@ -40,17 +43,41 @@ public class ShooterCommands {
 
         return new ConditionalCommand(
                 pickupNoteAndShoot,
-                keepOnRotating.until(isNoteVisible).andThen(pickupNoteAndShoot),
+                keepOnRotating,
+//                        .until(isNoteVisible).andThen(pickupNoteAndShoot),
 
                 isNoteVisible
+        );
+    }
+
+    public static Command calibrate() {
+        final Command timer = new WaitCommand(2);
+
+        return FLYWHEELS.setTargetTangentialVelocityFromRPS(32).alongWith(
+                ARM.setTargetPositionSupplier(CURRENT_ANGLE_CALIB),
+                timer,
+//f\left(x\right)=\frac{180}{\pi}\tan\left(\frac{1.88}{x}\right)\left\{0<x\right\}
+                KICKER.setKickerPercentageOutput(0)
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
+                                timer.isFinished())
+
+                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()).alongWith(
+                                new InstantCommand(() ->
+                                System.out.println("\n-----------------\n" +
+                                        "TO PUT ANGLE DISTANCE AHHH " +
+                                        "\n(" + POSE_ESTIMATOR.getCurrentPose().getTranslation().getDistance(BLUE_SPEAKER.toPose2d().getTranslation())
+                                        + ", "+ CURRENT_ANGLE_CALIB.getAsDouble() + ")" +
+                                        "\n---------------------"
+                                ))
+                        ))
         );
     }
 
     public static Command receiveFloorNote() {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
-                        FLYWHEELS.setVoltage(-5),
-                        INTAKE.setIntakeSpeedPercentage(0.5),
+                        FLYWHEELS.setVoltage(-4.5),
+                        INTAKE.setIntakeSpeedPercentage(1),
                         KICKER.setKickerPercentageOutput(-0.6)
                 );
     }
@@ -70,10 +97,45 @@ public class ShooterCommands {
         );
     }
 
+    public static Command shootFromCalibrationTable(Pose3d target) {
+        final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(32);
+        final Command setArmPosition = ARM.setTargetPositionSupplier(() ->
+                SHOOTING_ANGLES.get(POSE_ESTIMATOR
+                        .getCurrentPose().getTranslation().getDistance(target.toPose2d().getTranslation())));
+
+        final Command timer = new WaitCommand(2);
+
+        return setFlywheelVelocity.alongWith(
+                setArmPosition,
+                timer,
+                KICKER.setKickerPercentageOutput(0)
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
+                                timer.isFinished())
+
+                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
+        );
+    }
+
     public static Command shootPhysics(Pose3d target, double targetVelocityRPS) {
         final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(targetVelocityRPS);
         final Command setArmPosition = ARM.setTargetPhysicsBasedPosition(target, targetVelocityRPS);
         final Command timer = new WaitCommand(2);
+
+        return setFlywheelVelocity.alongWith(
+                setArmPosition,
+                timer,
+                KICKER.setKickerPercentageOutput(0)
+                        .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
+                                timer.isFinished())
+
+                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
+        );
+    }
+
+    public static Command shootPhysicsNoZoneIn(Pose3d target, double targetVelocityRPS) {
+        final Command setFlywheelVelocity = FLYWHEELS.setTargetTangentialVelocityFromRPS(targetVelocityRPS);
+        final Command setArmPosition = ARM.setTargetPhysicsBasedPositionNoZoneIn(target, targetVelocityRPS);
+        final Command timer = new WaitCommand(4);
 
         return setFlywheelVelocity.alongWith(
                 setArmPosition,
