@@ -37,6 +37,7 @@ import java.util.function.DoubleSupplier;
 
 import static frc.lib.util.Controller.Axis.LEFT_X;
 import static frc.lib.util.Controller.Axis.LEFT_Y;
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
 import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.FRONT_CAMERA;
 
 public class RobotContainer {
@@ -46,9 +47,8 @@ public class RobotContainer {
 
     public static final DetectionCameraIO DETECTION_CAMERA = DetectionCameraFactory.createDetectionCamera("NotesCamera",
             new Transform3d(
-                    new Translation3d(0.5, -0.1, 0.5),
+                    new Translation3d(0.3, 0.08, 0.31),
                     new Rotation3d()
-            //todo: put correct values here
     ));
 
     public static final Swerve SWERVE = new Swerve();
@@ -162,8 +162,18 @@ public class RobotContainer {
 //                        .alongWith(ShooterCommands.shootPhysics(BLUE_SPEAKER, 32))
 //                );
 
-        driveController.getButton(Controller.Inputs.A)
-            .whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
+//        driveController.getButton(Controller.Inputs.A)
+//            .whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
+
+        driveController.getButton(Controller.Inputs.B)
+                .whileTrue(ShooterCommands.shootPhysics(
+                        BLUE_SPEAKER, 32
+                ));
+
+        driveController.getStick(Controller.Stick.RIGHT_STICK)
+                .whileTrue(
+                ShooterCommands.shootFromCalibrationTable(BLUE_SPEAKER)
+        );
 
 //        driveController.getButton(Controller.Inputs.B).whileTrue(
 //                new WheelRadiusCharacterization(
@@ -176,6 +186,10 @@ public class RobotContainer {
 
         driveController.getButton(Controller.Inputs.X).whileTrue(
                 ShooterCommands.autoDetectAndShoot()
+        );
+
+        driveController.getButton(Controller.Inputs.Y).whileTrue(
+                ShooterCommands.calibrate()
         );
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());

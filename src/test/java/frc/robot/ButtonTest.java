@@ -5,15 +5,26 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.utilities.ShooterPhysicsCalculations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static frc.robot.GlobalConstants.BLUE_SPEAKER;
+import static frc.robot.utilities.ShooterPhysicsCalculations.PIVOT_POINT_Z_OFFSET_METRES;
+import static java.lang.Math.round;
 
 class ButtonTest {
     private double shooterLength = 2;
@@ -39,7 +50,9 @@ class ButtonTest {
     @Test
     void testButton() {
         DriverStation.silenceJoystickConnectionWarning(true);
-        notWorkingMethod();
+        printPointsForDistancesFromTheta();
+        printPointsForDistanceFromPhysics();
+//        notWorkingMethod();
 //
 //        Random random = new Random();
 //        TrapezoidProfile.State setpoint = new TrapezoidProfile.State();
@@ -47,6 +60,31 @@ class ButtonTest {
 //        for (int i = 0; i < 100; i++) {
 //            setpoint = testTrapezoidalPIDController((int) Math.pow(i, 2), setpoint);//* random.nextInt(10));
 //        }
+    }
+
+    private void printPointsForDistanceFromPhysics() {
+        double incrementedXYDistance = 0.5;
+
+        for (; incrementedXYDistance < 15; incrementedXYDistance+=0.02) {
+            double theta = ShooterPhysicsCalculations.zoneInOnShootingAngleGivenDistance(
+                    incrementedXYDistance
+                    ,BLUE_SPEAKER, 10).getDegrees();
+            System.out.println("(" + Math.floor(incrementedXYDistance*100) / 100 + ", " + theta + ")");
+        }
+    }
+
+    private void printPointsForDistancesFromTheta() {
+        double zDifference = BLUE_SPEAKER.getZ() - PIVOT_POINT_Z_OFFSET_METRES;
+
+        double incrementedXYDistance = 0;
+//\tanh\left(\frac{1.8}{x}\right)180\cdot\frac{1}{\pi} W function. works great.
+        for (; incrementedXYDistance < 5; incrementedXYDistance+=0.2) {
+            double thetaToReach = Units.radiansToDegrees(
+                    Math.tanh(zDifference / incrementedXYDistance)
+            );
+//            System.out.println("THETA TO REACH FROM DISTNACE " + incrementedXYDistance + " IS: " + thetaToReach);
+            System.out.println("(" + Math.floor(incrementedXYDistance*100) / 100 + ", " + Math.floor(thetaToReach * 1000) / 1000 + ")");
+        }
     }
 
     private void testProfiledPIDController(int additionToCurrentAngle) {
@@ -81,7 +119,7 @@ class ButtonTest {
         System.out.println("DegreesPerSecond [DEGS P S]: " + degreesPerSecond);
         System.out.println("RadiansPerSecond [RADS P S]: " + radiansPerSecond);
 
-        System.out.println("(" + Math.round(distanceFromSetpoint) + ", " + Math.round(degreesPerSecond) + ")");
+        System.out.println("(" + round(distanceFromSetpoint) + ", " + round(degreesPerSecond) + ")");
     }
 
     private double toNDecimals(double input, int n) {
@@ -129,8 +167,8 @@ class ButtonTest {
                 targetAngle
         );
 
-        double omegaRads = Math.round(chassisSpeeds.omegaRadiansPerSecond);
-        double difference = Math.round((targetAngle.minus(currentAngle).getDegrees()));
+        double omegaRads = round(chassisSpeeds.omegaRadiansPerSecond);
+        double difference = round((targetAngle.minus(currentAngle).getDegrees()));
 
 //        System.out.println("Another iteration of PID");
 //        System.out.println("Current angle: " + currentAngle.getDegrees() + ", Target angle: " + targetAngle.getDegrees() +
@@ -175,7 +213,7 @@ class ButtonTest {
     }
 
     private double toDegrees(double radians) {
-        return Math.round(radians * 180 / Math.PI);
+        return round(radians * 180 / Math.PI);
     }
 //    private Pose3d getNoteExitPoseTEST(Pose2d robotPose, double targetAngle) {
 //        Rotation2d pitchAngle = Rotation2d.fromDegrees(targetAngle);
