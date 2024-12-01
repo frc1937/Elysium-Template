@@ -2,7 +2,13 @@ package frc.lib.generic.hardware.pigeon;
 
 import frc.lib.generic.advantagekit.LoggableHardware;
 import frc.lib.generic.hardware.HardwareManager;
+import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.Logger;
+
+import java.util.NoSuchElementException;
+
+import static frc.lib.generic.hardware.pigeon.PigeonInputs.PIGEON_INPUTS_LENGTH;
+import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class Pigeon implements LoggableHardware {
     private final PigeonInputs inputs = new PigeonInputs();
@@ -14,10 +20,23 @@ public class Pigeon implements LoggableHardware {
         HardwareManager.addHardware(this);
     }
 
-    public void resetConfigurations() {}
-    public double getYaw() { return inputs.gyroYawDegrees; }
-    public double getPitch() { return inputs.gyroPitchDegrees; }
-    public double getRoll() { return inputs.gyroRollDegrees; }
+    public void configurePigeon(PigeonConfiguration pigeonConfiguration) {}
+
+    public double getYaw() {
+        if (!getSignalsToLog()[0]) printSignalError("YAW");
+        return inputs.gyroYawDegrees;
+    }
+
+    public double getRoll() {
+        if (!getSignalsToLog()[1]) printSignalError("ROLL");
+        return inputs.gyroRollDegrees;
+    }
+
+    public double getPitch() {
+        if (!getSignalsToLog()[2]) printSignalError("PITCH");
+        return inputs.gyroPitchDegrees;
+    }
+
     public void setGyroYaw(double yawDegrees) {}
 
     /**
@@ -26,6 +45,10 @@ public class Pigeon implements LoggableHardware {
     public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) { }
 
     public void setupSignalUpdates(PigeonSignal signal) { setupSignalUpdates(signal, false); }
+
+    public boolean[] getSignalsToLog() {
+        return new boolean[PIGEON_INPUTS_LENGTH];
+    }
 
     @Override
     public void periodic() {
@@ -39,4 +62,13 @@ public class Pigeon implements LoggableHardware {
     }
     
     protected void refreshInputs(PigeonInputs inputs) {}
+
+    private void printSignalError(String signalName) {
+        if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) return;
+
+        new NoSuchElementException("--------------\n" +
+                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT " + getClass().getName() + name +
+                "\n--------------")
+                .printStackTrace();
+    }
 }

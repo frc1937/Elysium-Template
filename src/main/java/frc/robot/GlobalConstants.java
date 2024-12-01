@@ -19,7 +19,6 @@ public class GlobalConstants {
     public static final double MINIMUM_ACCELERATION_FOR_COLLISION = 25; //todo: Tune
 
     public static final double FIELD_LENGTH_METRES = 14.56;
-    public static final double GRAVITY_FORCE = 9.806;
 
     public static final double VOLTAGE_COMPENSATION_SATURATION = 12;
 

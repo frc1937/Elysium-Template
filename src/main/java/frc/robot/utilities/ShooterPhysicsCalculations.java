@@ -5,7 +5,7 @@ import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 
 import static frc.robot.GlobalConstants.BLUE_SPEAKER;
-import static frc.robot.GlobalConstants.GRAVITY_FORCE;
+import static frc.robot.GlobalConstants.GRAVITY;
 import static frc.robot.RobotContainer.ARM;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
 
@@ -86,11 +86,11 @@ public class ShooterPhysicsCalculations {
         final double distanceSquared = noteExitPoseXYDistanceFromTarget * noteExitPoseXYDistanceFromTarget;
 
         final double squareRoot = Math.sqrt(
-                velocitySquared * velocitySquared - (GRAVITY_FORCE * ((GRAVITY_FORCE * distanceSquared) + (2 * velocitySquared * noteExitPoseHeightDifferenceFromTarget)))
+                velocitySquared * velocitySquared - (GRAVITY * ((GRAVITY * distanceSquared) + (2 * velocitySquared * noteExitPoseHeightDifferenceFromTarget)))
         );
 
         final double numerator = reachFromAbove ? velocitySquared + squareRoot : velocitySquared - squareRoot;
-        final double denominator = GRAVITY_FORCE * noteExitPoseXYDistanceFromTarget;
+        final double denominator = GRAVITY * noteExitPoseXYDistanceFromTarget;
         final double fraction = numerator / denominator;
 
         double angleRadians = Math.atan(fraction);
@@ -117,11 +117,11 @@ public class ShooterPhysicsCalculations {
         final double distanceSquared = noteExitPoseXYDistanceFromTarget * noteExitPoseXYDistanceFromTarget;
 
         final double squareRoot = Math.sqrt(
-                velocitySquared * velocitySquared - (GRAVITY_FORCE * ((GRAVITY_FORCE * distanceSquared) + (2 * velocitySquared * noteExitPoseHeightDifferenceFromTarget)))
+                velocitySquared * velocitySquared - (GRAVITY * ((GRAVITY * distanceSquared) + (2 * velocitySquared * noteExitPoseHeightDifferenceFromTarget)))
         );
 
         final double numerator = velocitySquared - squareRoot;
-        final double denominator = GRAVITY_FORCE * noteExitPoseXYDistanceFromTarget;
+        final double denominator = GRAVITY * noteExitPoseXYDistanceFromTarget;
         final double fraction = numerator / denominator;
 
         double angleRadians = Math.atan(fraction);

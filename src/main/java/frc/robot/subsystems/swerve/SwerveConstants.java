@@ -8,6 +8,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.hardware.pigeon.Pigeon;
+import frc.lib.generic.hardware.pigeon.PigeonConfiguration;
 import frc.lib.generic.hardware.pigeon.PigeonFactory;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
 
@@ -64,7 +65,7 @@ public class SwerveConstants {
     }
 
     private static void configureGyro() {
-        GYRO.resetConfigurations();
+        GYRO.configurePigeon(new PigeonConfiguration());
         GYRO.setupSignalUpdates(PigeonSignal.YAW, true);
     }
 
