@@ -252,13 +252,13 @@ public abstract class GenericSparkBase extends Motor {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        if (signalsToLog[0]) inputs.voltage = getVoltagePrivate();
-        if (signalsToLog[1]) inputs.current = spark.getOutputCurrent();
-        if (signalsToLog[2]) inputs.temperature = spark.getMotorTemperature();
-        if (signalsToLog[3] && goalState != null) inputs.target = goalState.position;
-        if (signalsToLog[4]) inputs.systemPosition = getEffectivePosition();
-        if (signalsToLog[5]) inputs.systemVelocity = getEffectiveVelocity();
-        if (signalsToLog[6]) inputs.systemAcceleration = getEffectiveAcceleration();
+        inputs.voltage = getVoltagePrivate();
+        inputs.current = spark.getOutputCurrent();
+        inputs.temperature = spark.getMotorTemperature();
+        if (goalState != null) inputs.target = goalState.position;
+        inputs.systemPosition = getEffectivePosition();
+        inputs.systemVelocity = getEffectiveVelocity();
+        inputs.systemAcceleration = getEffectiveAcceleration();
 
         MotorUtilities.handleThreadedInputs(inputs, signalQueueList);
     }
