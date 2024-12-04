@@ -11,10 +11,14 @@ public class SimulatedMotor extends Motor {
     private MotorConfiguration currentConfiguration;
     private GenericSimulation simulation;
 
+    private final String name;
+
     private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
 
     public SimulatedMotor(String name) {
         super(name);
+
+        this.name = name;
 
         if (CURRENT_MODE != GlobalConstants.Mode.SIMULATION)
             new RuntimeException("DO NOT Initialize THIS MOTOR! Use the factory methods instead!").printStackTrace();
@@ -51,6 +55,11 @@ public class SimulatedMotor extends Motor {
         currentConfiguration = configuration;
 
         simulation = configuration.simulationProperties.getSimulationFromType();
+
+        if (simulation == null) {
+            new RuntimeException("Simulation configurations not found for motor: " + name).printStackTrace();
+            return false;
+        }
 
         configuration.slot0 = configuration.simulationSlot;
         configuration.slot1 = configuration.simulationSlot;
