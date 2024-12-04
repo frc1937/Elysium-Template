@@ -30,14 +30,18 @@ public class GenericPigeon2 extends Pigeon {
     private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
-    public GenericPigeon2(String name, int deviceNumber) {
+    public GenericPigeon2(String name, int deviceNumber, String canbusName) {
         super(name);
 
-        pigeon = new Pigeon2(deviceNumber);
+        pigeon = new Pigeon2(deviceNumber, canbusName);
 
         yawSignal = pigeon.getYaw().clone();
         pitchSignal = pigeon.getPitch().clone();
         rollSignal = pigeon.getRoll().clone();
+    }
+
+    public GenericPigeon2(String name, int deviceNumber) {
+        this(name, deviceNumber, "CAN");
     }
 
     @Override
