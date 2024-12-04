@@ -62,10 +62,10 @@ public class GenericTalonFX extends Motor {
 
     private double target;
 
-    public GenericTalonFX(String name, int deviceId) {
+    public GenericTalonFX(String name, int deviceId, String canbusName) {
         super(name);
 
-        talonFX = new TalonFX(deviceId);
+        talonFX = new TalonFX(deviceId, canbusName);
 
         talonConfigurator = talonFX.getConfigurator();
 
@@ -75,6 +75,10 @@ public class GenericTalonFX extends Motor {
         voltageSignal = talonFX.getMotorVoltage().clone();
         currentSignal = talonFX.getStatorCurrent().clone();
         temperatureSignal = talonFX.getDeviceTemp().clone();
+    }
+
+    public GenericTalonFX(String name, int deviceId) {
+        this(name, deviceId, "CAN");
     }
 
     @Override

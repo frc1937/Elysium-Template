@@ -30,13 +30,17 @@ public class GenericCanCoder extends Encoder {
     private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
     private final StatusSignal<Double> positionSignal, velocitySignal;
 
-    public GenericCanCoder(String name, int canCoderID) {
+    public GenericCanCoder(String name, int canCoderID, String canbusName) {
         super(name);
 
-        canCoder = new CANcoder(canCoderID);
+        canCoder = new CANcoder(canCoderID, canbusName);
 
         positionSignal = canCoder.getPosition().clone();
         velocitySignal = canCoder.getVelocity().clone();
+    }
+
+    public GenericCanCoder(String name, int canCoderID) {
+        this(name, canCoderID, "CAN");
     }
 
     @Override
