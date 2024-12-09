@@ -22,7 +22,6 @@ public class SimulationTalonFX extends Motor {
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
-    private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
     private final VoltageOut voltageRequest = new VoltageOut(0);
 
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0);
@@ -58,7 +57,6 @@ public class SimulationTalonFX extends Motor {
         target = output;
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
 
             case POSITION -> {
