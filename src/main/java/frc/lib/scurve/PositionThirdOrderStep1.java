@@ -61,9 +61,9 @@ class PositionThirdOrderStep1 {
         profile.time[0] = t_acc0 - a0 / jMax;
         profile.time[1] = 0;
         profile.time[2] = t_acc0;
-        profile.time[3] = -(-8 * aMin * (-a0_p3) - 24 * aMin * jMax * (a0 * v0) + 6 * 0
-                * (aMin * aMin - 2 * jMax * 0) - 12 * jMax * (
-                2 * aMin * jMax * pd + aMin * aMin * (0 + vMax) + jMax * (vMax * vMax - 0) + aMin
+        profile.time[3] = -(-8 * aMin * (-a0_p3) - 24 * aMin * jMax * (a0 * v0) -
+                12 * jMax * (
+                2 * aMin * jMax * pd + aMin * aMin * (vMax) + jMax * (vMax * vMax) + aMin
                         * t_acc0 * (a0_a0 - 2 * jMax * (v0 + vMax)))) / (24 * aMin * jMax_jMax * vMax);
 
         if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.ACC1_VEL, jMax, vMax, vMin, aMax, aMin)) {
@@ -93,9 +93,9 @@ class PositionThirdOrderStep1 {
         profile.time[0] = t_acc0 - a0 / jMax;
         profile.time[1] = 0;
         profile.time[2] = t_acc0;
-        profile.time[3] = (0 - a0_p3) / (3 * jMax_jMax * vMax) + (
-                a0 * v0 - 0 + (0 * t_acc1 + a0_a0 * t_acc0) / 2) / (jMax * vMax) - (
-                v0 / vMax + 1.0) * t_acc0 - (0 / vMax + 1.0) * t_acc1 + pd / vMax;
+        profile.time[3] = ( - a0_p3) / (3 * jMax_jMax * vMax) + (
+                a0 * v0 + (a0_a0 * t_acc0) / 2) / (jMax * vMax) - (
+                v0 / vMax + 1.0) * t_acc0 - t_acc1 + pd / vMax;
 
         if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.VEL, jMax, vMax, vMin, aMax, aMin)) {
             return new PositionResult(profile, true);
@@ -108,9 +108,7 @@ class PositionThirdOrderStep1 {
                                   double aMin, double jMax) {
         double h1 = (3 * (-a0_p4 * aMin) + aMax * aMin * (
                 8 * (a0_p3 - 0) + 3 * aMax * aMin * (aMax - aMin) - 6 * aMax * a0_a0) +
-                12 * jMax * (aMax * aMin * ((aMax - 2 * a0) * v0) + aMin * a0_a0 * v0 - aMax
-                        * 0 * 0)) / (3 * (aMax - aMin) * jMax_jMax) + 4 * (
-                aMax * 0 - aMin * v0_v0 - 2 * aMin * aMax * pd) / (aMax - aMin);
+                12 * jMax * (aMax * aMin * ((aMax - 2 * a0) * v0) + aMin * a0_a0 * v0)) / (3 * (aMax - aMin) * jMax_jMax) + 4 * (- aMin * v0_v0 - 2 * aMin * aMax * pd) / (aMax - aMin);
 
         if (h1 >= 0) {
             h1 = Math.sqrt(h1) / 2;
@@ -173,7 +171,7 @@ class PositionThirdOrderStep1 {
 
         double h0_acc0 = 3 * ( - a0_p4) + 8 * (a0_p3) * aMax + 24 * aMax * jMax * (- a0 * v0)
                 - 6 * a0_a0 * (aMax * aMax - 2 * jMax * v0) +
-                12 * jMax * (jMax * (0 - v0_v0 - 2 * aMax * pd) - aMax * aMax * (0 - v0));
+                12 * jMax * (jMax * ( - v0_v0 - 2 * aMax * pd) - aMax * aMax * ( - v0));
         double h2_acc0 = aMax * aMax;
 
         double[] polynom_acc0 = new double[4];
@@ -184,7 +182,7 @@ class PositionThirdOrderStep1 {
 
 
         // ACC1
-        double h3_acc1 = -(a0_a0 + 0) / (2 * jMax * aMin) + aMin / jMax + ( - v0) / aMin;
+        double h3_acc1 = -(a0_a0) / (2 * jMax * aMin) + aMin / jMax + ( - v0) / aMin;
         double t_min_acc1 = (aMin - a0) / jMax;
         double t_max_acc1 = (aMax - a0) / jMax;
 
@@ -227,7 +225,7 @@ class PositionThirdOrderStep1 {
             if (t > DBL_EPSILON) {
                 double h1 = jMax * t * t;
                 double orig = -h2_h2 / (4 * jMax * t) + h2_none * (t) + (
-                        4 * a0_p3 + - 6 * a0_a0 * (0 + 2 * jMax * t) + 12 * (-a0) * jMax
+                        4 * a0_p3 + - 6 * a0_a0 * (2 * jMax * t) + 12 * (-a0) * jMax
                                 * v0 + 3 * jMax_jMax * (-4 * pd + (h1 + 8 * v0) * t)) / (12 * jMax_jMax);
                 double deriv = h2_none + 2 * v0 - a0_a0 / jMax + h2_h2 / (4 * h1) + (3 * h1) / 4;
 
@@ -268,7 +266,7 @@ class PositionThirdOrderStep1 {
             profile.time[3] = 0;
             profile.time[4] = 0;
             profile.time[5] = 0;
-            profile.time[6] = (0 - aMax) / jMax + t;
+            profile.time[6] = ( - aMax) / jMax + t;
 
             if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.ACC0, jMax, vMax, vMin, aMax, aMin)) {
                 return new PositionResult(profile, true);
@@ -320,7 +318,7 @@ class PositionThirdOrderStep1 {
             profile.time[3] = 0;
             profile.time[4] = 0;
             profile.time[5] = h3_acc1 - (2 * a0 + jMax * t) * t / aMin;
-            profile.time[6] = (0 - aMin) / jMax;
+            profile.time[6] = ( - aMin) / jMax;
 
             if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.ACC1, true, jMax, vMax, vMin, aMax, aMin)) {
                 return new PositionResult(profile, true);
@@ -336,13 +334,12 @@ class PositionThirdOrderStep1 {
         profile.time[0] = 0;
         profile.time[1] = 0;
         profile.time[2] = a0 / jMax;
-        profile.time[3] = -(0 - 8 * aMin * (0 - a0_p3) - 24 * aMin * jMax * (a0 * v0 - 0) + 6 * 0
-                * (aMin * aMin - 2 * jMax * 0) - 12 * jMax * (
-                2 * aMin * jMax * pd + aMin * aMin * (0 + vMax) + jMax * (vMax * vMax - 0) + aMin
+        profile.time[3] = -( - 8 * aMin * (- a0_p3) - 24 * aMin * jMax * (a0 * v0) - 12 * jMax * (
+                2 * aMin * jMax * pd + aMin * aMin * (vMax) + jMax * (vMax * vMax) + aMin
                         * a0 * (a0_a0 - 2 * jMax * (v0 + vMax)) / jMax)) / (24 * aMin * jMax_jMax * vMax);
         profile.time[4] = -aMin / jMax;
-        profile.time[5] = -(0 - aMin * aMin + jMax * (vMax - 0)) / (aMin * jMax);
-        profile.time[6] = profile.time[4] + 0 / jMax;
+        profile.time[5] = -(-aMin * aMin + jMax * (vMax)) / (aMin * jMax);
+        profile.time[6] = profile.time[4];
 
         if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.ACC1_VEL, jMax, vMax, vMin, aMax, aMin)) {
             return new PositionResult(profile, true);
@@ -357,8 +354,8 @@ class PositionThirdOrderStep1 {
                        double aMin, double jMax) {
 // Two step
         profile.time[0] = 0;
-        profile.time[1] = (0 - a0_a0 + 2 * jMax * (0 - v0)) / (2 * a0 * jMax);
-        profile.time[2] = (a0 - 0) / jMax;
+        profile.time[1] = ( - a0_a0 + 2 * jMax * ( - v0)) / (2 * a0 * jMax);
+        profile.time[2] = (a0) / jMax;
         profile.time[3] = 0;
         profile.time[4] = 0;
         profile.time[5] = 0;
@@ -371,8 +368,8 @@ class PositionThirdOrderStep1 {
         // Three step - Removed pf
         {
             profile.time[0] = (-a0 + aMax) / jMax;
-            profile.time[1] = (a0_a0 - 2 * aMax * aMax + 2 * jMax * (0 - v0)) / (2 * aMax * jMax);
-            profile.time[2] = (-0 + aMax) / jMax;
+            profile.time[1] = (a0_a0 - 2 * aMax * aMax + 2 * jMax * ( - v0)) / (2 * aMax * jMax);
+            profile.time[2] = (aMax) / jMax;
             profile.time[3] = 0;
             profile.time[4] = 0;
             profile.time[5] = 0;
@@ -385,16 +382,15 @@ class PositionThirdOrderStep1 {
 
         // Three step - Removed aMax
         {
-            double h0 = 3 * (0 - a0_a0 + 2 * jMax * (v0 + 0));
-            double h2 = a0_p3 + 0 + 6 * jMax_jMax * pd + 6 * (0 - a0) * jMax * 0 - 3 * a0 * 0;
+            double h0 = 3 * ( - a0_a0 + 2 * jMax * (v0));
+            double h2 = a0_p3 + 6 * jMax_jMax * pd;
             double h1 = Math.sqrt(
                     2 * (2 * h2 * h2 + h0 * (
-                            a0_p4 - 6 * a0_a0 * (0 + 2 * jMax * 0) + 8 * a0 * (
-                                    0 + 3 * jMax_jMax * pd + 3 * 0 * jMax * 0) - 3 * (4 * jMax_jMax * (- v0_v0))))) *
+                            a0_p4 + 8 * a0 * (3 * jMax_jMax * pd) - 3 * (4 * jMax_jMax * (- v0_v0))))) *
                     Math.abs(jMax) / jMax;
             profile.time[0] = ( 2 * a0_p3 + 12 * jMax_jMax * pd + h1) / (2 * jMax * h0);
             profile.time[1] = -h1 / (jMax * h0);
-            profile.time[2] = (-4 * a0_p3 + 12 * jMax_jMax * pd - 12 * (0 - a0) * jMax *
+            profile.time[2] = (-4 * a0_p3 + 12 * jMax_jMax * pd - 12 * (- a0) * jMax *
                     v0 + h1) / (2 * jMax * h0);
             profile.time[3] = 0;
             profile.time[4] = 0;
@@ -411,7 +407,7 @@ class PositionThirdOrderStep1 {
             double t = (aMax - aMin) / jMax;
 
             profile.time[0] = (-a0 + aMax) / jMax;
-            profile.time[1] = (a0_a0 - 0) / (2 * aMax * jMax) + (0 - v0 + jMax * t * t) / aMax - 2 * t;
+            profile.time[1] = (a0_a0) / (2 * aMax * jMax) + ( - v0 + jMax * t * t) / aMax - 2 * t;
             profile.time[2] = t;
             profile.time[3] = 0;
             profile.time[4] = 0;
@@ -430,18 +426,18 @@ class PositionThirdOrderStep1 {
 
     time_vel_two_step(Profile profile, double vMax, double vMin, double aMax,
                       double aMin, double jMax) {
-        double h1 = Math.sqrt(0 / (2 * jMax_jMax) + (vMax - 0) / jMax);
+        double h1 = Math.sqrt((vMax) / jMax);
         // Four step
         {
 // Solution 3/4
             profile.time[0] = -a0 / jMax;
             profile.time[1] = 0;
             profile.time[2] = 0;
-            profile.time[3] = (0 - a0_p3) / (3 * jMax_jMax * vMax) + (a0 * v0 - 0 + (0 * h1) / 2) / (
-                    jMax * vMax) - (0 / vMax + 1.0) * h1 + pd / vMax;
+            profile.time[3] = ( - a0_p3) / (3 * jMax_jMax * vMax) + (a0 * v0) / (
+                    jMax * vMax) - h1 + pd / vMax;
             profile.time[4] = h1;
             profile.time[5] = 0;
-            profile.time[6] = h1 + 0 / jMax;
+            profile.time[6] = h1;
 
             if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.VEL, jMax, vMax, vMin, aMax, aMin)) {
                 return new PositionResult(profile, true);
@@ -453,12 +449,12 @@ class PositionThirdOrderStep1 {
             profile.time[0] = 0;
             profile.time[1] = 0;
             profile.time[2] = a0 / jMax;
-            profile.time[3] = (0 - a0_p3) / (3 * jMax_jMax * vMax) + (
-                    a0 * v0 - 0 + (0 * h1 + a0_p3 / jMax) / 2) / (jMax * vMax) - (
-                    v0 / vMax + 1.0) * a0 / jMax - (0 / vMax + 1.0) * h1 + pd / vMax;
+            profile.time[3] = ( - a0_p3) / (3 * jMax_jMax * vMax) + (
+                    a0 * v0 + (a0_p3 / jMax) / 2) / (jMax * vMax) - (
+                    v0 / vMax + 1.0) * a0 / jMax - h1 + pd / vMax;
             profile.time[4] = h1;
             profile.time[5] = 0;
-            profile.time[6] = h1 + 0 / jMax;
+            profile.time[6] = h1;
 
             if (profile.check(Profile.ControlSigns.UDDU, Profile.ReachedLimits.VEL, jMax, vMax, vMin, aMax, aMin)) {
                 return new PositionResult(profile, true);
@@ -474,10 +470,10 @@ class PositionThirdOrderStep1 {
                        double aMin, double jMax) {
         // Two step
 
-        double h0 = Math.sqrt((a0_a0 + 0) / 2 + jMax * (0 - v0)) * Math.abs(jMax) / jMax;
+        double h0 = Math.sqrt((a0_a0) / 2 + jMax * ( - v0)) * Math.abs(jMax) / jMax;
         profile.time[0] = (h0 - a0) / jMax;
         profile.time[1] = 0;
-        profile.time[2] = (h0 - 0) / jMax;
+        profile.time[2] = (h0) / jMax;
         profile.time[3] = 0;
         profile.time[4] = 0;
         profile.time[5] = 0;
@@ -537,4 +533,4 @@ class PositionThirdOrderStep1 {
 
         return result.profile;
     }
-} //namespace
+}

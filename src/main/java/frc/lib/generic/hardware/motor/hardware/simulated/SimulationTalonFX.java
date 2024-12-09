@@ -119,7 +119,8 @@ public class SimulationTalonFX extends Motor {
     }
 
     private void configureMotionMagic() {
-        if (currentConfiguration.profileMaxVelocity == 0 || currentConfiguration.profileMaxAcceleration == 0)
+        if (currentConfiguration.profileMaxVelocity == 0 && currentConfiguration.profileMaxAcceleration == 0 && currentConfiguration.profileMaxJerk == 0 ||
+                currentConfiguration.profileMaxVelocity != 0 && currentConfiguration.profileMaxAcceleration == 0 && currentConfiguration.profileMaxJerk == 0)
             return;
 
         talonConfig.MotionMagic.MotionMagicCruiseVelocity = currentConfiguration.profileMaxVelocity;

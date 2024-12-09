@@ -88,9 +88,7 @@ public abstract class GenericSparkBase extends Motor {
 
         switch (mode) {
             case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
-            case POSITION, VELOCITY -> {
-                handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
-            }
+            case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
         }
@@ -306,12 +304,13 @@ public abstract class GenericSparkBase extends Motor {
                 motionType = MotorUtilities.MotionType.POSITION_TRAPEZOIDAL;
             }
         } else if (configuration.profileMaxAcceleration != 0 && configuration.profileMaxJerk != 0) {
-            motionProfile = new TrapezoidProfile(
-                    new TrapezoidProfile.Constraints(
+            motionProfile =
+                    new TrapezoidProfile(
+                        new TrapezoidProfile.Constraints(
                             configuration.profileMaxAcceleration,
                             configuration.profileMaxJerk
-                    )
-            );
+                        )
+                );
 
             motionType = MotorUtilities.MotionType.VELOCITY_TRAPEZOIDAL;
         } else if (feedforward.getConstants().kG != 0 && feedforward.getConstants().kV == 0 && feedforward.getConstants().kA == 0 && feedforward.getConstants().kS == 0) {
