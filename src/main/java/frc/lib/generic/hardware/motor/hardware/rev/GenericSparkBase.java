@@ -87,7 +87,6 @@ public abstract class GenericSparkBase extends Motor {
         setNewGoal(output);
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> sparkController.setReference(output, CANSparkBase.ControlType.kDutyCycle);
             case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
             case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
             case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);

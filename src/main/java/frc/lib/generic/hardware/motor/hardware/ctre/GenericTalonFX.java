@@ -5,7 +5,6 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVelocityVoltage;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
@@ -46,7 +45,6 @@ public class GenericTalonFX extends Motor {
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
-    private final DutyCycleOut dutyCycleRequest = new DutyCycleOut(0);
     private final VoltageOut voltageRequest = new VoltageOut(0);
 
     private final PositionVoltage positionVoltageRequest = new PositionVoltage(0);
@@ -86,23 +84,20 @@ public class GenericTalonFX extends Motor {
         target = output;
 
         switch (mode) {
-            case PERCENTAGE_OUTPUT -> talonFX.setControl(dutyCycleRequest.withOutput(output));
             case VOLTAGE -> talonFX.setControl(voltageRequest.withOutput(output));
 
             case POSITION -> {
-                if (shouldUseProfile) {
+                if (shouldUseProfile)
                     talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
-                } else {
+                else
                     talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
-                }
             }
 
             case VELOCITY -> {
-                if (shouldUseProfile) {
+                if (shouldUseProfile)
                     talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse));
-                } else {
+                else
                     talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
-                }
             }
 
             case CURRENT -> new UnsupportedOperationException("CTRE LOVES money and wants $150!!! dollars for this.. wtf.").printStackTrace();

@@ -9,9 +9,9 @@ import static frc.robot.subsystems.kicker.KickerConstants.BEAM_BREAKER;
 import static frc.robot.subsystems.kicker.KickerConstants.MOTOR;
 
 public class Kicker extends GenericSubsystem {
-    public Command setKickerPercentageOutput(double percentageOutput) {
+    public Command setKickerVoltage(double voltage) {
         return Commands.startEnd(
-                () -> setPercentageOutput(percentageOutput),
+                () -> setVoltageOutput(voltage),
                 this::stop,
                 this
         );
@@ -21,8 +21,8 @@ public class Kicker extends GenericSubsystem {
         return BEAM_BREAKER.get() == 0;
     }
 
-    private void setPercentageOutput(double percentageOutput) {
-        MOTOR.setOutput(MotorProperties.ControlMode.PERCENTAGE_OUTPUT, percentageOutput);
+    private void setVoltageOutput(double voltage) {
+        MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
     private void stop() {

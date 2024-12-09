@@ -57,11 +57,11 @@ public class ShooterCommands {
                 ARM.setTargetPositionSupplier(CURRENT_ANGLE_CALIB),
                 timer,
 //f\left(x\right)=\frac{180}{\pi}\tan\left(\frac{1.88}{x}\right)\left\{0<x\right\}
-                KICKER.setKickerPercentageOutput(0)
+                KICKER.setKickerVoltage(0)
                         .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
                                 timer.isFinished())
 
-                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()).alongWith(
+                        .andThen(KICKER.setKickerVoltage(7).alongWith(simulateNoteShooting()).alongWith(
                                 new InstantCommand(() ->
                                 System.out.println("\n-----------------\n" +
                                         "TO PUT ANGLE DISTANCE AHHH " +
@@ -77,16 +77,16 @@ public class ShooterCommands {
         return ARM.setTargetPosition(Rotation2d.fromDegrees(-20))
                 .alongWith(
                         FLYWHEELS.setVoltage(-4.5),
-                        INTAKE.setIntakeSpeedPercentage(1),
-                        KICKER.setKickerPercentageOutput(-0.6)
+                        INTAKE.setIntakeVoltage(12),
+                        KICKER.setKickerVoltage(-7)
                 );
     }
 
     public static Command outtakeNote() {
         return FLYWHEELS.setTargetVelocity(15)
                 .alongWith(
-                        INTAKE.setIntakeSpeedPercentage(-0.5),
-                        KICKER.setKickerPercentageOutput(0.5)
+                        INTAKE.setIntakeVoltage(-6),
+                        KICKER.setKickerVoltage(6)
                 );
     }
 
@@ -108,11 +108,11 @@ public class ShooterCommands {
         return setFlywheelVelocity.alongWith(
                 setArmPosition,
                 timer,
-                KICKER.setKickerPercentageOutput(0)
+                KICKER.setKickerVoltage(0)
                         .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
                                 timer.isFinished())
 
-                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
+                        .andThen(KICKER.setKickerVoltage(7).alongWith(simulateNoteShooting()))
         );
     }
 
@@ -124,11 +124,11 @@ public class ShooterCommands {
         return setFlywheelVelocity.alongWith(
                 setArmPosition,
                 timer,
-                KICKER.setKickerPercentageOutput(0)
+                KICKER.setKickerVoltage(0)
                         .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
                                 timer.isFinished())
 
-                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
+                        .andThen(KICKER.setKickerVoltage(7).alongWith(simulateNoteShooting()))
         );
     }
 
@@ -140,18 +140,18 @@ public class ShooterCommands {
         return setFlywheelVelocity.alongWith(
                 setArmPosition,
                 timer,
-                KICKER.setKickerPercentageOutput(0)
+                KICKER.setKickerVoltage(0)
                         .until(() -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget() ||
                                 timer.isFinished())
 
-                        .andThen(KICKER.setKickerPercentageOutput(0.7).alongWith(simulateNoteShooting()))
+                        .andThen(KICKER.setKickerVoltage(7).alongWith(simulateNoteShooting()))
         );
     }
 
     public static Command shootWithoutPhysics(double targetRPS, Rotation2d armAngle) {
         ConditionalCommand shootFromKicker = new ConditionalCommand(
-                KICKER.setKickerPercentageOutput(0.5),
-                KICKER.setKickerPercentageOutput(0.0),
+                KICKER.setKickerVoltage(6),
+                KICKER.setKickerVoltage(0.0),
                 () -> FLYWHEELS.hasReachedTarget() && ARM.hasReachedTarget()
         );
 

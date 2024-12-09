@@ -8,16 +8,16 @@ import frc.lib.util.commands.ExecuteEndCommand;
 import static frc.robot.subsystems.intake.IntakeConstants.INTAKE_MOTOR;
 
 public class Intake extends GenericSubsystem {
-    public Command setIntakeSpeedPercentage(double speedPercentage) {
+    public Command setIntakeVoltage(double voltage) {
         return new ExecuteEndCommand(
-                () -> setPercentageOutput(speedPercentage),
+                () -> setVoltageOutput(voltage),
                 this::stop,
                 this
         );
     }
 
-    private void setPercentageOutput(double percentageOutput) {
-        INTAKE_MOTOR.setOutput(MotorProperties.ControlMode.PERCENTAGE_OUTPUT, percentageOutput);
+    private void setVoltageOutput(double voltage) {
+        INTAKE_MOTOR.setOutput(MotorProperties.ControlMode.VOLTAGE, voltage);
     }
 
     private void stop() {

@@ -32,14 +32,6 @@ public class MotorProperties {
         VOLTAGE(),
 
         /**
-         * Control the motor output based on the desired duty cycle.
-         * <p>Control type: Duty cycle control</p>
-         * <p>Units: Percentage (%)</p>
-         * <p>Note: 0.5 represents 50% duty cycle.</p>
-         */
-        PERCENTAGE_OUTPUT(),
-
-        /**
          * Control the motor to achieve a specific position.
          * <p>Control type: Position control</p>
          * <p>Units: Rotations</p>

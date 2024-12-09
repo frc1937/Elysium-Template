@@ -31,7 +31,6 @@ public class GenericTalonSRX extends Motor {
         switch (controlMode) {
             case POSITION -> talonSRX.set(ControlMode.Position, output);
             case VELOCITY -> talonSRX.set(ControlMode.Velocity, output);
-            case PERCENTAGE_OUTPUT -> talonSRX.set(ControlMode.PercentOutput, output);
             case CURRENT -> talonSRX.set(ControlMode.Current, output);
             case VOLTAGE -> talonSRX.setVoltage(output);
         }
