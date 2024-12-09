@@ -44,28 +44,10 @@ public class Arm extends GenericSubsystem {
     public Command setTargetPhysicsBasedPositionNoZoneIn(Pose3d targetPose, double targetVelocityRPS) {
         double[] targetAngleRotations = new double[1];
 
-        int[] i = {0};
-
         return new FunctionalCommand(
-                () -> {
-                    targetAngleRotations[0] =
-                            calculateShootingAngle(targetPose, Conversions.rpsToMps(targetVelocityRPS, FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER)).getRotations();
-                },
-                () -> {
-//                    i[0] = i[0]+1;
-//
-//                    if (i[0] < 5) {
-//                        targetAngleRotations[0] =
-//                                calculateShootingAngle(targetPose,
-//                                        Conversions.rpsToMps(targetVelocityRPS,
-//                                                FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER))
-//                                        .getRotations();
-//                    }
-
-                    setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0]));
-
-//                    i[0] %= 30; //Divide by seconds. Each second, refresh and recalc position!
-                },
+                () -> targetAngleRotations[0] =
+                        calculateShootingAngle(targetPose, Conversions.rpsToMps(targetVelocityRPS, FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER)).getRotations(),
+                () -> setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0])),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
@@ -76,16 +58,10 @@ public class Arm extends GenericSubsystem {
     public Command setTargetPhysicsBasedPosition(Pose3d targetPose, double targetVelocityRPS) {
         double[] targetAngleRotations = new double[1];
 
-//        int[] i = {0};
-
         return new FunctionalCommand(
-                () -> {
-                    targetAngleRotations[0] =
-                            zoneInOnShootingAngle(targetPose, Conversions.rpsToMps(targetVelocityRPS, FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER)).getRotations();
-                },
-                () -> {
-                    setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0] + Units.degreesToRotations(3)));
-                },
+                () -> targetAngleRotations[0] =
+                        zoneInOnShootingAngle(targetPose, Conversions.rpsToMps(targetVelocityRPS, FlywheelsConstants.RIGHT_FLYWHEEL_DIAMETER)).getRotations(),
+                () -> setMotorTargetPosition(Rotation2d.fromRotations(targetAngleRotations[0] + Units.degreesToRotations(3))),
                 interrupted -> ARM_MOTOR.stopMotor(),
                 () -> false,
                 this
