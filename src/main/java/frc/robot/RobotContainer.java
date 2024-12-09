@@ -5,12 +5,9 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -58,8 +55,6 @@ public class RobotContainer {
     public static final Kicker KICKER = new Kicker();
     public static final Leds LEDS = new Leds();
 
-    public static final BuiltInAccelerometer ROBORIO_ACCELEROMETER = new BuiltInAccelerometer();
-
     public static final Trigger isNoteInShooter = new Trigger(KICKER::doesSeeNote);
     private final Trigger userButton = new Trigger(RobotController::getUserButton);
 
@@ -80,8 +75,6 @@ public class RobotContainer {
         setupBrakeMode();
 
         configureButtons(ButtonLayout.TELEOP);
-
-//        isAtPlaceForAuto();
     }
 
     private void configureButtons(ButtonLayout layout) {
@@ -194,21 +187,5 @@ public class RobotContainer {
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());
-    }
-
-    private void isAtPlaceForAuto() {
-        Pose2d autoPose = new Pose2d(5, 5, Rotation2d.fromDegrees(36));
-
-        Trigger isAtAutonomousPose = new Trigger(() -> {
-//            System.out.println(POSE_ESTIMATOR.getCurrentPose().minus(autoPose).getTranslation().getNorm() + " is the diff in merhak, but in degs: " + POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
-            return POSE_ESTIMATOR.getCurrentPose().minus(autoPose).getTranslation().getNorm() < 0.5 &&
-                    POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees() < 1;
-        });
-
-//        isAtAutonomousPose.toggleOnTrue(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5)
-//                .alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
-//        isAtAutonomousPose.whileFalse(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5).alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
-//        isAtAutonomousPose.whileTrue(LEDS.setLEDStatus(Leds.LEDMode.NOT_AT_AUTO_PLACE, 5).alongWith( new InstantCommand(() -> System.out.println("At autonomous pose"))));
-
     }
 }

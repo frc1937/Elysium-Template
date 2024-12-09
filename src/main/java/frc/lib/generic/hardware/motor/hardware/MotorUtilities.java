@@ -6,6 +6,11 @@ import java.util.Map;
 import java.util.Queue;
 
 public class MotorUtilities {
+    public enum MotionType {
+        POSITION_PID, POSITION_PID_WITH_KG, POSITION_S_CURVE, POSITION_TRAPEZOIDAL,
+        VELOCITY_PID_FF, VELOCITY_TRAPEZOIDAL
+    }
+
     public static void handleThreadedInputs(MotorInputs inputs, Map<String, Queue<Double>> signalQueueList) {
         if (signalQueueList.isEmpty()) return;
 

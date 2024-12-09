@@ -87,8 +87,8 @@ public class Motor implements LoggableHardware {
      * </p>
      *
      * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
-     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profiledMaxVelocity profiledMaxVelocity}
-     * and {@link MotorConfiguration#profiledTargetAcceleration profiledTargetAcceleration} are set.
+     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profileMaxVelocity profiledMaxVelocity}
+     * and {@link MotorConfiguration#profileMaxAcceleration profiledTargetAcceleration} are set.
      * The motor will calculate the needed feedforward based on the provided gains.
      * </p>
      *
@@ -114,8 +114,8 @@ public class Motor implements LoggableHardware {
      * </p>
      *
      * <p>For {@link MotorProperties.ControlMode#POSITION POSITION} and {@link MotorProperties.ControlMode#VELOCITY VELOCITY} control modes,
-     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profiledMaxVelocity profiledMaxVelocity}
-     * and {@link MotorConfiguration#profiledTargetAcceleration profiledTargetAcceleration} are set.
+     * a trapezoidal motion profile can optionally be used. To enable it, ensure both {@link MotorConfiguration#profileMaxVelocity profiledMaxVelocity}
+     * and {@link MotorConfiguration#profileMaxAcceleration profiledTargetAcceleration} are set.
      * </p>
      *
      * <p>The custom feedforward is used to provide additional control over the motor output, allowing for fine-tuned

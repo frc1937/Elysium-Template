@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import static frc.robot.GlobalConstants.GRAVITY;
 import static frc.robot.GlobalConstants.MINIMUM_ACCELERATION_FOR_COLLISION;
-import static frc.robot.RobotContainer.ROBORIO_ACCELEROMETER;
+import static frc.robot.GlobalConstants.ROBORIO_ACCELEROMETER;
 
 public class Optimizations {
     /**

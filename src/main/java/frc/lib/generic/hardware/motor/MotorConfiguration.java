@@ -2,8 +2,6 @@ package frc.lib.generic.hardware.motor;
 
 import frc.lib.generic.simulation.SimulationProperties;
 
-import frc.lib.generic.simulation.SimulationProperties;
-
 /**
  * Generic configurations class with default values
  */
@@ -14,8 +12,6 @@ public class MotorConfiguration {
     public MotorProperties.Slot slot0 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
     public MotorProperties.Slot slot1 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
     public MotorProperties.Slot slot2 = new MotorProperties.Slot(0, 0, 0, 0, 0, 0, 0, null);
-
-    public SimulationProperties.Slot simSlot = new SimulationProperties.Slot(null, null, 0, 0);
 
     public int slotToUse = 0;
 
@@ -76,7 +72,7 @@ public class MotorConfiguration {
      *   <li> <b>Units:</b> rps
      * </ul>
      */
-    public double profiledMaxVelocity = 0;
+    public double profileMaxVelocity = 0;
 
     /**
      * This is the target acceleration the motion profile will try to honour.
@@ -89,11 +85,10 @@ public class MotorConfiguration {
      *   <li> <b>Units:</b> rot per sec²
      * </ul>
      */
-    public double profiledTargetAcceleration = 0;
+    public double profileMaxAcceleration = 0;
 
     /**
-     * This is the target jerk of the velocity motion profile will try to honour.
-     * Only set this if a VELOCITY profile is desired.
+     * This is the maximum jerk the motion profile will try to honour.
      *
      * <ul>
      *   <li> <b>Minimum Value:</b> 0
@@ -102,7 +97,7 @@ public class MotorConfiguration {
      *   <li> <b>Units:</b> rot per sec²
      * </ul>
      */
-    public double profiledJerk = 0;
+    public double profileMaxJerk = 0;
 
     /**
      * Tolerance for closed-loop control, used for determining if the target is reached.
