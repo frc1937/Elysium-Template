@@ -9,6 +9,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.scurve.InputParameter;
 import frc.lib.scurve.OutputParameter;
 import frc.lib.scurve.UpdateResult;
@@ -97,7 +98,7 @@ public class GenericSparkFlex extends GenericSparkBase {
         //check if works, and if theres a default
     }
 
-    protected void handleSmoothMotion(SparkCommon.MotionType motionType,
+    protected void handleSmoothMotion(MotorUtilities.MotionType motionType,
                                       TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
                                       Feedforward feedforward, int slotToUse) {
         if (goalState == null) return;
@@ -105,6 +106,13 @@ public class GenericSparkFlex extends GenericSparkBase {
         double feedforwardOutput, acceleration;
 
         switch (motionType) {
+            case POSITION_PID_WITH_KG -> {
+                sparkController.setReference(goalState.position,
+                        CANSparkBase.ControlType.kPosition, slotToUse,
+                        feedforward.calculate(getEffectivePosition(), 0, 0),
+                        SparkPIDController.ArbFFUnits.kVoltage);
+            }
+
             case POSITION_PID -> {
                 sparkController.setReference(goalState.position,
                         CANSparkBase.ControlType.kPosition, slotToUse,
@@ -143,7 +151,6 @@ public class GenericSparkFlex extends GenericSparkBase {
                         CANSparkBase.ControlType.kVelocity,
                         slotToUse, feedforwardOutput,
                         SparkPIDController.ArbFFUnits.kVoltage);
-
 
                 previousSetpoint = currentSetpoint;
                 lastProfileCalculationTimestamp = Logger.getRealTimestamp();

@@ -5,6 +5,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
 import frc.lib.generic.PID;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
+import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
 import frc.lib.scurve.InputParameter;
 import frc.lib.scurve.OutputParameter;
 import frc.lib.scurve.UpdateResult;
@@ -81,7 +82,7 @@ public class GenericSparkMax extends GenericSparkBase {
             feedback.enableContinuousInput(-0.5, 0.5);
     }
 
-    protected void handleSmoothMotion(SparkCommon.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
+    protected void handleSmoothMotion(MotorUtilities.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile,
                                       Feedforward feedforward, int slotToUse) {
         if (goalState == null) return;
 
@@ -116,6 +117,11 @@ public class GenericSparkMax extends GenericSparkBase {
             }
 
             case POSITION_PID -> feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
+            case POSITION_PID_WITH_KG -> {
+                feedforwardOutput = feedforward.calculate(getEffectivePosition(), 0, 0);
+                feedbackOutput = this.feedback.calculate(getEffectivePosition(), goalState.position);
+            }
+
 
             case POSITION_S_CURVE -> {
                 final UpdateResult result = getSCurveGenerator().update(scurveInputs, scurveOutput);
