@@ -70,6 +70,7 @@ public enum HardwareManager {
         }
 
         Logger.start();
+        Logger.disableConsoleCapture();
     }
 
 

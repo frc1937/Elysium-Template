@@ -4,70 +4,45 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color8Bit;
+import org.littletonrobotics.junction.Logger;
 
-import java.util.List;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.createDefaultRoot;
 
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.MECHANISM_LINE_LENGTH;
-import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.generateLigaments;
-
-/**
- * A Mechanism2d object to display the current angle and the target angle of a single jointed arm.
- */
 public class SingleJointedArmMechanism2d {
-    private final String key;
+    private final String name;
+    private final Mechanism2d armMechanism;
+    private final MechanismRoot2d root;
+    private MechanismLigament2d
+            currentAngleLigament,
+            targetAngleLigament;
 
-    private final Mechanism2d mechanism;
-    private final MechanismLigament2d
-            currentPositionLigament,
-            targetPositionLigament;
+    public SingleJointedArmMechanism2d(String name, double armLength, Rotation2d defaultAngle) {
+        this.name = name;
+        this.armMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        this.root = createDefaultRoot("armRoot", armMechanism);
 
-    public SingleJointedArmMechanism2d(String key, Color8Bit mechanismColor) {
-        this.key = key;
-
-        this.mechanism = new Mechanism2d(2 * MECHANISM_LINE_LENGTH,
-                2 * MECHANISM_LINE_LENGTH);
-
-        MechanismRoot2d root = mechanism.getRoot(
-                "AngleRoot",
-                MECHANISM_LINE_LENGTH,
-                MECHANISM_LINE_LENGTH
-        );
-
-        List<MechanismLigament2d> ligaments = generateLigaments(mechanismColor, MECHANISM_LINE_LENGTH);
-
-        this.currentPositionLigament = root.append(ligaments.get(0));
-        this.targetPositionLigament = root.append(ligaments.get(1));
+        createCurrent(armLength, defaultAngle);
+        createTarget(armLength, defaultAngle);
     }
 
-    /**
-     * Updates the mechanism's angle and target angle, then logs the Mechanism2d object.
-     *
-     * @param currentAngle the current angle
-     * @param targetAngle  the target angle
-     */
-    public void updateMechanism(Rotation2d currentAngle, Rotation2d targetAngle) {
-        setTargetAngle(targetAngle);
-        updateMechanism(currentAngle);
+    public void updateCurrentAngle(Rotation2d currentAngle) {
+        currentAngleLigament.setAngle(currentAngle);
+        Logger.recordOutput(name, armMechanism);
     }
 
-    /**
-     * Updates the mechanism's angle, then logs the Mechanism2d object.
-     *
-     * @param currentAngle the current angle
-     */
-    public void updateMechanism(Rotation2d currentAngle) {
-        currentPositionLigament.setAngle(currentAngle);
-        SmartDashboard.putData("Mechanisms/" + key, mechanism);
+    public void updateTargetAngle(Rotation2d targetAngle) {
+        targetAngleLigament.setAngle(targetAngle);
+        Logger.recordOutput(name, armMechanism);
     }
 
-    /**
-     * Sets the target angle of the mechanism.
-     *
-     * @param targetAngle the target angle
-     */
-    public void setTargetAngle(Rotation2d targetAngle) {
-        targetPositionLigament.setAngle(targetAngle);
+    private void createCurrent(double armLength, Rotation2d defaultAngle) {
+        currentAngleLigament = new MechanismLigament2d("armLigament", armLength, defaultAngle.getDegrees(), DEFAULT_LINE_WIDTH, BLUE);
+        root.append(currentAngleLigament);
+    }
+
+    private void createTarget(double armLength, Rotation2d defaultAngle) {
+        targetAngleLigament = new MechanismLigament2d("targetArmLigament", armLength, defaultAngle.getDegrees(), DEFAULT_LINE_WIDTH, GRAY);
+        root.append(targetAngleLigament);
     }
 }

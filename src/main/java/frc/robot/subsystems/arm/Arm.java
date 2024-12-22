@@ -93,7 +93,7 @@ public class Arm extends GenericSubsystem {
 
     @Override
     public void periodic() {
-        ARM_MECHANISM.updateMechanism(Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()));
+        ARM_MECHANISM.updateCurrentAngle(Rotation2d.fromRotations(ARM_MOTOR.getSystemPosition()));
     }
 
     public double getTargetAngleRotations() {
@@ -128,6 +128,6 @@ public class Arm extends GenericSubsystem {
 
     private void setMotorTargetPosition(Rotation2d targetPosition) {
         ARM_MOTOR.setOutput(MotorProperties.ControlMode.POSITION, targetPosition.getRotations());
-        ARM_MECHANISM.setTargetAngle(targetPosition);
+        ARM_MECHANISM.updateTargetAngle(targetPosition);
     }
 }

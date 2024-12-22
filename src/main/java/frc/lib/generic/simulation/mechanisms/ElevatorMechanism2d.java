@@ -3,73 +3,58 @@ package frc.lib.generic.simulation.mechanisms;
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj.util.Color8Bit;
+import org.littletonrobotics.junction.Logger;
 
-import java.util.List;
-
-import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.generateLigaments;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.createDefaultRoot;
+import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.createElevatorOutline;
 
 public class ElevatorMechanism2d {
-    private final String key;
+    private final String name;
+    private final Mechanism2d elevatorMechanism;
+    private final MechanismRoot2d
+            root,
+            targetRoot;
 
-    private final Mechanism2d mechanism;
-    private final MechanismLigament2d
-            currentPositionLigament,
-            targetPositionLigament;
+    public ElevatorMechanism2d(String name, double elevatorLength) {
+        this.name = name;
+        this.elevatorMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, 20);
 
-    private final double minimumLength;
+        this.root = createDefaultRoot("elevatorRoot", elevatorMechanism);
+        this.targetRoot = createDefaultRoot("elevatorTargetRoot", elevatorMechanism);
 
-    /**
-     * Constructs an ElevatorMechanism2d object.
-     *
-     * @param key            the key of the mechanism
-     * @param minimumLength  the minimum length of the elevator
-     * @param maximumLength  the maximum length of the elevator
-     * @param mechanismColor the color of the mechanism
-     */
-    public ElevatorMechanism2d(String key, double minimumLength, double maximumLength, Color8Bit mechanismColor) {
-        this.key = key;
-
-        this.minimumLength = minimumLength;
-        this.mechanism = new Mechanism2d(maximumLength, maximumLength);
-
-        MechanismRoot2d currentPositionRoot = mechanism.getRoot("ZCurrentPositionRoot", 0.5 * maximumLength, 0);
-        MechanismRoot2d targetPositionRoot = mechanism.getRoot("TargetPositionRoot", 0.5 * maximumLength, 0);
-
-        List<MechanismLigament2d> ligaments = generateLigaments(mechanismColor, minimumLength, maximumLength);
-
-        this.currentPositionLigament = currentPositionRoot.append(ligaments.get(0));
-        this.targetPositionLigament = targetPositionRoot.append(ligaments.get(1));
+        createCurrentLigament(elevatorLength);
+        createTargetLigament(elevatorLength);
+        createOutlineLigament();
     }
 
-    /**
-     * Updates the mechanism's position and target position, then logs the Mechanism2d object.
-     *
-     * @param currentPosition the current position
-     * @param targetPosition  the target position
-     */
-    public void updateMechanism(double currentPosition, double targetPosition) {
-        setTargetPosition(targetPosition);
-        updateMechanism(currentPosition);
+    public void updateCurrentPosition(double position) {
+        root.setPosition(DEFAULT_ROOT_X, DEFAULT_ROOT_Y + position);
+        Logger.recordOutput(name, elevatorMechanism);
     }
 
-    /**
-     * Updates the mechanism's position, then logs the Mechanism2d object.
-     *
-     * @param currentPosition the current position
-     */
-    public void updateMechanism(double currentPosition) {
-        currentPositionLigament.setLength(currentPosition + minimumLength);
-        SmartDashboard.putData("Mechanism/" + key, mechanism);
+    public void updateTargetPosition(double targetPosition) {
+        targetRoot.setPosition(DEFAULT_ROOT_X, DEFAULT_ROOT_Y + targetPosition);
+        Logger.recordOutput(name, elevatorMechanism);
     }
 
-    /**
-     * Sets the target position of the mechanism, but doesn't log the Mechanism2d object.
-     *
-     * @param targetPosition the target position
-     */
-    public void setTargetPosition(double targetPosition) {
-        targetPositionLigament.setLength(targetPosition + minimumLength);
+    private void createCurrentLigament(double elevatorLength) {
+        final MechanismLigament2d currentRightLigament = new MechanismLigament2d("elevatorRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, RED);
+        final MechanismLigament2d currentLeftLigament = new MechanismLigament2d("elevatorLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, RED);
+
+        root.append(currentRightLigament);
+        root.append(currentLeftLigament);
+    }
+
+    private void createTargetLigament(double elevatorLength) {
+        final MechanismLigament2d targetRightLigament = new MechanismLigament2d("targetRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, BLUE);
+        final MechanismLigament2d targetLeftLigament = new MechanismLigament2d("targetLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, BLUE);
+
+        targetRoot.append(targetRightLigament);
+        targetRoot.append(targetLeftLigament);
+    }
+
+    private void createOutlineLigament() {
+        createElevatorOutline(elevatorMechanism);
     }
 }

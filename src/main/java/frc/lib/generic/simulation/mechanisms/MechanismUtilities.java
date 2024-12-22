@@ -1,46 +1,28 @@
 package frc.lib.generic.simulation.mechanisms;
 
+import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.util.Color8Bit;
-
-import java.util.ArrayList;
-import java.util.List;
+import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 
 import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.simulation.mechanisms.MechanismConstants.GRAY;
+
 
 public class MechanismUtilities {
-
-    public static List<MechanismLigament2d> generateLigaments(Color8Bit mechanismColour, double currentLength, double targetLength) {
-        List<MechanismLigament2d> ligaments = new ArrayList<>();
-
-        try (MechanismLigament2d currentPose = new MechanismLigament2d(CURRENT_POS, currentLength, 0, MECHANISM_LINE_WIDTH, mechanismColour)) {
-            ligaments.add(currentPose);
-        }
-
-        try (MechanismLigament2d targetPose = new MechanismLigament2d(TARGET_POS, targetLength, 0, MECHANISM_LINE_WIDTH, TARGET_COLOUR)) {
-            ligaments.add(targetPose);
-        }
-
-        return ligaments;
+    protected static MechanismRoot2d createDefaultRoot(String name, Mechanism2d mechanism) {
+        return mechanism.getRoot(name, DEFAULT_ROOT_X, DEFAULT_ROOT_Y);
     }
 
-    public static List<MechanismLigament2d> generateLigaments(Color8Bit mechanismColour, double length) {
-        return generateLigaments(mechanismColour, length, length);
-    }
+    protected static void createElevatorOutline(Mechanism2d mechanism) {
+        final MechanismRoot2d outlineRoot = mechanism.getRoot("outlineRoot", 1, 1);
 
-    public static List<MechanismLigament2d> generateArrowLigaments(String name, Color8Bit mechanismColour, double length) {
-        List<MechanismLigament2d> ligaments = new ArrayList<>();
+        final MechanismLigament2d
+                outlineTop = new MechanismLigament2d("outlineTop", 8, -90, DEFAULT_LINE_WIDTH, GRAY),
+                outlineLeft = new MechanismLigament2d("outlineLeft", 18, 90, DEFAULT_LINE_WIDTH, GRAY),
+                outlineRight = new MechanismLigament2d("outlineRight", 18, -90, DEFAULT_LINE_WIDTH, GRAY);
 
-        try (MechanismLigament2d topWing = new MechanismLigament2d("TopArrowWing" + name
-                , length, TOP_WING_UPWARDS_ANGLE, MECHANISM_LINE_WIDTH, mechanismColour)) {
-            ligaments.add(topWing);
-        }
-
-        try (MechanismLigament2d bottomWing = new MechanismLigament2d("BottomArrowWing" + name
-                , length, BOTTOM_WING_DOWNWARDS_ANGLE, MECHANISM_LINE_WIDTH, mechanismColour)) {
-            ligaments.add(bottomWing);
-        }
-
-        return ligaments;
+        outlineTop.append(outlineRight);
+        outlineRoot.append(outlineLeft);
+        outlineLeft.append(outlineTop);
     }
 }
