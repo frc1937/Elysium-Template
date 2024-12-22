@@ -25,8 +25,8 @@ public class SpeedMechanism2d {
         this.speedMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("speedMechanismRoot", speedMechanism);
 
-        createCurrent();
-        createTarget();
+        createCurrentLigament();
+        createTargetLigament();
     }
 
     public void updateCurrentSpeed(double speedRPS) {
@@ -73,7 +73,7 @@ public class SpeedMechanism2d {
         Logger.recordOutput(name, speedMechanism);
     }
 
-    private void createCurrent() {
+    private void createCurrentLigament() {
         currentSpeedLigament = new MechanismLigament2d("currentSpeed", 5, 0, DEFAULT_LINE_WIDTH, GREEN);
         currentArrowTopLigament = new MechanismLigament2d("currentArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
         currentArrowBottomLigament = new MechanismLigament2d("currentArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
@@ -83,7 +83,7 @@ public class SpeedMechanism2d {
         root.append(currentSpeedLigament);
     }
 
-    private void createTarget() {
+    private void createTargetLigament() {
         targetSpeedLigament = new MechanismLigament2d("targetSpeed", 5, 0, DEFAULT_LINE_WIDTH, GRAY);
         targetArrowTopLigament = new MechanismLigament2d("targetArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
         targetArrowBottomLigament = new MechanismLigament2d("targetArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
