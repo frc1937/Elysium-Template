@@ -53,12 +53,12 @@ public class ArmElevatorMechanism2d {
     }
 
     private void createCurrentLigaments(double elevatorLength) {
-        currentLigament = new MechanismLigament2d("armElevatorLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, RED);
+        currentLigament = new MechanismLigament2d("armElevatorLigament", elevatorLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, RED);
         root.append(currentLigament);
     }
 
     private void createTargetLigaments(double elevatorLength) {
-        targetLigament = new MechanismLigament2d("targetArmElevatorLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, BLUE);
+        targetLigament = new MechanismLigament2d("targetArmElevatorLigament", elevatorLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
         targetRoot.append(targetLigament);
     }
 

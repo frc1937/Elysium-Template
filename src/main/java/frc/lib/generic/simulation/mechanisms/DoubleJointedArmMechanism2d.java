@@ -20,40 +20,40 @@ public class DoubleJointedArmMechanism2d {
             currentElbowLigament,
             targetElbowLigament;
 
-    public DoubleJointedArmMechanism2d(String name, double shoulderLength, double elbowLength, Rotation2d defaultShoulderAngle, Rotation2d defaultElbowAngle) {
+    public DoubleJointedArmMechanism2d(String name, double shoulderLength, double elbowLength) {
         this.name = name;
         this.doubleJointedArmMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("DoubleJointedArmRoot", doubleJointedArmMechanism);
 
-        createCurrentLigament(shoulderLength, elbowLength, defaultShoulderAngle, defaultElbowAngle);
-        createTargetLigament(shoulderLength, elbowLength, defaultShoulderAngle, defaultElbowAngle);
+        createCurrentLigament(shoulderLength, elbowLength);
+        createTargetLigament(shoulderLength, elbowLength);
     }
 
-    public void updateCurrentAngle(Rotation2d newShoulderAngle, Rotation2d newElbowAngle) {
-        currentShoulderLigament.setAngle(newShoulderAngle);
-        currentElbowLigament.setAngle(newElbowAngle.minus(newShoulderAngle));
+    public void updateCurrentAngle(Rotation2d shoulderAngle, Rotation2d elbowAngle) {
+        currentShoulderLigament.setAngle(shoulderAngle);
+        currentElbowLigament.setAngle(elbowAngle.minus(shoulderAngle));
 
         Logger.recordOutput(name, doubleJointedArmMechanism);
     }
 
-    public void updateTargetAngle(Rotation2d newTargetShoulderAngle, Rotation2d newTargetElbowAngle) {
-        targetShoulderLigament.setAngle(newTargetShoulderAngle);
-        targetElbowLigament.setAngle(newTargetElbowAngle.minus(newTargetShoulderAngle));
+    public void updateTargetAngle(Rotation2d targetShoulderAngle, Rotation2d targetElbowAngle) {
+        targetShoulderLigament.setAngle(targetShoulderAngle);
+        targetElbowLigament.setAngle(targetElbowAngle.minus(targetShoulderAngle));
 
         Logger.recordOutput(name, doubleJointedArmMechanism);
     }
 
-    private void createCurrentLigament(double shoulderLength, double elbowLength, Rotation2d defaultShoulderAngle, Rotation2d defaultElbowAngle) {
-        currentShoulderLigament = new MechanismLigament2d("currentShoulderLigament", shoulderLength, defaultShoulderAngle.getDegrees(), DEFAULT_LINE_WIDTH, BLUE);
-        currentElbowLigament = new MechanismLigament2d("currentElbowLigament", elbowLength, defaultElbowAngle.getDegrees(), DEFAULT_LINE_WIDTH, DARK_BLUE);
+    private void createCurrentLigament(double shoulderLength, double elbowLength) {
+        currentShoulderLigament = new MechanismLigament2d("currentShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
+        currentElbowLigament = new MechanismLigament2d("currentElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_BLUE);
 
         currentShoulderLigament.append(currentElbowLigament);
         root.append(currentShoulderLigament);
     }
 
-    private void createTargetLigament(double shoulderLength, double elbowLength, Rotation2d defaultShoulderAngle, Rotation2d defaultElbowAngle) {
-        targetShoulderLigament = new MechanismLigament2d("targetShoulderLigament", shoulderLength, defaultShoulderAngle.getDegrees(), DEFAULT_LINE_WIDTH, GRAY);
-        targetElbowLigament = new MechanismLigament2d("targetElbowLigament", elbowLength, defaultElbowAngle.getDegrees(), DEFAULT_LINE_WIDTH, DARK_GRAY);
+    private void createTargetLigament(double shoulderLength, double elbowLength) {
+        targetShoulderLigament = new MechanismLigament2d("targetShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
+        targetElbowLigament = new MechanismLigament2d("targetElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_GRAY);
 
         targetShoulderLigament.append(targetElbowLigament);
         root.append(targetShoulderLigament);

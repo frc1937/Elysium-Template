@@ -13,7 +13,8 @@ public class MechanismConstants {
 
     protected static final double
             SLOWEST_SPEED_TO_CONSIDER_IDLE_RPS = 0.001,
-            RPS_TO_LENGTH_FACTOR = 25;
+            RPS_TO_LENGTH_FACTOR = 25,
+            DEFAULT_ARM_ANGLE = 0;
 
     protected static final double
             ARROW_TOP_ANGLE = 135,

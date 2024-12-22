@@ -27,7 +27,7 @@ public class ArmConstants {
     static final double TOLERANCE_ROTATIONS = Units.degreesToRotations(1.1);
 
     static final SingleJointedArmMechanism2d ARM_MECHANISM =
-            new SingleJointedArmMechanism2d("ArmMechanism", 0.5, Rotation2d.fromDegrees(-10));
+            new SingleJointedArmMechanism2d("ArmMechanism", 0.5);
 
     static final Motor ARM_MOTOR = MotorFactory.createSpark("Arm",62, MotorProperties.SparkType.FLEX);
     static final Encoder ABSOLUTE_ARM_ENCODER = EncoderFactory.createCanCoder("Arm Encoder", 22);
