@@ -21,7 +21,7 @@ public class DoubleJointedArmMechanism2d {
             targetElbowLigament;
 
     public DoubleJointedArmMechanism2d(String name, double shoulderLength, double elbowLength) {
-        this.name = name;
+        this.name = "Mechanism/" + name;
         this.doubleJointedArmMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("DoubleJointedArmRoot", doubleJointedArmMechanism);
 

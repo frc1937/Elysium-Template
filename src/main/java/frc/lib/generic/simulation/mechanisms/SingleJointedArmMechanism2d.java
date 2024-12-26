@@ -18,7 +18,7 @@ public class SingleJointedArmMechanism2d {
             targetAngleLigament;
 
     public SingleJointedArmMechanism2d(String name, double armLength) {
-        this.name = name;
+        this.name = "Mechanism/" + name;
         this.armMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("armRoot", armMechanism);
 

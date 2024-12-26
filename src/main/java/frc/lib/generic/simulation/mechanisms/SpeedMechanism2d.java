@@ -21,7 +21,7 @@ public class SpeedMechanism2d {
             targetArrowBottomLigament;
 
     public SpeedMechanism2d(String name) {
-        this.name = name;
+        this.name = "Mechanism/" + name;
         this.speedMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("speedMechanismRoot", speedMechanism);
 

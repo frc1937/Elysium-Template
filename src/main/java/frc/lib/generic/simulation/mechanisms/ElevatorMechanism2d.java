@@ -17,7 +17,7 @@ public class ElevatorMechanism2d {
             targetRoot;
 
     public ElevatorMechanism2d(String name, double elevatorLength) {
-        this.name = name;
+        this.name = "Mechanism/" + name;
         this.elevatorMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, 20);
 
         this.root = createDefaultRoot("elevatorRoot", elevatorMechanism);

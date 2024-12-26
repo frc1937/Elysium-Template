@@ -21,7 +21,7 @@ public class ArmElevatorMechanism2d {
             targetLigament;
 
     public ArmElevatorMechanism2d(String name, double armLength) {
-        this.name = name;
+        this.name = "Mechanism/" + name;
         this.armElevatorMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, 20);
 
         this.root = createDefaultRoot("armElevatorRoot", armElevatorMechanism);
