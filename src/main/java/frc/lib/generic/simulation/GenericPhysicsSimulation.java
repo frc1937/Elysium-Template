@@ -1,4 +1,4 @@
-package frc.lib.generic.simulation.newsims.simulations;
+package frc.lib.generic.simulation;
 
 /**
  * An abstract class to simulate the physics of a motor.

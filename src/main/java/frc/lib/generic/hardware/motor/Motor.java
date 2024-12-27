@@ -22,7 +22,7 @@ public class Motor implements LoggableHardware {
 
     private MotorConfiguration configuration;
 
-    public Motor(String name) {
+    public Motor(String name) { //every motor has a port. reflect this here.
         this.name = name;
 
         periodic();
@@ -80,7 +80,6 @@ public class Motor implements LoggableHardware {
      * <ul>
      *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
      *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT} - Achieve a specific duty cycle percentage.
      *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
      *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
      * </ul>
@@ -107,7 +106,6 @@ public class Motor implements LoggableHardware {
      * <ul>
      *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
      *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT} - Achieve a specific duty cycle percentage.
      *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
      *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
      * </ul>
@@ -124,7 +122,7 @@ public class Motor implements LoggableHardware {
      *
      * @param controlMode the control mode for the motor
      * @param output      the desired output value (amperes for {@link MotorProperties.ControlMode#CURRENT CURRENT}, volts for {@link MotorProperties.ControlMode#VOLTAGE VOLTAGE},
-     *                    percentage for {@link MotorProperties.ControlMode#PERCENTAGE_OUTPUT PERCENTAGE_OUTPUT}, rotations for {@link MotorProperties.ControlMode#POSITION POSITION}
+     *                    rotations for {@link MotorProperties.ControlMode#POSITION POSITION}
      *                    or rotations per second for {@link MotorProperties.ControlMode#VELOCITY VELOCITY})
      * @param feedforward the custom feedforward to be applied to the motor output
      */
@@ -299,7 +297,6 @@ public class Motor implements LoggableHardware {
 
         return Math.abs(getClosedLoopTarget() - getSystemVelocity()) < getCurrentConfiguration().closedLoopTolerance;
     }
-
 
     protected void refreshInputs(MotorInputs inputs) { }
 

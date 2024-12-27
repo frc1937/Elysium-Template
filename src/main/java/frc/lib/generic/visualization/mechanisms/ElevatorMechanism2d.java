@@ -1,13 +1,13 @@
-package frc.lib.generic.simulation.mechanisms;
+package frc.lib.generic.visualization.mechanisms;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import org.littletonrobotics.junction.Logger;
 
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
-import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.createDefaultRoot;
-import static frc.lib.generic.simulation.mechanisms.MechanismUtilities.createElevatorOutline;
+import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createDefaultRoot;
+import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createElevatorOutline;
 
 public class ElevatorMechanism2d {
     private final String name;

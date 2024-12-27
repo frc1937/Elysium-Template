@@ -2,7 +2,7 @@ package frc.lib.generic.hardware;
 
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.advantagekit.LoggableHardware;
-import frc.lib.generic.simulation.GenericSimulation;
+import frc.lib.generic.hardware.motor.MotorFactory;
 import frc.robot.GlobalConstants;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static frc.robot.GlobalConstants.CURRENT_MODE;
-import static frc.robot.GlobalConstants.FASTER_THREAD_LOCK;
-import static frc.robot.GlobalConstants.SHOULD_WRITE_LOGS;
+import static frc.robot.GlobalConstants.*;
 
 //Credit to team 418 for this
 public enum HardwareManager {
@@ -114,7 +112,7 @@ public enum HardwareManager {
     }
 
     public static void updateSimulation() {
-        GenericSimulation.updateAllSimulations();
+        MotorFactory.updateAllSimulations();
     }
 
     private static void cleanOldFiles(File logsDirectory) {

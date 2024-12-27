@@ -11,7 +11,7 @@ import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorFactory;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.generic.simulation.SimulationProperties;
-import frc.lib.generic.simulation.mechanisms.SingleJointedArmMechanism2d;
+import frc.lib.generic.visualization.mechanisms.SingleJointedArmMechanism2d;
 import frc.lib.util.LoggedTunableNumber;
 
 import static edu.wpi.first.units.Units.*;

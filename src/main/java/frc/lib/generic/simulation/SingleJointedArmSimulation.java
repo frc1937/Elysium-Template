@@ -8,10 +8,11 @@ import frc.lib.generic.simulation.extensions.ExtendedSingleJointedArmSim;
 
 import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 
-public class SingleJointedArmSimulation extends GenericSimulation {
+public class SingleJointedArmSimulation extends GenericPhysicsSimulation {
     private final ExtendedSingleJointedArmSim armSimulation;
 
     public SingleJointedArmSimulation(DCMotor gearbox, double gearRatio, double armLengthMeters, double armMassKilograms, Rotation2d minimumAngle, Rotation2d maximumAngle, boolean simulateGravity) {
+        super(gearRatio);
         armSimulation = new ExtendedSingleJointedArmSim(
                 gearbox,
                 gearRatio,
@@ -30,17 +31,17 @@ public class SingleJointedArmSimulation extends GenericSimulation {
     }
 
     @Override
-    public double getPositionRotations() {
+    public double getSystemPositionRotations() {
         return Units.radiansToRotations(armSimulation.getAngleRads());
     }
 
     @Override
-    public double getVelocityRotationsPerSecond() {
+    public double getSystemVelocityRotationsPerSecond() {
         return Units.radiansToRotations(armSimulation.getVelocityRadPerSec());
     }
 
     @Override
-    public double getAccelerationRotationsPerSecondSquared() {
+    public double getSystemAccelerationRotationsPerSecondSquared() {
         return Units.radiansToRotations(armSimulation.getAccelerationRadiansPerSecondSquared());
     }
 
@@ -50,7 +51,7 @@ public class SingleJointedArmSimulation extends GenericSimulation {
     }
 
     @Override
-    public void update() {
-        armSimulation.update((ROBOT_PERIODIC_LOOP_TIME));
+    public void updateMotor() {
+        armSimulation.update(ROBOT_PERIODIC_LOOP_TIME);
     }
 }

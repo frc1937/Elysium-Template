@@ -2,7 +2,7 @@ package frc.robot.subsystems.flywheels;
 
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.simulation.mechanisms.SpeedMechanism2d;
+import frc.lib.generic.visualization.mechanisms.SpeedMechanism2d;
 import frc.lib.math.Conversions;
 
 public class SingleFlywheel {

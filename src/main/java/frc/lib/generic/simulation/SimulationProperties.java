@@ -72,8 +72,10 @@ public class SimulationProperties {
             this.ka = ka;
         }
 
-        public GenericSimulation getSimulationFromType() {
-            if (type == null) { return null; }
+        public GenericPhysicsSimulation getSimulationType() {
+            if (type == null) {
+                return null;
+            }
 
             return switch (type) {
                 case SIMPLE_MOTOR -> {
@@ -87,7 +89,7 @@ public class SimulationProperties {
                 case ELEVATOR ->
                         new ElevatorSimulation(gearbox, gearRatio, carriageMassKilograms, drumRadiusMeters, minimumHeightMeters, maximumHeightMeters, simulateGravity);
                 case ARM ->
-                        new SingleJointedArmSimulation(gearbox,gearRatio,
+                        new SingleJointedArmSimulation(gearbox, gearRatio,
                                 armLengthMeters, momentOfInertia,
                                 minimumAngle, maximumAngle, simulateGravity);
             };

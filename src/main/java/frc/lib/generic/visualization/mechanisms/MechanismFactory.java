@@ -1,4 +1,4 @@
-package frc.lib.generic.simulation.mechanisms;
+package frc.lib.generic.visualization.mechanisms;
 
 import static frc.robot.GlobalConstants.SHOULD_DISPLAY_MECHANISMS;
 

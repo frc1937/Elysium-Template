@@ -1,11 +1,11 @@
-package frc.lib.generic.simulation.mechanisms;
+package frc.lib.generic.visualization.mechanisms;
 
 import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.*;
-import static frc.lib.generic.simulation.mechanisms.MechanismConstants.GRAY;
+import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
+import static frc.lib.generic.visualization.mechanisms.MechanismConstants.GRAY;
 
 
 public class MechanismUtilities {
