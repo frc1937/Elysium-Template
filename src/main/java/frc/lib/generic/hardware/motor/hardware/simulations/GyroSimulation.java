@@ -1,4 +1,4 @@
-package frc.lib.generic.simulation;
+package frc.lib.generic.hardware.motor.hardware.simulations;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
