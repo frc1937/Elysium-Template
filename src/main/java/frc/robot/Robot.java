@@ -18,6 +18,7 @@ public class Robot extends LoggedRobot {
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
 
+    final Field2d simulatedVisionField = VISION_SIMULATION.getDebugField();
 
     @Override
     public void robotInit() {
@@ -85,9 +86,6 @@ public class Robot extends LoggedRobot {
         HardwareManager.updateSimulation();
 
         VISION_SIMULATION.updateRobotPose(POSE_ESTIMATOR.getOdometryPose());
-
-        final Field2d simulatedVisionField = VISION_SIMULATION.getDebugField();
-
         simulatedVisionField.getObject("EstimatedRobot").setPose(POSE_ESTIMATOR.getCurrentPose());
     }
 
