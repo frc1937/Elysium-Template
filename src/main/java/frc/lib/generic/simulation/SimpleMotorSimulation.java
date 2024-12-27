@@ -1,6 +1,7 @@
 package frc.lib.generic.simulation;
 
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import frc.lib.generic.simulation.extensions.ExtendedDCMotorSim;
 
@@ -12,6 +13,11 @@ public class SimpleMotorSimulation extends GenericSimulation {
     public SimpleMotorSimulation(DCMotor gearbox, double gearRatio, double momentOfInertia) {
         motorSimulation = new ExtendedDCMotorSim(gearbox, gearRatio, momentOfInertia);
     }
+
+    public SimpleMotorSimulation(DCMotor gearbox, double gearRatio, double kv, double ka) {
+        motorSimulation = new ExtendedDCMotorSim(LinearSystemId.createDCMotorSystem(kv, ka), gearbox, gearRatio);
+    }
+
 
     @Override
     public double getCurrent() {
