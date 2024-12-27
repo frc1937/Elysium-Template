@@ -11,7 +11,6 @@ import com.ctre.phoenix6.sim.TalonFXSimState;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorConfiguration;
 import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.hardware.motor.MotorSignal;
 
 import static frc.lib.generic.hardware.motor.MotorProperties.GravityType.ARM;
 
@@ -33,8 +32,6 @@ public class SimulationTalonFX extends Motor {
     private MotorConfiguration currentConfiguration;
 
     private boolean shouldUseProfile = false;
-    private int slotToUse = 0;
-
     private double target = 0;
 
     public SimulationTalonFX(String name, int deviceId) {
@@ -45,6 +42,7 @@ public class SimulationTalonFX extends Motor {
         talonConfigurator = talonFX.getConfigurator();
 
         voltageSignal = talonFX.getMotorVoltage().clone();
+        voltageSignal.setUpdateFrequency(1000);
     }
 
     @Override
@@ -56,17 +54,17 @@ public class SimulationTalonFX extends Motor {
 
             case POSITION -> {
                 if (shouldUseProfile) {
-                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(slotToUse));
+                    talonFX.setControl(positionMMRequest.withPosition(output).withSlot(0));
                 } else {
-                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(slotToUse));
+                    talonFX.setControl(positionVoltageRequest.withPosition(output).withSlot(0));
                 }
             }
 
             case VELOCITY -> {
                 if (shouldUseProfile) {
-                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(slotToUse));
+                    talonFX.setControl(velocityMMRequest.withVelocity(output).withSlot(0));
                 } else {
-                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(slotToUse));
+                    talonFX.setControl(velocityVoltageRequest.withVelocity(output).withSlot(0));
                 }
             }
 
@@ -90,10 +88,6 @@ public class SimulationTalonFX extends Motor {
         talonFX.stopMotor();
     }
 
-    public TalonFXSimState getSimulationState() {
-        return talonFX.getSimState();
-    }
-
     @Override
     public boolean configure(MotorConfiguration configuration) {
         this.currentConfiguration = configuration;
@@ -101,14 +95,14 @@ public class SimulationTalonFX extends Motor {
         configureMotionMagic();
 
         setConfig0();
-        setConfig1();
-        setConfig2();
 
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 
-        slotToUse = configuration.slotToUse;
-
         return applyConfig();
+    }
+
+    public TalonFXSimState getSimulationState() {
+        return talonFX.getSimState();
     }
 
     private void configureMotionMagic() {
@@ -137,32 +131,6 @@ public class SimulationTalonFX extends Motor {
             talonConfig.Slot0.GravityType = currentConfiguration.slot0.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
-    private void setConfig1() {
-        talonConfig.Slot1.kP = currentConfiguration.slot1.kP();
-        talonConfig.Slot1.kI = currentConfiguration.slot1.kI();
-        talonConfig.Slot1.kD = currentConfiguration.slot1.kD();
-        talonConfig.Slot1.kA = currentConfiguration.slot1.kA();
-        talonConfig.Slot1.kS = currentConfiguration.slot1.kS();
-        talonConfig.Slot1.kV = currentConfiguration.slot1.kV();
-        talonConfig.Slot1.kG = currentConfiguration.slot1.kG();
-
-        if (currentConfiguration.slot1.gravityType() != null)
-            talonConfig.Slot1.GravityType = currentConfiguration.slot1.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
-    }
-
-    private void setConfig2() {
-        talonConfig.Slot2.kP = currentConfiguration.slot2.kP();
-        talonConfig.Slot2.kI = currentConfiguration.slot2.kI();
-        talonConfig.Slot2.kD = currentConfiguration.slot2.kD();
-        talonConfig.Slot2.kA = currentConfiguration.slot2.kA();
-        talonConfig.Slot2.kS = currentConfiguration.slot2.kS();
-        talonConfig.Slot2.kV = currentConfiguration.slot2.kV();
-        talonConfig.Slot2.kG = currentConfiguration.slot2.kG();
-
-        if (currentConfiguration.slot2.gravityType() != null)
-            talonConfig.Slot2.GravityType = currentConfiguration.slot2.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
-    }
-
     private boolean applyConfig() {
         int counter = 10;
         StatusCode statusCode = null;
@@ -173,12 +141,5 @@ public class SimulationTalonFX extends Motor {
         }
 
         return statusCode == StatusCode.OK;
-    }
-
-    @Override
-    public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
-        if (signal == MotorSignal.VOLTAGE) {
-            voltageSignal.setUpdateFrequency(1000);
-        }
     }
 }
