@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -158,10 +159,10 @@ public class RobotContainer {
 //        driveController.getButton(Controller.Inputs.A)
 //            .whileTrue(SwerveCommands.driveAndRotateToClosestNote(translationSupplier, strafeSupplier));
 
-        driveController.getButton(Controller.Inputs.B)
-                .whileTrue(ShooterCommands.shootPhysics(
-                        BLUE_SPEAKER, 32
-                ));
+//        driveController.getButton(Controller.Inputs.B)
+//                .whileTrue(ShooterCommands.shootPhysics(
+//                        BLUE_SPEAKER, 32
+//                ));
 
         driveController.getStick(Controller.Stick.RIGHT_STICK)
                 .whileTrue(
@@ -177,13 +178,27 @@ public class RobotContainer {
 //                        SWERVE::runWheelCharacterization
 //                ));
 
+//        driveController.getButton(Controller.Inputs.X).whileTrue(
+//                ShooterCommands.autoDetectAndShoot()
+//        );
+//
+//        driveController.getButton(Controller.Inputs.Y).whileTrue(
+//                ShooterCommands.calibrate()
+//        );
+
+        driveController.getButton(Controller.Inputs.A).whileTrue(
+                ShooterCommands.shootWithoutPhysics(32, Rotation2d.fromDegrees(50)));
+
+        driveController.getButton(Controller.Inputs.B).whileTrue(
+                ShooterCommands.shootWithoutPhysics(10, Rotation2d.fromDegrees(90)));
+
+
         driveController.getButton(Controller.Inputs.X).whileTrue(
-                ShooterCommands.autoDetectAndShoot()
-        );
+                ShooterCommands.shootWithoutPhysics(-30, Rotation2d.fromDegrees(-10)));
+
 
         driveController.getButton(Controller.Inputs.Y).whileTrue(
-                ShooterCommands.calibrate()
-        );
+                ShooterCommands.shootWithoutPhysics(-15, Rotation2d.fromDegrees(43)));
 
         driveController.getStick(Controller.Stick.LEFT_STICK).whileTrue(ShooterCommands.receiveFloorNote());
         driveController.getButton(Controller.Inputs.LEFT_BUMPER).whileTrue(ShooterCommands.outtakeNote());

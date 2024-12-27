@@ -89,7 +89,7 @@ public class SimulationProperties {
                 case ARM ->
                         new SingleJointedArmSimulation(gearbox,gearRatio,
                                 armLengthMeters, momentOfInertia,
-                                minimumAngle, maximumAngle, simulateGravity, true);
+                                minimumAngle, maximumAngle, simulateGravity);
             };
         }
     }

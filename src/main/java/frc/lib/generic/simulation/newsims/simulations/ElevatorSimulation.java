@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware.simulations;
+package frc.lib.generic.simulation.newsims.simulations;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.simulation.extensions.ExtendedElevatorSim;
@@ -48,7 +48,7 @@ public class ElevatorSimulation extends GenericPhysicsSimulation {
     }
 
     @Override
-    public void setInputVoltage(double voltage) {
+    public void setVoltage(double voltage) {
         elevatorSimulation.setInputVoltage(voltage);
     }
 

@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware.simulations;
+package frc.lib.generic.simulation.newsims.simulations;
 
 /**
  * An abstract class to simulate the physics of a motor.
@@ -26,7 +26,7 @@ public abstract class GenericPhysicsSimulation {
 
     public abstract double getSystemAccelerationRotationsPerSecondSquared();
 
-    public abstract void setInputVoltage(double voltage);
+    public abstract void setVoltage(double voltage);
 
     public abstract void updateMotor();
 }

@@ -4,7 +4,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.generic.simulation.extensions.ExtendedElevatorSim;
 import frc.lib.math.Conversions;
 
-import static frc.lib.generic.simulation.SimulationConstants.ROBORIO_LOOP_TIME;
+import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 
 public class ElevatorSimulation extends GenericSimulation {
     private final ExtendedElevatorSim elevatorSimulation;
@@ -57,6 +57,6 @@ public class ElevatorSimulation extends GenericSimulation {
 
     @Override
      void update() {
-        elevatorSimulation.update(ROBORIO_LOOP_TIME);
+        elevatorSimulation.update((ROBOT_PERIODIC_LOOP_TIME));
     }
 }

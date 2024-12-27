@@ -8,6 +8,12 @@
   },
   "NTProvider": {
     "types": {
+      "/AdvantageKit/RealOutputs/ArmMechanism": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/LEFT_FLYWHEEL": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/ArmMechanism": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/LEFT_FLYWHEEL": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/Mechanism/RIGHT_FLYWHEEL": "Mechanism2d",
+      "/AdvantageKit/RealOutputs/RIGHT_FLYWHEEL": "Mechanism2d",
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/AutoChooser": "String Chooser",
       "/SmartDashboard/Field": "Field2d",
@@ -17,6 +23,16 @@
       "/SmartDashboard/VisionSystemSim-main/Sim Field": "Field2d"
     },
     "windows": {
+      "/AdvantageKit/RealOutputs/Mechanism/ArmMechanism": {
+        "window": {
+          "visible": true
+        }
+      },
+      "/AdvantageKit/RealOutputs/Mechanism/LEFT_FLYWHEEL": {
+        "window": {
+          "visible": true
+        }
+      },
       "/SmartDashboard/Field": {
         "bottom": 1476,
         "height": 8.210550308227539,
@@ -24,11 +40,6 @@
         "right": 2961,
         "top": 79,
         "width": 16.541748046875,
-        "window": {
-          "visible": true
-        }
-      },
-      "/SmartDashboard/Mechanisms/ArmMechanism": {
         "window": {
           "visible": true
         }
@@ -127,6 +138,9 @@
   "NetworkTables": {
     "transitory": {
       "AdvantageKit": {
+        "Motors": {
+          "open": true
+        },
         "open": true
       },
       "CameraPublisher": {
@@ -147,10 +161,15 @@
     }
   },
   "NetworkTables Info": {
+    "Clients": {
+      "open": true
+    },
+    "Server": {
+      "Publishers": {
+        "open": true
+      }
+    },
     "visible": true
-  },
-  "NetworkTables View": {
-    "visible": false
   },
   "Plot": {
     "Plot <0>": {

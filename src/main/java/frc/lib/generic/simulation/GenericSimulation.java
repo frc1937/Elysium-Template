@@ -16,7 +16,7 @@ public abstract class GenericSimulation {
     private static final List<GenericSimulation> REGISTERED_SIMULATIONS = new ArrayList<>();
 
     private final SimulationTalonFX motor;
-    private final TalonFXSimState motorSimulatedState;
+    private final TalonFXSimState talonFXSimState;
 
     protected GenericSimulation() {
         REGISTERED_SIMULATIONS.add(this);
@@ -25,8 +25,8 @@ public abstract class GenericSimulation {
 
         motor.setupSignalUpdates(MotorSignal.VOLTAGE);
 
-        motorSimulatedState = motor.getSimulationState();
-        motorSimulatedState.setSupplyVoltage(12);
+        talonFXSimState = motor.getSimulationState();
+        talonFXSimState.setSupplyVoltage(12);
     }
 
     /**
@@ -63,11 +63,11 @@ public abstract class GenericSimulation {
     }
 
     private void updateSimulation() {
-        setVoltage(motorSimulatedState.getMotorVoltage());
+        setVoltage(talonFXSimState.getMotorVoltage());
         update();
 
-        motorSimulatedState.setRawRotorPosition(getPositionRotations());
-        motorSimulatedState.setRotorVelocity(getVelocityRotationsPerSecond());
+        talonFXSimState.setRawRotorPosition(getPositionRotations());
+        talonFXSimState.setRotorVelocity(getVelocityRotationsPerSecond());
     }
 
     public abstract double getPositionRotations();

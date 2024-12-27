@@ -1,4 +1,4 @@
-package frc.lib.generic.hardware.motor.hardware.simulations;
+package frc.lib.generic.simulation.newsims.simulations;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -46,7 +46,7 @@ public class SingleJointedArmSimulation extends GenericPhysicsSimulation {
     }
 
     @Override
-    public void setInputVoltage(double voltage) {
+    public void setVoltage(double voltage) {
         armSimulation.setInputVoltage(voltage);
     }
 

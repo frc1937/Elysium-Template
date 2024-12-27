@@ -1,9 +1,11 @@
-package frc.lib.generic.hardware.motor.hardware.simulations;
+package frc.lib.generic.simulation.newsims.simulations;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 import frc.lib.generic.simulation.extensions.ExtendedDCMotorSim;
+
+import static frc.robot.GlobalConstants.ROBOT_PERIODIC_LOOP_TIME;
 
 public class SimpleMotorSimulation extends GenericPhysicsSimulation {
     private final ExtendedDCMotorSim motorSimulation;
@@ -26,12 +28,12 @@ public class SimpleMotorSimulation extends GenericPhysicsSimulation {
 
     @Override
     public double getSystemPositionRotations() {
-        return motorSimulation.getAngularPositionRotations();
+        return Units.radiansToRotations(motorSimulation.getAngularPositionRad());
     }
 
     @Override
     public double getSystemVelocityRotationsPerSecond() {
-        return motorSimulation.getAngularVelocityRPM() / 60;
+        return Units.radiansToRotations(motorSimulation.getAngularVelocityRadPerSec());
     }
 
     @Override
@@ -40,12 +42,12 @@ public class SimpleMotorSimulation extends GenericPhysicsSimulation {
     }
 
     @Override
-    public void setInputVoltage(double voltage) {
+    public void setVoltage(double voltage) {
         motorSimulation.setInputVoltage(voltage);
     }
 
     @Override
     public void updateMotor() {
-        motorSimulation.update(0.02);
+        motorSimulation.update(ROBOT_PERIODIC_LOOP_TIME);
     }
 }
