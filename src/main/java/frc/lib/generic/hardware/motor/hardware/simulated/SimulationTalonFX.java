@@ -18,7 +18,7 @@ import static frc.lib.generic.hardware.motor.MotorProperties.GravityType.ARM;
 public class SimulationTalonFX extends Motor {
     private final TalonFX talonFX;
 
-    private final StatusSignal<Double> positionSignal, velocitySignal, accelerationSignal, voltageSignal, currentSignal, temperatureSignal;
+    private final StatusSignal<Double> voltageSignal;
     private final TalonFXConfiguration talonConfig = new TalonFXConfiguration();
     private final TalonFXConfigurator talonConfigurator;
 
@@ -44,12 +44,7 @@ public class SimulationTalonFX extends Motor {
 
         talonConfigurator = talonFX.getConfigurator();
 
-        positionSignal = talonFX.getPosition().clone();
-        velocitySignal = talonFX.getVelocity().clone();
-        accelerationSignal = talonFX.getAcceleration().clone();
         voltageSignal = talonFX.getMotorVoltage().clone();
-        currentSignal = talonFX.getStatorCurrent().clone();
-        temperatureSignal = talonFX.getDeviceTemp().clone();
     }
 
     @Override
@@ -182,13 +177,8 @@ public class SimulationTalonFX extends Motor {
 
     @Override
     public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
-        switch (signal) {
-            case ACCELERATION -> accelerationSignal.setUpdateFrequency(1000);
-            case VELOCITY -> velocitySignal.setUpdateFrequency(1000);
-            case POSITION -> positionSignal.setUpdateFrequency(1000);
-            case VOLTAGE -> voltageSignal.setUpdateFrequency(1000);
-            case CURRENT -> currentSignal.setUpdateFrequency(1000);
-            case TEMPERATURE -> temperatureSignal.setUpdateFrequency(1000);
+        if (signal == MotorSignal.VOLTAGE) {
+            voltageSignal.setUpdateFrequency(1000);
         }
     }
 }
