@@ -4,16 +4,13 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.OdometryThread;
 import frc.lib.generic.PID;
+import frc.lib.math.AdvancedSwerveKinematics;
 import frc.lib.math.Optimizations;
 import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.RobotContainer;
@@ -22,20 +19,20 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import static frc.lib.math.Conversions.proportionalPowerToMps;
 import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.subsystems.swerve.SwerveConstants.GYRO;
-import static frc.robot.subsystems.swerve.SwerveConstants.HOLONOMIC_PATH_FOLLOWER_CONFIG;
-import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
-import static frc.robot.subsystems.swerve.SwerveConstants.ROTATION_CONTROLLER;
-import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
+import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
 
 public class Swerve extends GenericSubsystem {
     private static final PID translationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.translationConstants);
     private static final PID rotationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.rotationConstants);
 
+    private final AdvancedSwerveKinematics ADVANCED_KINEMATICS;
     private double lastTimestamp = Timer.getFPGATimestamp();
 
     public Swerve() {
+         ADVANCED_KINEMATICS = new AdvancedSwerveKinematics(
+                MODULE_LOCATIONS
+        );
         configurePathPlanner();
     }
 
@@ -153,6 +150,7 @@ public class Swerve extends GenericSubsystem {
 
     protected void driveSelfRelative(ChassisSpeeds chassisSpeeds) {
         chassisSpeeds = discretize(chassisSpeeds);
+        chassisSpeeds = AdvancedSwerveKinematics.correctForDynamics(chassisSpeeds);
 
         if (Optimizations.isStill(chassisSpeeds)) {
             stop();

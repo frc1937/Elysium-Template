@@ -17,7 +17,6 @@ import static frc.lib.generic.hardware.motor.MotorProperties.GravityType.ARM;
 import static frc.robot.GlobalConstants.CURRENT_MODE;
 
 public class SimulatedMotor extends Motor {
-
     private MotorConfiguration currentConfiguration;
     private GenericPhysicsSimulation simulation;
 
@@ -107,13 +106,8 @@ public class SimulatedMotor extends Motor {
             return false;
         }
 
-        configuration.slot0 = configuration.simulationSlot;
-        configuration.slot1 = configuration.simulationSlot;
-        configuration.slot2 = configuration.simulationSlot;
-
         configureMotionMagic();
-
-        setConfig0();
+        setTalonConfig();
 
         talonConfig.ClosedLoopGeneral.ContinuousWrap = configuration.closedLoopContinuousWrap;
 
@@ -132,18 +126,18 @@ public class SimulatedMotor extends Motor {
         shouldUseProfile = true;
     }
 
-    private void setConfig0() {
-        talonConfig.Slot0.kP = currentConfiguration.slot0.kP();
-        talonConfig.Slot0.kI = currentConfiguration.slot0.kI();
-        talonConfig.Slot0.kD = currentConfiguration.slot0.kD();
+    private void setTalonConfig() {
+        talonConfig.Slot0.kP = currentConfiguration.simulationSlot.kP();
+        talonConfig.Slot0.kI = currentConfiguration.simulationSlot.kI();
+        talonConfig.Slot0.kD = currentConfiguration.simulationSlot.kD();
 
-        talonConfig.Slot0.kA = currentConfiguration.slot0.kA();
-        talonConfig.Slot0.kS = currentConfiguration.slot0.kS();
-        talonConfig.Slot0.kV = currentConfiguration.slot0.kV();
-        talonConfig.Slot0.kG = currentConfiguration.slot0.kG();
+        talonConfig.Slot0.kA = currentConfiguration.simulationSlot.kA();
+        talonConfig.Slot0.kS = currentConfiguration.simulationSlot.kS();
+        talonConfig.Slot0.kV = currentConfiguration.simulationSlot.kV();
+        talonConfig.Slot0.kG = currentConfiguration.simulationSlot.kG();
 
-        if (currentConfiguration.slot0.gravityType() != null)
-            talonConfig.Slot0.GravityType = currentConfiguration.slot0.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
+        if (currentConfiguration.simulationSlot.gravityType() != null)
+            talonConfig.Slot0.GravityType = currentConfiguration.simulationSlot.gravityType() == ARM ? GravityTypeValue.Arm_Cosine : GravityTypeValue.Elevator_Static;
     }
 
     private boolean applyConfig() {
@@ -192,7 +186,7 @@ public class SimulatedMotor extends Motor {
         inputs.target = target;
         inputs.systemPosition = simulation.getSystemPositionRotations();
         inputs.systemVelocity = simulation.getSystemVelocityRotationsPerSecond();
-//        inputs.systemAcceleration = simulation.getSystemAccelerationRotationsPerSecondSquared();
+        inputs.systemAcceleration = simulation.getSystemAccelerationRotationsPerSecondSquared();
 
         inputs.threadVoltage = new double[]{inputs.voltage};
         inputs.threadCurrent = new double[]{inputs.current};
@@ -209,6 +203,6 @@ public class SimulatedMotor extends Motor {
 
         talonFXSimState.setRawRotorPosition(simulation.getSystemPositionRotations());
         talonFXSimState.setRotorVelocity(simulation.getSystemVelocityRotationsPerSecond());
-//        talonFXSimState.setRotorAcceleration(simulation.getSystemAccelerationRotationsPerSecondSquared());
+        talonFXSimState.setRotorAcceleration(simulation.getSystemAccelerationRotationsPerSecondSquared());
     }
 }

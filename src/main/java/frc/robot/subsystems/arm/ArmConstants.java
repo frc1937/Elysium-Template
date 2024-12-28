@@ -74,7 +74,7 @@ public class ArmConstants {
     }
 
     private static void configureEncoder() {
-        EncoderConfiguration encoderConfiguration = new EncoderConfiguration();
+        final EncoderConfiguration encoderConfiguration = new EncoderConfiguration();
 
         encoderConfiguration.invert = true;
         encoderConfiguration.offsetRotations = PIVOT_ENCODER_OFFSET.getRotations();

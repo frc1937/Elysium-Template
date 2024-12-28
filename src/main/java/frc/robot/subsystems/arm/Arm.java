@@ -33,7 +33,6 @@ public class Arm extends GenericSubsystem {
 
     public boolean hasReachedTarget() {
         Logger.recordOutput("IsArmReady ", ARM_MOTOR.isAtPositionSetpoint());
-
         return ARM_MOTOR.isAtPositionSetpoint();
     }
 
