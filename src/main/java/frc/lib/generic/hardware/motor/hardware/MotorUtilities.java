@@ -14,21 +14,26 @@ public class MotorUtilities {
     public static void handleThreadedInputs(MotorInputs inputs, Map<String, Queue<Double>> signalQueueList) {
         if (signalQueueList.isEmpty()) return;
 
-        if (signalQueueList.get("position") != null)
-            inputs.threadSystemPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("velocity") != null)
-            inputs.threadSystemVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("acceleration") != null)
-            inputs.threadSystemAcceleration = signalQueueList.get("acceleration").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("voltage") != null)
-            inputs.threadVoltage = signalQueueList.get("voltage").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("current") != null)
-            inputs.threadCurrent = signalQueueList.get("current").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("temperature") != null)
-            inputs.threadTemperature = signalQueueList.get("temperature").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("target") != null)
-            inputs.threadTarget = signalQueueList.get("target").stream().mapToDouble(Double::doubleValue).toArray();
+        inputs.threadSystemPosition = toArray(signalQueueList.get("position"));
+        inputs.threadSystemVelocity = toArray(signalQueueList.get("velocity"));
+        inputs.threadSystemAcceleration = toArray(signalQueueList.get("acceleration"));
+        inputs.threadVoltage = toArray(signalQueueList.get("voltage"));
+        inputs.threadCurrent = toArray(signalQueueList.get("current"));
+        inputs.threadTemperature = toArray(signalQueueList.get("temperature"));
+        inputs.threadTarget = toArray(signalQueueList.get("target"));
 
-        signalQueueList.forEach((k, v) -> v.clear());
+        signalQueueList.values().forEach(Queue::clear);
+    }
+
+    private static double[] toArray(Queue<Double> queue) {
+        if (queue == null || queue.isEmpty())
+            return new double[0];
+
+        final double[] array = new double[queue.size()];
+        int i = 0;
+        for (Double value : queue)
+            array[i++] = value;
+
+        return array;
     }
 }

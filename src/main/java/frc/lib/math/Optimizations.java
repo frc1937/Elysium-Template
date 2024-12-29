@@ -10,10 +10,6 @@ import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
-import static frc.robot.GlobalConstants.GRAVITY;
-import static frc.robot.GlobalConstants.MINIMUM_ACCELERATION_FOR_COLLISION;
-import static frc.robot.GlobalConstants.ROBORIO_ACCELEROMETER;
-
 public class Optimizations {
     /**
      * Determines if the robot is currently experiencing a collision based on accelerometer data.
@@ -24,10 +20,11 @@ public class Optimizations {
      * @return true if the calculated force indicates a collision; false otherwise.
      */
     public static boolean isColliding() {
-        final float xAcceleration = (float) ROBORIO_ACCELEROMETER.getX();
-        final float yAcceleration = (float) ROBORIO_ACCELEROMETER.getY();
-
-        return Math.hypot(xAcceleration, yAcceleration) * GRAVITY > MINIMUM_ACCELERATION_FOR_COLLISION;
+//        final float xAcceleration = (float) ROBORIO_ACCELEROMETER.getX();
+//        final float yAcceleration = (float) ROBORIO_ACCELEROMETER.getY();
+//
+//        return Math.hypot(xAcceleration, yAcceleration) * GRAVITY > MINIMUM_ACCELERATION_FOR_COLLISION;
+        return false; //TODO: USE GYRO INSTEAD! THE ACCELEROMETER IS DEEPLY FLAWED!
     }
 
     /**

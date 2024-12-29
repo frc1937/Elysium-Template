@@ -11,8 +11,6 @@ import frc.lib.generic.hardware.motor.MotorProperties;
 import frc.lib.math.Conversions;
 import frc.lib.math.Optimizations;
 
-import java.util.Arrays;
-
 import static frc.lib.math.Conversions.rotationsToMetres;
 import static frc.robot.GlobalConstants.VOLTAGE_COMPENSATION_SATURATION;
 import static frc.robot.subsystems.swerve.SwerveConstants.MAX_SPEED_MPS;
@@ -109,7 +107,11 @@ public class SwerveModule {
     }
 
     private double[] getDriveMetersTraveled(double[] rotationsPositions) {
-        return Arrays.stream(rotationsPositions).map(position -> rotationsToMetres(position, WHEEL_DIAMETER)).toArray();
+        final double[] metersTraveled = new double[rotationsPositions.length];
+        for (int i = 0; i < rotationsPositions.length; i++) {
+            metersTraveled[i] = rotationsToMetres(rotationsPositions[i], WHEEL_DIAMETER);
+        }
+        return metersTraveled;
     }
 
     private boolean isTemperatureOkay() {

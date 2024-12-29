@@ -40,7 +40,7 @@ public class GenericCanCoder extends Encoder {
     }
 
     public GenericCanCoder(String name, int canCoderID) {
-        this(name, canCoderID, "CAN");
+        this(name, canCoderID, "");
     }
 
     @Override
@@ -55,7 +55,7 @@ public class GenericCanCoder extends Encoder {
         }
 
         if (!useFasterThread) return;
-
+//        C:\Users\Public\wpilib\visualvm_2110\bin\visualvm.exe --jdkhome "C:\Program Files (x86)\Eclipse Adoptium\jdk-11.0.22.7-hotspot\bin\java.exe"
         signalsToLog[signal.getId() + ENCODER_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
@@ -120,11 +120,11 @@ public class GenericCanCoder extends Encoder {
     }
 
     private double getEncoderPositionPrivate() {
-        return positionSignal.refresh().getValue();
+        return positionSignal.getValue();
     }
 
     private double getEncoderVelocityPrivate() {
-        return velocitySignal.refresh().getValue();
+        return velocitySignal.getValue();
     }
 
     private void setupSignal(final StatusSignal<Double> correspondingSignal, int updateFrequency) {

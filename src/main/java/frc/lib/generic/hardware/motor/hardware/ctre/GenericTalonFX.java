@@ -63,7 +63,7 @@ public class GenericTalonFX extends Motor {
     public GenericTalonFX(String name, int deviceId, String canbusName) {
         super(name);
 
-        talonFX = new TalonFX(deviceId, canbusName);
+        talonFX = new TalonFX(deviceId);
 
         talonConfigurator = talonFX.getConfigurator();
 
@@ -76,7 +76,7 @@ public class GenericTalonFX extends Motor {
     }
 
     public GenericTalonFX(String name, int deviceId) {
-        this(name, deviceId, "CAN");
+        this(name, deviceId, "");
     }
 
     @Override
@@ -138,7 +138,7 @@ public class GenericTalonFX extends Motor {
 
     @Override
     public void stopMotor() {
-        talonFX.stopMotor();
+        this.setOutput(MotorProperties.ControlMode.VOLTAGE,0);
     }
 
     @Override

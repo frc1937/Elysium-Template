@@ -4,6 +4,8 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
+import java.util.List;
+
 public class PhotonDetectionCamera extends DetectionCameraIO {
     private final PhotonCamera camera;
 
@@ -23,7 +25,14 @@ public class PhotonDetectionCamera extends DetectionCameraIO {
 
         if (!result.hasTargets()) return;
 
-        inputs.yaws = result.getTargets().stream().mapToDouble(PhotonTrackedTarget::getYaw).toArray();
+        final List<PhotonTrackedTarget> results = result.getTargets();
+        final double[] array =  new double[results.size()];
+
+        for(int i = 0; i < array.length; i++) {
+            array[i] = results.get(i).getYaw();
+        }
+
+        inputs.yaws = array;
 
         final double[] targetYawValues = getClosestTargetYawValues(result);
 

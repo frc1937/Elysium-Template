@@ -151,7 +151,7 @@ public abstract class GenericSparkBase extends Motor {
     @Override
     public void stopMotor() {
         hasStoppedOccurred = true;
-        spark.stopMotor();
+        this.setOutput(MotorProperties.ControlMode.VOLTAGE,0);
     }
 
     @Override
