@@ -206,7 +206,10 @@ public abstract class GenericSparkBase extends Motor {
             case VELOCITY, CURRENT, TEMPERATURE, ACCELERATION ->
                     spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
             case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
-            case VOLTAGE -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, ms);
+            case VOLTAGE -> {
+                spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, ms);
+                spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+            }
         }
 
         if (!useFasterThread) return;
