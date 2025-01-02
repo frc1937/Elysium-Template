@@ -111,6 +111,9 @@ public abstract class GenericSparkBase extends Motor {
         if (configuration.statorCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
         if (configuration.supplyCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
 
+        spark.setOpenLoopRampRate(configuration.dutyCycleOpenLoopRampPeriod);
+        spark.setClosedLoopRampRate(configuration.dutyCycleClosedLoopRampPeriod);
+
         configureFeedforward(getCurrentSlot());
 
         configureProfile(configuration);
