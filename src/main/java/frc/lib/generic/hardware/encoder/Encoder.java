@@ -16,7 +16,7 @@ public class Encoder implements LoggableHardware {
     private final String name;
 
     public Encoder(String name) {
-        this.name = name;
+        this.name = "Encoders/" + name;
 
         periodic();
         HardwareManager.addHardware(this);
@@ -32,14 +32,51 @@ public class Encoder implements LoggableHardware {
         if (!getSignalsToLog()[0]) printSignalError("POSITION");
         return inputs.position;
     }
+
     public double getEncoderVelocity() {
         if (!getSignalsToLog()[1]) printSignalError("VELOCITY");
         return inputs.velocity;
     }
 
-    /** Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.*/
+    /**
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     * @param useFasterThread Whether to use a faster thread.
+     */
     public void setupSignalUpdates(EncoderSignal signal, boolean useFasterThread) { }
 
+    /**
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     */
     public void setupSignalUpdates(EncoderSignal signal) { setupSignalUpdates(signal, false); }
 
     public boolean configure(EncoderConfiguration encoderConfiguration) { return true; }
@@ -49,7 +86,7 @@ public class Encoder implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs("Encoders/" + name, inputs);
+        Logger.processInputs(name, inputs);
     }
 
     @Override

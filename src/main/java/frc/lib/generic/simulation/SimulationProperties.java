@@ -5,7 +5,9 @@ import edu.wpi.first.math.system.plant.DCMotor;
 
 public class SimulationProperties {
     public enum SimulationType {
-        SIMPLE_MOTOR, ELEVATOR, ARM
+        SIMPLE_MOTOR,
+        ELEVATOR,
+        ARM
     }
 
     public static class Slot {
@@ -73,16 +75,15 @@ public class SimulationProperties {
         }
 
         public GenericPhysicsSimulation getSimulationType() {
-            if (type == null) {
+            if (type == null)
                 return null;
-            }
 
             return switch (type) {
                 case SIMPLE_MOTOR -> {
                     if (kv == 0 && ka == 0) {
                         yield new SimpleMotorSimulation(gearbox, gearRatio, momentOfInertia);
                     } else {
-                        yield new SimpleMotorSimulation(gearbox, gearRatio, kv, ka);
+                        yield new SimpleMotorSimulation(kv, ka, gearbox, gearRatio);
                     }
                 }
 

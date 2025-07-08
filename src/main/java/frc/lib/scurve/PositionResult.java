@@ -2,7 +2,7 @@ package frc.lib.scurve;
 
 public class PositionResult {
     public Profile profile;
-    public boolean has_found = false;
+    public boolean has_found;
 
     public PositionResult(Profile profile, boolean has_found) {
         this.profile = profile;

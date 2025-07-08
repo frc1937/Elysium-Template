@@ -1,45 +1,37 @@
 package frc.lib.generic.hardware.motor.hardware.rev;
 
-import com.revrobotics.CANSparkBase;
-import com.revrobotics.CANSparkLowLevel;
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.REVLibError;
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.SparkPIDController;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.config.SignalsConfig;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import frc.lib.generic.Feedforward;
-import frc.lib.generic.OdometryThread;
-import frc.lib.generic.hardware.motor.Motor;
-import frc.lib.generic.hardware.motor.MotorConfiguration;
-import frc.lib.generic.hardware.motor.MotorInputs;
-import frc.lib.generic.hardware.motor.MotorProperties;
-import frc.lib.generic.hardware.motor.MotorSignal;
+import frc.lib.generic.hardware.motor.*;
 import frc.lib.generic.hardware.motor.hardware.MotorUtilities;
-import frc.lib.math.Conversions;
 import frc.lib.scurve.InputParameter;
 import frc.lib.scurve.OutputParameter;
 import frc.lib.scurve.SCurveGenerator;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Queue;
 import java.util.function.DoubleSupplier;
 
 import static frc.lib.generic.hardware.motor.MotorInputs.MOTOR_INPUTS_LENGTH;
 
 public abstract class GenericSparkBase extends Motor {
+    protected final SignalsConfig signalsConfig = new SignalsConfig();
+
     private MotorUtilities.MotionType motionType;
 
-    private final CANSparkBase spark;
+    private final SparkBase spark;
     private final RelativeEncoder encoder;
-    private final SparkPIDController sparkController;
+    private final SparkClosedLoopController sparkController;
     private final int deviceId;
 
     private final boolean[] signalsToLog = new boolean[MOTOR_INPUTS_LENGTH];
-    private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
-    private DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
+    protected DoubleSupplier externalPositionSupplier, externalVelocitySupplier;
     private Feedforward feedforward;
 
     private double previousVelocity = 0;
@@ -52,8 +44,7 @@ public abstract class GenericSparkBase extends Motor {
 
     private MotorConfiguration currentConfiguration;
 
-    private int slotToUse = 0;
-    private double conversionFactor = 1;
+    protected double target = 0;
 
     protected GenericSparkBase(String name, int deviceId) {
         super(name);
@@ -64,7 +55,7 @@ public abstract class GenericSparkBase extends Motor {
         encoder = getEncoder();
         sparkController = getSparkController();
 
-        optimizeBusUsage(spark);
+        optimizeBusUsage();
     }
 
     @Override
@@ -87,57 +78,20 @@ public abstract class GenericSparkBase extends Motor {
         setNewGoal(output);
 
         switch (mode) {
-            case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward, slotToUse);
-            case VOLTAGE -> sparkController.setReference(output, CANSparkBase.ControlType.kVoltage, slotToUse, 0);
-            case CURRENT -> sparkController.setReference(output, CANSparkBase.ControlType.kCurrent, slotToUse, 0);
+            case POSITION, VELOCITY -> handleSmoothMotion(motionType, goalState, motionProfile, this.feedforward);
+            case VOLTAGE -> sparkController.setReference(output, SparkBase.ControlType.kVoltage, ClosedLoopSlot.kSlot0, 0);
+            case CURRENT -> sparkController.setReference(output, SparkBase.ControlType.kCurrent, ClosedLoopSlot.kSlot0, 0);
         }
     }
 
     @Override
     public boolean configure(MotorConfiguration configuration) {
-        currentConfiguration = configuration;
-
-        slotToUse = configuration.slotToUse;
-
-        spark.restoreFactoryDefaults();
-
-        setIdleMode(configuration.idleMode);
-        spark.setInverted(configuration.inverted);
-
-        spark.enableVoltageCompensation(12);
-
-        conversionFactor = (1.0 / configuration.gearRatio);
-
-        if (configuration.statorCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.statorCurrentLimit);
-        if (configuration.supplyCurrentLimit != -1) spark.setSmartCurrentLimit((int) configuration.supplyCurrentLimit);
-
-        spark.setOpenLoopRampRate(configuration.dutyCycleOpenLoopRampPeriod);
-        spark.setClosedLoopRampRate(configuration.dutyCycleClosedLoopRampPeriod);
-
-        configureFeedforward(getCurrentSlot());
-
-        configureProfile(configuration);
-        configurePID(configuration);
-        configureExtras(configuration);
-
-        int i = 0;
-
-        while (i <= 5 && spark.burnFlash() != REVLibError.kOk) {
-            i++;
-        }
-
-        return spark.burnFlash() == REVLibError.kOk;
+        return configureMotor(configuration, null, false);
     }
 
-    protected void configureFeedforward(MotorProperties.Slot slot) {
-        final Feedforward.Type type = switch (slot.gravityType()) {
-            case ARM -> Feedforward.Type.ARM;
-            case ELEVATOR -> Feedforward.Type.ELEVATOR;
-            default -> Feedforward.Type.SIMPLE;
-        };
-
-        this.feedforward = new Feedforward(type,
-                new Feedforward.FeedForwardConstants(slot.kS(), slot.kV(), slot.kA(), slot.kG()));
+    protected void setFeedforward(MotorProperties.Slot slot) {
+        feedforward = new Feedforward(slot.feedforwardType,
+                new Feedforward.FeedForwardConstants(slot.kS, slot.kV, slot.kA, slot.kG));
     }
 
     @Override
@@ -146,9 +100,11 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     @Override
-    public void setFollowerOf(String name, int masterPort) {
-        spark.follow(new CANSparkMax(masterPort, CANSparkLowLevel.MotorType.kBrushless));
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 10);
+    public void setFollower(Motor motor, boolean invert) {
+        if (!(motor instanceof GenericSparkBase))
+            return;
+
+        configureMotor(currentConfiguration, ((GenericSparkFlex) motor).getSpark(), invert);
     }
 
     @Override
@@ -165,11 +121,6 @@ public abstract class GenericSparkBase extends Motor {
     @Override
     public int getDeviceID() {
         return deviceId;
-    }
-
-    @Override
-    public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        spark.setIdleMode(idleMode == MotorProperties.IdleMode.COAST ? CANSparkBase.IdleMode.kCoast : CANSparkBase.IdleMode.kBrake);
     }
 
     private void setNewGoal(double goal) {
@@ -201,40 +152,34 @@ public abstract class GenericSparkBase extends Motor {
      */
     @Override
     public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) {
+        if (useFasterThread)
+            new UnsupportedOperationException("Spark doesn't support faster thread");
+
         final int ms = 1000 / (useFasterThread ? 200 : 50);
 
         signalsToLog[signal.getId()] = true;
 
         switch (signal) {
-            case VELOCITY, CURRENT, TEMPERATURE, ACCELERATION ->
-                    spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
-            case POSITION -> spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, ms);
+            case CURRENT -> signalsConfig.outputCurrentPeriodMs(ms);
+            case TEMPERATURE -> signalsConfig.motorTemperaturePeriodMs(ms);
+
+            case POSITION -> {
+                signalsConfig.primaryEncoderPositionAlwaysOn(true);
+                signalsConfig.primaryEncoderPositionPeriodMs(ms);
+            }
+
+            case VELOCITY, ACCELERATION -> {
+                signalsConfig.primaryEncoderVelocityPeriodMs(ms);
+                signalsConfig.primaryEncoderVelocityAlwaysOn(true);
+            }
+
             case VOLTAGE -> {
-                spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, ms);
-                spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, ms);
+                signalsConfig.appliedOutputPeriodMs(ms);
+                signalsConfig.busVoltagePeriodMs(ms);
             }
         }
 
-        if (!useFasterThread) return;
-
-        signalsToLog[signal.getId() + MOTOR_INPUTS_LENGTH / 2] = true;
-
-        switch (signal) {
-            case POSITION ->
-                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getSystemPositionPrivate));
-            case VELOCITY ->
-                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getSystemVelocityPrivate));
-            case CURRENT ->
-                    signalQueueList.put("current", OdometryThread.getInstance().registerSignal(spark::getOutputCurrent));
-            case VOLTAGE ->
-                    signalQueueList.put("voltage", OdometryThread.getInstance().registerSignal(this::getVoltagePrivate));
-            case TEMPERATURE ->
-                    signalQueueList.put("temperature", OdometryThread.getInstance().registerSignal(spark::getMotorTemperature));
-            case CLOSED_LOOP_TARGET ->
-                    signalQueueList.put("target", OdometryThread.getInstance().registerSignal(() -> goalState.position));
-            case ACCELERATION ->
-                    signalQueueList.put("acceleration", OdometryThread.getInstance().registerSignal(this::getEffectiveAcceleration));
-        }
+        configure(currentConfiguration);
     }
 
     @Override
@@ -253,12 +198,10 @@ public abstract class GenericSparkBase extends Motor {
         inputs.voltage = getVoltagePrivate();
         inputs.current = spark.getOutputCurrent();
         inputs.temperature = spark.getMotorTemperature();
-        if (goalState != null) inputs.target = goalState.position;
+        inputs.target = target;
         inputs.systemPosition = getEffectivePosition();
         inputs.systemVelocity = getEffectiveVelocity();
         inputs.systemAcceleration = getEffectiveAcceleration();
-
-        MotorUtilities.handleThreadedInputs(inputs, signalQueueList);
     }
 
     private double getVoltagePrivate() {
@@ -266,11 +209,11 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     private double getSystemPositionPrivate() {
-        return encoder.getPosition() * conversionFactor;
+        return encoder.getPosition();
     }
 
     private double getSystemVelocityPrivate() {
-        return (encoder.getVelocity() / Conversions.SEC_PER_MIN) * conversionFactor;
+        return (encoder.getVelocity());
     }
 
     double getEffectivePosition() {
@@ -282,9 +225,9 @@ public abstract class GenericSparkBase extends Motor {
     }
 
     private double getEffectiveAcceleration() {
-        final double acceleration = externalVelocitySupplier == null ? getSystemVelocityPrivate() - previousVelocity : externalVelocitySupplier.getAsDouble() - previousVelocity;
+        final double acceleration = (getEffectiveVelocity() - previousVelocity) / 0.02;
 
-        previousVelocity = externalVelocitySupplier == null ? getSystemVelocityPrivate() : externalVelocitySupplier.getAsDouble();
+        previousVelocity = getEffectiveVelocity();
 
         return acceleration;
     }
@@ -331,7 +274,7 @@ public abstract class GenericSparkBase extends Motor {
         return goalState != null
                 && goalState.equals(newGoal)
                 && !hasStoppedOccurred
-                && (Logger.getRealTimestamp() - getLastProfileCalculationTimestamp() <= 100000); //(0.1 sec has passed)
+                && (Logger.getTimestamp() - getLastProfileCalculationTimestamp() <= 100000); //(0.1 sec has passed)
     }
 
     protected SCurveGenerator getSCurveGenerator() {
@@ -342,34 +285,80 @@ public abstract class GenericSparkBase extends Motor {
 
     protected abstract void setSCurveOutputs(OutputParameter outputParameter);
 
-    protected abstract CANSparkBase getSpark();
+    protected abstract SparkBase getSpark();
 
     protected abstract RelativeEncoder getEncoder();
 
-    protected abstract SparkPIDController getSparkController();
+    protected abstract SparkClosedLoopController getSparkController();
 
     protected abstract void refreshExtras();
 
     protected abstract void setNewGoalExtras();
 
-    protected abstract void configureExtras(MotorConfiguration configuration);
+    /**
+     * This exists because REV doesn't work properly with THEIR OW NFUCKING abstract configuration object
+     */
+    protected abstract boolean configureMotorInternal(MotorConfiguration configuration, SparkFlex master, boolean invertFollower);
 
-    protected abstract void handleSmoothMotion(MotorUtilities.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, final Feedforward feedforward, int slotToUse);
-
-    protected abstract void configurePID(MotorConfiguration configuration);
+    protected abstract void handleSmoothMotion(MotorUtilities.MotionType motionType, TrapezoidProfile.State goalState, TrapezoidProfile motionProfile, final Feedforward feedforward);
 
     protected abstract double getLastProfileCalculationTimestamp();
 
     protected abstract void setPreviousSetpoint(TrapezoidProfile.State previousSetpoint);
 
-    private void optimizeBusUsage(CANSparkBase spark) {
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus0, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus1, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus2, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus3, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus4, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus5, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus6, 32767);
-        spark.setPeriodicFramePeriod(CANSparkLowLevel.PeriodicFrame.kStatus7, 32767);
+    private void optimizeBusUsage() {
+        final int disabledMs = 1000;
+
+        //Status0:
+        signalsConfig.appliedOutputPeriodMs(50);
+        signalsConfig.busVoltagePeriodMs(50);
+        signalsConfig.motorTemperaturePeriodMs(50);
+        signalsConfig.limitsPeriodMs(50);
+        signalsConfig.outputCurrentPeriodMs(50);
+
+        //Status1:
+        signalsConfig.warningsPeriodMs(disabledMs);
+        signalsConfig.faultsPeriodMs(disabledMs);
+        signalsConfig.warningsAlwaysOn(false);
+        signalsConfig.faultsAlwaysOn(false);
+
+        //Status2:
+        signalsConfig.primaryEncoderPositionPeriodMs(disabledMs);
+        signalsConfig.primaryEncoderVelocityPeriodMs(disabledMs);
+        signalsConfig.primaryEncoderPositionAlwaysOn(false);
+        signalsConfig.primaryEncoderVelocityAlwaysOn(false);
+
+        //Status3:
+        signalsConfig.analogPositionPeriodMs(disabledMs);
+        signalsConfig.analogVelocityPeriodMs(disabledMs);
+        signalsConfig.analogVoltagePeriodMs(disabledMs);
+        signalsConfig.analogPositionAlwaysOn(false);
+        signalsConfig.analogVelocityAlwaysOn(false);
+        signalsConfig.analogVoltageAlwaysOn(false);
+
+        //Status4:
+        signalsConfig.externalOrAltEncoderPosition(disabledMs);
+        signalsConfig.externalOrAltEncoderVelocity(disabledMs);
+        signalsConfig.externalOrAltEncoderPositionAlwaysOn(false);
+        signalsConfig.externalOrAltEncoderVelocityAlwaysOn(false);
+
+        //Status5:
+        signalsConfig.absoluteEncoderPositionPeriodMs(disabledMs);
+        signalsConfig.absoluteEncoderVelocityPeriodMs(disabledMs);
+        signalsConfig.absoluteEncoderPositionAlwaysOn(false);
+        signalsConfig.absoluteEncoderVelocityAlwaysOn(false);
+
+        //Status7:
+        signalsConfig.iAccumulationPeriodMs(disabledMs);
+        signalsConfig.iAccumulationAlwaysOn(false);
+    }
+
+    private boolean configureMotor(MotorConfiguration configuration, SparkFlex masterId, boolean invertFollower) {
+        currentConfiguration = configuration;
+
+        setFeedforward(configuration.slot);
+        configureProfile(configuration);
+
+        return configureMotorInternal(configuration, masterId, invertFollower);
     }
 }

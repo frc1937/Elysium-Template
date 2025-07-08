@@ -15,36 +15,71 @@ public class Pigeon implements LoggableHardware {
     private final String name;
 
     public Pigeon(String name) {
-        this.name = name;
+        this.name = "Pigeons/" + name;
 
+        periodic();
         HardwareManager.addHardware(this);
     }
 
     public void configurePigeon(PigeonConfiguration pigeonConfiguration) {}
 
-    public double getYaw() {
+    public double getYawRotations() {
         if (!getSignalsToLog()[0]) printSignalError("YAW");
-        return inputs.gyroYawDegrees;
+        return inputs.gyroYawRotations;
     }
 
-    public double getRoll() {
+    public double getRollRotations() {
         if (!getSignalsToLog()[1]) printSignalError("ROLL");
-        return inputs.gyroRollDegrees;
+        return inputs.gyroRollRotations;
     }
 
-    public double getPitch() {
+    public double getPitchRotations() {
         if (!getSignalsToLog()[2]) printSignalError("PITCH");
-        return inputs.gyroPitchDegrees;
+        return inputs.gyroPitchRotations;
     }
 
-    public void setGyroYaw(double yawDegrees) {}
+    public void setGyroYaw(double yawRotations) {}
 
     /**
-     * Signals are lazily loaded - only these explicity called will be updated. Thus you must call this method. when using a signal.
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     * @param useFasterThread Whether to use a faster thread.
      */
-    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) { }
+    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) {}
 
-    public void setupSignalUpdates(PigeonSignal signal) { setupSignalUpdates(signal, false); }
+    /**
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     */
+    public void setupSignalUpdates(PigeonSignal signal) {setupSignalUpdates(signal, false);}
 
     public boolean[] getSignalsToLog() {
         return new boolean[PIGEON_INPUTS_LENGTH];
@@ -53,7 +88,7 @@ public class Pigeon implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs("Pigeons/" + name, inputs);
+        Logger.processInputs(name, inputs);
     }
 
     @Override

@@ -6,15 +6,15 @@ import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Angle;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.hardware.pigeon.Pigeon;
 import frc.lib.generic.hardware.pigeon.PigeonConfiguration;
 import frc.lib.generic.hardware.pigeon.PigeonInputs;
 import frc.lib.generic.hardware.pigeon.PigeonSignal;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
@@ -24,45 +24,40 @@ import static frc.lib.generic.hardware.pigeon.hardware.PigeonUtilities.handleThr
 public class GenericPigeon2 extends Pigeon {
     private final Pigeon2 pigeon;
 
-    private final StatusSignal<Double> yawSignal, pitchSignal, rollSignal;
-    private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
+    private final StatusSignal<Angle> yawSignal, pitchSignal, rollSignal;
 
-    private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
+    private final boolean[] signalsToLog = new boolean[PIGEON_INPUTS_LENGTH];
 
-    public GenericPigeon2(String name, int deviceNumber, String canbusName) {
+    public GenericPigeon2(String name, int deviceNumber) {
         super(name);
 
-        pigeon = new Pigeon2(deviceNumber, canbusName);
+        pigeon = new Pigeon2(deviceNumber);
 
         yawSignal = pigeon.getYaw().clone();
         pitchSignal = pigeon.getPitch().clone();
         rollSignal = pigeon.getRoll().clone();
     }
 
-    public GenericPigeon2(String name, int deviceNumber) {
-        this(name, deviceNumber, "CAN");
-    }
 
     @Override
     public void configurePigeon(PigeonConfiguration pigeonConfiguration) {
         pigeon.reset();
 
         final Pigeon2Configuration configuration  = new Pigeon2Configuration();
-        final Rotation3d centerOfRotationOffset = pigeonConfiguration.centerOfRotationOffset;
 
-        configuration.MountPose.MountPoseYaw = Units.radiansToDegrees(centerOfRotationOffset.getZ());
-        configuration.MountPose.MountPosePitch = Units.radiansToDegrees(centerOfRotationOffset.getY());
-        configuration.MountPose.MountPoseRoll = Units.radiansToDegrees(centerOfRotationOffset.getX());
+        configuration.MountPose.MountPoseYaw = pigeonConfiguration.mountPoseYawDegrees;
+        configuration.MountPose.MountPosePitch = pigeonConfiguration.mountPosePitchDegrees;
+        configuration.MountPose.MountPoseRoll = pigeonConfiguration.mountPoseRollDegrees;
 
         pigeon.optimizeBusUtilization();
 
-        pigeon.getConfigurator().apply(configuration);
+        pigeon.getConfigurator().apply(configuration.Pigeon2Features.withEnableCompass(false));
     }
 
     @Override
-    public void setGyroYaw(double yawDegrees) {
-        pigeon.setYaw(yawDegrees);
+    public void setGyroYaw(double yawRotations) {
+        pigeon.setYaw(yawRotations * 360);
     }
 
     @Override
@@ -71,56 +66,49 @@ public class GenericPigeon2 extends Pigeon {
     }
 
     @Override
-    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) {
-        final int updateFrequency = useFasterThread ? 200 : 50;
-        signalsToLog[signal.getId()] = true;
-
-        switch (signal) {
-            case YAW -> setupSignal(yawSignal, updateFrequency);
-            case ROLL -> setupSignal(rollSignal, updateFrequency);
-            case PITCH -> setupSignal(pitchSignal, updateFrequency);
-        }
-
-        if (!useFasterThread) return;
-
-        signalsToLog[signal.getId() + PIGEON_INPUTS_LENGTH / 2] = true;
-
-        switch (signal) {
-            case YAW -> signalQueueList.put("yaw", OdometryThread.getInstance().registerSignal(this::getYawPrivate));
-            case ROLL -> signalQueueList.put("roll", OdometryThread.getInstance().registerSignal(this::getRollPrivate));
-            case PITCH -> signalQueueList.put("pitch", OdometryThread.getInstance().registerSignal(this::getPitchPrivate));
-        }
-    }
-
-    @Override
     protected void refreshInputs(PigeonInputs inputs) {
         if (pigeon == null) return;
 
         inputs.setSignalsToLog(signalsToLog);
 
-        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
-
-        inputs.gyroYawDegrees = getYawPrivate();
-        inputs.gyroRollDegrees = getRollPrivate();
-        inputs.gyroPitchDegrees = getPitchPrivate();
+        inputs.gyroYawRotations = yawSignal.getValueAsDouble() / 360;
+        inputs.gyroPitchRotations = pitchSignal.getValueAsDouble() / 360;
+        inputs.gyroRollRotations = rollSignal.getValueAsDouble() / 360;
 
         handleThreadedInputs(inputs, signalQueueList);
     }
 
-    private double getYawPrivate() {
-        return yawSignal.getValue();
+    @Override
+    public void setupSignalUpdates(PigeonSignal signal, boolean useFasterThread) {
+        signalsToLog[signal.getId()] = true;
+
+        if (!useFasterThread) {
+            switch (signal) {
+                case YAW -> setupNonThreadedSignal(yawSignal);
+                case ROLL -> setupNonThreadedSignal(rollSignal);
+                case PITCH -> setupNonThreadedSignal(pitchSignal);
+            }
+
+            return;
+        }
+
+        signalsToLog[signal.getId() + PIGEON_INPUTS_LENGTH / 2] = true;
+
+        switch (signal) {
+            case YAW -> setupThreadedSignal("yaw_pigeon2", yawSignal);
+            case ROLL -> setupThreadedSignal("roll_pigeon2", rollSignal);
+            case PITCH -> setupThreadedSignal("pitch_pigeon2", pitchSignal);
+        }
     }
 
-    private double getPitchPrivate() {
-        return pitchSignal.getValue();
+
+    private void setupNonThreadedSignal(final BaseStatusSignal signal) {
+        signal.setUpdateFrequency(50);
+        HardwareManager.registerCTREStatusSignal(signal);
     }
 
-    private double getRollPrivate() {
-        return rollSignal.getValue();
-    }
-
-    private void setupSignal(final StatusSignal<Double> correspondingSignal, final int updateFrequency) {
-        correspondingSignal.setUpdateFrequency(updateFrequency);
-        signalsToUpdateList.add(correspondingSignal);
+    private void setupThreadedSignal(String name, BaseStatusSignal signal) {
+        signal.setUpdateFrequency(200);
+        signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
     }
 }

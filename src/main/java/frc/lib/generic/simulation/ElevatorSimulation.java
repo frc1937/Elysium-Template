@@ -39,7 +39,6 @@ public class ElevatorSimulation extends GenericPhysicsSimulation {
     public double getSystemPositionRotations() {
         return Conversions.metresToRotations(
                 elevatorSimulation.getPositionMeters() - minimumHeightMetres, drumDiameterMetres);
-
     }
 
     @Override
