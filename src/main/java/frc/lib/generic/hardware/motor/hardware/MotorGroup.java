@@ -13,13 +13,6 @@ public class MotorGroup extends Motor {
     }
 
     @Override
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        for(Motor motor : motors) {
-            motor.resetSlot(slot, slotNumber);
-        }
-    }
-
-    @Override
     public void setOutput(MotorProperties.ControlMode controlMode, double output) {
         for(Motor motor : motors) {
             motor.setOutput(controlMode, output);

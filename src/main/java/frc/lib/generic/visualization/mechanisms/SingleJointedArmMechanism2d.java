@@ -1,25 +1,25 @@
 package frc.lib.generic.visualization.mechanisms;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
 import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createDefaultRoot;
 
 public class SingleJointedArmMechanism2d {
     private final String name;
-    private final Mechanism2d armMechanism;
-    private final MechanismRoot2d root;
-    private MechanismLigament2d
+    private final LoggedMechanism2d armMechanism;
+    private final LoggedMechanismRoot2d root;
+    private LoggedMechanismLigament2d
             currentAngleLigament,
             targetAngleLigament;
 
     public SingleJointedArmMechanism2d(String name, double armLength) {
         this.name = "Mechanism/" + name;
-        this.armMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        this.armMechanism = new LoggedMechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("armRoot", armMechanism);
 
         createCurrentLigament(armLength);
@@ -37,12 +37,12 @@ public class SingleJointedArmMechanism2d {
     }
 
     private void createCurrentLigament(double armLength) {
-        currentAngleLigament = new MechanismLigament2d("armLigament", armLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
+        currentAngleLigament = new LoggedMechanismLigament2d("armLigament", armLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
         root.append(currentAngleLigament);
     }
 
     private void createTargetLigament(double armLength) {
-        targetAngleLigament = new MechanismLigament2d("targetArmLigament", armLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
+        targetAngleLigament = new LoggedMechanismLigament2d("targetArmLigament", armLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
         root.append(targetAngleLigament);
     }
 }

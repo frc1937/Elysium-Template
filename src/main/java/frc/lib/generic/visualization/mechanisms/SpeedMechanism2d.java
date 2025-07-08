@@ -1,18 +1,18 @@
 package frc.lib.generic.visualization.mechanisms;
 
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
 import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createDefaultRoot;
 
 public class SpeedMechanism2d {
     private final String name;
-    private final Mechanism2d speedMechanism;
-    private final MechanismRoot2d root;
-    private MechanismLigament2d
+    private final LoggedMechanism2d speedMechanism;
+    private final LoggedMechanismRoot2d root;
+    private LoggedMechanismLigament2d
             currentSpeedLigament,
             targetSpeedLigament,
             currentArrowTopLigament,
@@ -22,7 +22,7 @@ public class SpeedMechanism2d {
 
     public SpeedMechanism2d(String name) {
         this.name = "Mechanism/" + name;
-        this.speedMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        this.speedMechanism = new LoggedMechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("speedMechanismRoot", speedMechanism);
 
         createCurrentLigament();
@@ -74,9 +74,9 @@ public class SpeedMechanism2d {
     }
 
     private void createCurrentLigament() {
-        currentSpeedLigament = new MechanismLigament2d("currentSpeed", 5, 0, DEFAULT_LINE_WIDTH, GREEN);
-        currentArrowTopLigament = new MechanismLigament2d("currentArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
-        currentArrowBottomLigament = new MechanismLigament2d("currentArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
+        currentSpeedLigament = new LoggedMechanismLigament2d("currentSpeed", 5, 0, DEFAULT_LINE_WIDTH, GREEN);
+        currentArrowTopLigament = new LoggedMechanismLigament2d("currentArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
+        currentArrowBottomLigament = new LoggedMechanismLigament2d("currentArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GREEN);
 
         currentSpeedLigament.append(currentArrowTopLigament);
         currentSpeedLigament.append(currentArrowBottomLigament);
@@ -84,9 +84,9 @@ public class SpeedMechanism2d {
     }
 
     private void createTargetLigament() {
-        targetSpeedLigament = new MechanismLigament2d("targetSpeed", 5, 0, DEFAULT_LINE_WIDTH, GRAY);
-        targetArrowTopLigament = new MechanismLigament2d("targetArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
-        targetArrowBottomLigament = new MechanismLigament2d("targetArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
+        targetSpeedLigament = new LoggedMechanismLigament2d("targetSpeed", 5, 0, DEFAULT_LINE_WIDTH, GRAY);
+        targetArrowTopLigament = new LoggedMechanismLigament2d("targetArrowTop", 1, ARROW_TOP_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
+        targetArrowBottomLigament = new LoggedMechanismLigament2d("targetArrowBottom", 1, ARROW_BOTTOM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
 
         targetSpeedLigament.append(targetArrowTopLigament);
         targetSpeedLigament.append(targetArrowBottomLigament);

@@ -1,10 +1,10 @@
 package frc.lib.generic.visualization.mechanisms;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
 import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createDefaultRoot;
@@ -12,9 +12,9 @@ import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.create
 
 public class DoubleJointedArmMechanism2d {
     private final String name;
-    private final Mechanism2d doubleJointedArmMechanism;
-    private final MechanismRoot2d root;
-    private MechanismLigament2d
+    private final LoggedMechanism2d doubleJointedArmMechanism;
+    private final LoggedMechanismRoot2d root;
+    private LoggedMechanismLigament2d
             currentShoulderLigament,
             targetShoulderLigament,
             currentElbowLigament,
@@ -22,7 +22,7 @@ public class DoubleJointedArmMechanism2d {
 
     public DoubleJointedArmMechanism2d(String name, double shoulderLength, double elbowLength) {
         this.name = "Mechanism/" + name;
-        this.doubleJointedArmMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
+        this.doubleJointedArmMechanism = new LoggedMechanism2d(DEFAULT_CANVAS_WIDTH, DEFAULT_CANVAS_HEIGHT);
         this.root = createDefaultRoot("DoubleJointedArmRoot", doubleJointedArmMechanism);
 
         createCurrentLigament(shoulderLength, elbowLength);
@@ -44,16 +44,16 @@ public class DoubleJointedArmMechanism2d {
     }
 
     private void createCurrentLigament(double shoulderLength, double elbowLength) {
-        currentShoulderLigament = new MechanismLigament2d("currentShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
-        currentElbowLigament = new MechanismLigament2d("currentElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_BLUE);
+        currentShoulderLigament = new LoggedMechanismLigament2d("currentShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, BLUE);
+        currentElbowLigament = new LoggedMechanismLigament2d("currentElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_BLUE);
 
         currentShoulderLigament.append(currentElbowLigament);
         root.append(currentShoulderLigament);
     }
 
     private void createTargetLigament(double shoulderLength, double elbowLength) {
-        targetShoulderLigament = new MechanismLigament2d("targetShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
-        targetElbowLigament = new MechanismLigament2d("targetElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_GRAY);
+        targetShoulderLigament = new LoggedMechanismLigament2d("targetShoulderLigament", shoulderLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, GRAY);
+        targetElbowLigament = new LoggedMechanismLigament2d("targetElbowLigament", elbowLength, DEFAULT_ARM_ANGLE, DEFAULT_LINE_WIDTH, DARK_GRAY);
 
         targetShoulderLigament.append(targetElbowLigament);
         root.append(targetShoulderLigament);

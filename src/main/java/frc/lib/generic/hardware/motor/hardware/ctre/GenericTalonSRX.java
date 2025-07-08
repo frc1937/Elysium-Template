@@ -2,7 +2,6 @@ package frc.lib.generic.hardware.motor.hardware.ctre;
 
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRXConfiguration;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import frc.lib.generic.hardware.motor.*;
@@ -57,25 +56,16 @@ public class GenericTalonSRX extends Motor {
     }
 
     @Override
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        talonSRX.config_kP(slotNumber, slot.kP());
-        talonSRX.config_kI(slotNumber, slot.kI());
-        talonSRX.config_kD(slotNumber, slot.kD());
-    }
-
-    @Override
-    public void setIdleMode(MotorProperties.IdleMode idleMode) {
-        talonSRX.setNeutralMode(idleMode == MotorProperties.IdleMode.COAST ? NeutralMode.Coast : NeutralMode.Brake);
-    }
-
-    @Override
     public void stopMotor() {
         talonSRX.stopMotor();
     }
 
     @Override
-    public void setFollowerOf(String name, int masterPort) {
-        talonSRX.set(ControlMode.Follower, masterPort);
+    public void setFollower(Motor motor, boolean invert) {
+        if (!(motor instanceof GenericTalonSRX))
+            return;
+
+        talonSRX.follow(((GenericTalonSRX) motor).talonSRX);
     }
 
     @Override
@@ -164,17 +154,9 @@ public class GenericTalonSRX extends Motor {
     }
 
     private void configureSlots(MotorConfiguration configuration) {
-        talonSRX.config_kP(0, configuration.slot0.kP());
-        talonSRX.config_kI(0, configuration.slot0.kI());
-        talonSRX.config_kD(0, configuration.slot0.kD());
-
-        talonSRX.config_kP(1, configuration.slot1.kP());
-        talonSRX.config_kI(1, configuration.slot1.kI());
-        talonSRX.config_kD(1, configuration.slot1.kD());
-
-        talonSRX.config_kP(2, configuration.slot2.kP());
-        talonSRX.config_kI(2, configuration.slot2.kI());
-        talonSRX.config_kD(2, configuration.slot2.kD());
+        talonSRX.config_kP(0, configuration.slot.kP);
+        talonSRX.config_kI(0, configuration.slot.kI);
+        talonSRX.config_kD(0, configuration.slot.kD);
     }
 
     @Override

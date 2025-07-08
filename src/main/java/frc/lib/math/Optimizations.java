@@ -6,27 +6,12 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import frc.robot.subsystems.swerve.SwerveConstants;
-import org.littletonrobotics.junction.Logger;
 
 import java.util.Arrays;
 
-public class Optimizations {
-    /**
-     * Determines if the robot is currently experiencing a collision based on accelerometer data.
-     * This method calculates the resultant acceleration from the X and Y axes of the accelerometer,
-     * then multiplies it by the gravitational constant to convert it into a force value.
-     * If this force exceeds a predefined minimum threshold, it is considered that a collision has occurred.
-     *
-     * @return true if the calculated force indicates a collision; false otherwise.
-     */
-    public static boolean isColliding() {
-//        final float xAcceleration = (float) ROBORIO_ACCELEROMETER.getX();
-//        final float yAcceleration = (float) ROBORIO_ACCELEROMETER.getY();
-//
-//        return Math.hypot(xAcceleration, yAcceleration) * GRAVITY > MINIMUM_ACCELERATION_FOR_COLLISION;
-        return false; //TODO: USE GYRO INSTEAD! THE ACCELEROMETER IS DEEPLY FLAWED!
-    }
+import static frc.robot.RobotContainer.ACCELEROMETER;
 
+public class Optimizations {
     /**
      * Gets the skidding ratio from the latest module state, that can be used to determine how much the chassis is skidding
      * the skidding ratio is defined as the ratio between the maximum and minimum magnitude of the "translational" part of the speed of the modules
@@ -53,6 +38,12 @@ public class Optimizations {
         final double minSpeed = Arrays.stream(translationalSpeeds).min().orElse(Double.POSITIVE_INFINITY);
 
         return maxSpeed / minSpeed;
+    }
+
+    public static boolean isColliding() {
+        final float xAccel = (float) ACCELEROMETER.getX();
+        final float yAccel = (float) ACCELEROMETER.getY();
+        return Math.hypot(xAccel, yAccel) * 9.8015 > 36;
     }
 
     /**
@@ -84,21 +75,6 @@ public class Optimizations {
     }
 
     /**
-     * When the robot drives while rotating it skews a bit to the side.
-     * This should fix the chassis speeds, so they won't make the robot skew while rotating.
-     *
-     * @param chassisSpeeds The chassis speeds to fix skewing for
-     * @param lastTimestamp The timestamp of the last loop
-     * @return the fixed speeds
-     */
-    public static ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds, double lastTimestamp) {
-        final double currentTimestamp = Logger.getTimestamp();
-        final double difference = currentTimestamp - lastTimestamp;
-
-        return ChassisSpeeds.discretize(chassisSpeeds, difference);
-    }
-
-    /**
      * Returns whether the given chassis speeds are considered to be "still" by the swerve neutral deadband.
      *
      * @param chassisSpeeds the chassis speeds to check
@@ -109,27 +85,6 @@ public class Optimizations {
                 Math.abs(chassisSpeeds.vyMetersPerSecond) <= SwerveConstants.DRIVE_NEUTRAL_DEADBAND &&
                 Math.abs(chassisSpeeds.omegaRadiansPerSecond) <= SwerveConstants.ROTATION_NEUTRAL_DEADBAND;
     }
-
-    /**
-     * Minimize the change in heading the desired swerve module state would require by potentially
-     * reversing the direction the wheel spins. Customized from WPILib's version to include placing
-     * in appropriate scope for CTRE onboard control.
-     *
-     * @param desiredState The desired state.
-     * @param currentAngle The current module angle.
-     */
-    public static SwerveModuleState optimize(SwerveModuleState desiredState, Rotation2d currentAngle) {
-        double targetAngle = placeInAppropriate0To360Scope(currentAngle.getDegrees(), desiredState.angle.getDegrees());
-        double targetSpeed = desiredState.speedMetersPerSecond;
-        double delta = targetAngle - currentAngle.getDegrees();
-
-        if (Math.abs(delta) > 90) {
-            targetSpeed = -targetSpeed;
-            targetAngle = delta > 90 ? targetAngle - 180 : targetAngle + 180;
-        }
-        return new SwerveModuleState(targetSpeed, Rotation2d.fromDegrees(targetAngle));
-    }
-
 
     /**
      * @param scopeReference Current Angle

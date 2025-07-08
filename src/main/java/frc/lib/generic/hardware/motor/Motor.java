@@ -23,7 +23,7 @@ public class Motor implements LoggableHardware {
     private MotorConfiguration configuration;
 
     public Motor(String name) { //every motor has a port. reflect this here.
-        this.name = name;
+        this.name = "Motors/" + name;
 
         periodic();
         HardwareManager.addHardware(this);
@@ -54,34 +54,16 @@ public class Motor implements LoggableHardware {
     public void setExternalVelocitySupplier(DoubleSupplier velocitySupplier) { }
 
     /**
-     * In case you need to re-set the slot on runtime, use this.
-     *
-     * @param slot       The new slot values
-     * @param slotNumber The slot number to modify
-     */
-    public void resetSlot(MotorProperties.Slot slot, int slotNumber) {
-        if (getCurrentConfiguration() == null) return;
-
-        switch (slotNumber) {
-            case 0 -> getCurrentConfiguration().slot0 = slot;
-            case 1 -> getCurrentConfiguration().slot1 = slot;
-            case 2 -> getCurrentConfiguration().slot2 = slot;
-        }
-
-        configure(getCurrentConfiguration());
-    }
-
-    /**
      * Sets the output of the motor based on the specified control mode and desired output value.
      *
      * <p>This method utilizes the built-in feedforward and PID controller to achieve precise control
      * over the motor. The control mode determines how the output value is interpreted and applied
      * to the motor. The supported control modes include:
      * <ul>
-     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
-     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
-     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} Achieve a specific current.
+     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} Achieve a specific voltage.
+     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} Achieve a specific position using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} Achieve a specific velocity using advanced control.
      * </ul>
      * </p>
      *
@@ -104,10 +86,10 @@ public class Motor implements LoggableHardware {
      * over the motor. The control mode determines how the output value is interpreted and applied
      * to the motor. The supported control modes include:
      * <ul>
-     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} - Achieve a specific current.
-     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} - Achieve a specific voltage.
-     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} - Achieve a specific position using advanced control.
-     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} - Achieve a specific velocity using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#CURRENT CURRENT} Achieve a specific current.
+     *   <li>{@link MotorProperties.ControlMode#VOLTAGE VOLTAGE} Achieve a specific voltage.
+     *   <li>{@link MotorProperties.ControlMode#POSITION POSITION} Achieve a specific position using advanced control.
+     *   <li>{@link MotorProperties.ControlMode#VELOCITY VELOCITY} Achieve a specific velocity using advanced control.
      * </ul>
      * </p>
      *
@@ -133,7 +115,10 @@ public class Motor implements LoggableHardware {
      *
      * @param idleMode The new idle mode
      */
-    public void setIdleMode(MotorProperties.IdleMode idleMode) { }
+    public void setIdleMode(MotorProperties.IdleMode idleMode) {
+        getCurrentConfiguration().idleMode = idleMode;
+        configure(getCurrentConfiguration());
+    }
 
     /**
      * Stop the motor
@@ -248,11 +233,47 @@ public class Motor implements LoggableHardware {
         return inputs.systemAcceleration;
     }
 
-    public void setFollowerOf(String name, int masterPort) { }
+    public void setFollower(Motor motor, boolean invert) { }
 
-    /** Signals are lazily loaded - only these explicitly called will be updated. Thus you must call this method. when using a signal.*/
+    /**
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     * @param useFasterThread Whether to use a faster thread.
+     */
     public void setupSignalUpdates(MotorSignal signal, boolean useFasterThread) { }
 
+    /**
+     * Registers and automatically updates telemetry signals for logging.
+     * <p>
+     * This method is used to automate the process of tracking important robot signals
+     * such as sensor readings or motor outputs. It ensures these values are
+     * consistently updated and logged without needing manual updates in each robot loop.
+     * </p>
+     *
+     * <p>
+     * Benefits include:
+     * <ul>
+     *   <li><b>Debugging:</b> Easily diagnose issues with a record of sensor and system values.</li>
+     *   <li><b>Performance Tuning:</b> Analyze robot behavior during matches or tests for optimization.</li>
+     * </ul>
+     * </p>
+     *
+     * @param signal The signal to log.
+     */
     public void setupSignalUpdates(MotorSignal signal) { setupSignalUpdates(signal, false); }
 
     public boolean configure(MotorConfiguration configuration) {
@@ -266,23 +287,6 @@ public class Motor implements LoggableHardware {
      * @return The configuration
      */
     public MotorConfiguration getCurrentConfiguration() { return configuration; }
-
-    /**
-     * Gets the currently used configuration slot used by the motor. If this is not set, it will return null.
-     *
-     * @return The configuration slot
-     */
-    public MotorProperties.Slot getCurrentSlot() {
-        return getSlot(getCurrentConfiguration().slotToUse, getCurrentConfiguration());
-    }
-
-    public MotorProperties.Slot getSlot(int slotToUse, MotorConfiguration currentConfiguration) {
-        switch (slotToUse) {
-            case 1 -> { return currentConfiguration.slot1; }
-            case 2 -> { return currentConfiguration.slot2; }
-            default -> { return currentConfiguration.slot0; }
-        }
-    }
 
     public boolean isAtPositionSetpoint() {
         if (getCurrentConfiguration() == null || getCurrentConfiguration().closedLoopTolerance == 0)
@@ -305,7 +309,7 @@ public class Motor implements LoggableHardware {
     @Override
     public void periodic() {
         refreshInputs(inputs);
-        Logger.processInputs("Motors/" + name, inputs);
+        Logger.processInputs(name, inputs);
     }
 
     @Override
@@ -316,9 +320,9 @@ public class Motor implements LoggableHardware {
     private void printSignalError(String signalName) {
         if (CURRENT_MODE == GlobalConstants.Mode.REPLAY) return;
 
-        new NoSuchElementException("--------------\n" +
-                "ERROR - TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT " + getClass().getName() + name +
-                "\n--------------")
+        new NoSuchElementException("--------------------\n" +
+                "ERROR: TRYING TO RETRIEVE UNINITIALIZED SIGNAL " + signalName + "| AT " + getClass().getName() + name +
+                "\n--------------------")
                 .printStackTrace();
     }
 }

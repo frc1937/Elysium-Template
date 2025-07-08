@@ -6,12 +6,12 @@ import frc.lib.generic.hardware.encoder.Encoder;
 import frc.lib.generic.hardware.motor.Motor;
 import frc.lib.generic.hardware.motor.MotorProperties;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 public class GearRatioCharacterization extends Command {
-    private static final LoggedDashboardNumber MOVEMENT_VOLTAGE = new LoggedDashboardNumber("GearRatioCharacterization/Voltage", 1.0);
-    private static final LoggedDashboardBoolean SHOULD_MOVE_CLOCKWISE = new LoggedDashboardBoolean("GearRatioCharacterization/ShouldMoveClockwise", false);
+    private static final LoggedNetworkNumber MOVEMENT_VOLTAGE = new LoggedNetworkNumber("GearRatioCharacterization/Voltage", 1.0);
+    private static final LoggedNetworkBoolean SHOULD_MOVE_CLOCKWISE = new LoggedNetworkBoolean("GearRatioCharacterization/ShouldMoveClockwise", false);
 
     private final Motor motor;
     private final Encoder encoder;
@@ -63,6 +63,6 @@ public class GearRatioCharacterization extends Command {
     }
 
     private int getVoltageSign() {
-        return SHOULD_MOVE_CLOCKWISE.get() ? -1 : 1;
+        return SHOULD_MOVE_CLOCKWISE.get()  ? -1 : 1;
     }
 }

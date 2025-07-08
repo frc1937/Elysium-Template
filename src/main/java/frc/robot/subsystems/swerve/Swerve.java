@@ -1,156 +1,124 @@
 package frc.robot.subsystems.swerve;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.generic.GenericSubsystem;
 import frc.lib.generic.OdometryThread;
-import frc.lib.generic.PID;
-import frc.lib.math.AdvancedSwerveKinematics;
 import frc.lib.math.Optimizations;
-import frc.lib.util.mirrorable.Mirrorable;
 import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
-import static frc.lib.math.Conversions.proportionalPowerToMps;
-import static frc.lib.math.MathUtils.getAngleFromPoseToPose;
 import static frc.robot.RobotContainer.POSE_ESTIMATOR;
+import static frc.robot.RobotContainer.SWERVE;
 import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveModuleConstants.MODULES;
+import static frc.robot.utilities.PathPlannerConstants.ROBOT_CONFIG;
 
 public class Swerve extends GenericSubsystem {
-    private static final PID translationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.translationConstants);
-    private static final PID rotationController = new PID(HOLONOMIC_PATH_FOLLOWER_CONFIG.rotationConstants);
-
-    private final AdvancedSwerveKinematics ADVANCED_KINEMATICS;
     private double lastTimestamp = Timer.getFPGATimestamp();
+    private double previousTotalVelocity = 0;
 
-    public Swerve() {
-         ADVANCED_KINEMATICS = new AdvancedSwerveKinematics(
-                MODULE_LOCATIONS
-        );
-        configurePathPlanner();
+    public boolean isAtPose(Pose2d target, double allowedDistanceFromTargetMeters, double allowedRotationalErrorDegrees) {
+        Logger.recordOutput("Distance from target", POSE_ESTIMATOR.getCurrentPose().getTranslation().getDistance(target.getTranslation()));
+        Logger.recordOutput("Distance from target ROT", Math.abs(POSE_ESTIMATOR.getCurrentPose().getRotation().minus(target.getRotation()).getDegrees()));
+
+        return POSE_ESTIMATOR.getCurrentPose().getTranslation().getDistance(target.getTranslation()) < allowedDistanceFromTargetMeters &&
+                Math.abs(POSE_ESTIMATOR.getCurrentPose().getRotation().minus(target.getRotation()).getDegrees()) < allowedRotationalErrorDegrees;
     }
 
-    public void stop() {
-        for (SwerveModule currentModule : MODULES)
-            currentModule.stop();
+    @Override
+    public SysIdRoutine.Config getSysIdConfig() {
+        return SYSID_DRIVE_CONFIG;
     }
 
-    public void runWheelCharacterization(double rotationSpeed) {
-        driveSelfRelative(0, 0, rotationSpeed);
-    }
-
-    public Rotation2d getGyroHeading() {
-        final double inputtedHeading =
-//                MathUtil.inputModulus(
-                GYRO.getYaw()
-//                , -180, 180)
-                ;
-        return Rotation2d.fromDegrees(inputtedHeading);
-    }
-
-    public double[] getDriveWheelPositionsRadians() {
-        double[] positions = new double[4];
-
-        for (int i = 0; i < MODULES.length; i++) {
-            positions[i] = MODULES[i].getDriveWheelPositionRadians();
+    @Override
+    public void sysIdDrive(double voltage) {
+        for (SwerveModule module : MODULES) {
+            module.runDriveMotorForCharacterization(voltage);
         }
+    }
 
-        return positions;
+    @Override
+    public void sysIdUpdateLog(SysIdRoutineLog log) {
+        MODULES[0].logForSysId(log);
     }
 
     public void setGyroHeading(Rotation2d heading) {
-        GYRO.setGyroYaw(heading.getDegrees());
+        GYRO.setGyroYaw(heading.getRotations());
     }
 
-    public ChassisSpeeds getSelfRelativeVelocity() {
-        return SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+    public double getGyroHeading() {
+        return GYRO.getYawRotations();
+    }
+
+    @AutoLogOutput(key="Swerve/velocity")
+    public ChassisSpeeds getRobotRelativeVelocity() {
+        final ChassisSpeeds speeds = SWERVE_KINEMATICS.toChassisSpeeds(getModuleStates());
+
+        double currentTotalVelocity = Math.hypot(speeds.vxMetersPerSecond, speeds.vyMetersPerSecond);
+
+        Logger.recordOutput("TOTAL_VELOCITY_VECTOR", currentTotalVelocity);
+        Logger.recordOutput("TOTAL_ACCELERATION_VECTOR", (currentTotalVelocity - previousTotalVelocity)/0.02);
+
+        previousTotalVelocity = currentTotalVelocity;
+        return speeds;
+    }
+
+    public ChassisSpeeds getFieldRelativeVelocity() {
+        return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeVelocity(), POSE_ESTIMATOR.getCurrentPose().getRotation());
+    }
+
+    public void runDriveMotorWheelCharacterization(double voltage) {
+        for (SwerveModule module : MODULES)
+            module.runDriveMotorForCharacterization(voltage);
+    }
+
+    public double[] getDriveWheelPositionsRadians() {
+        final double[] driveWheelPositions = new double[MODULES.length];
+
+        for (int i = 0; i < MODULES.length; i++)
+            driveWheelPositions[i] = MODULES[i].getDriveWheelPositionRadians();
+
+        return driveWheelPositions;
     }
 
     @Override
     public void periodic() {
-        final double[] odometryUpdatesYawDegrees = GYRO.getInputs().threadGyroYawDegrees;
-        final int odometryUpdates = odometryUpdatesYawDegrees.length;
+        final double[] odometryUpdatesYawRotations = GYRO.getInputs().threadGyroYawRotations;
+        final int odometryUpdates = odometryUpdatesYawRotations.length;
 
         if (OdometryThread.getInstance().getLatestTimestamps().length == 0) return;
 
-        final SwerveDriveWheelPositions[] swerveWheelPositions = new SwerveDriveWheelPositions[odometryUpdates];
+        final SwerveModulePosition[][] swerveWheelPositions = new SwerveModulePosition[odometryUpdates][];
         final Rotation2d[] gyroRotations = new Rotation2d[odometryUpdates];
 
         for (int i = 0; i < odometryUpdates; i++) {
             swerveWheelPositions[i] = getSwerveWheelPositions(i);
-            gyroRotations[i] = Rotation2d.fromDegrees(odometryUpdatesYawDegrees[i]);
+            gyroRotations[i] = Rotation2d.fromRotations(odometryUpdatesYawRotations[i]);
         }
 
-        POSE_ESTIMATOR.addOdometryObservations(
-                        swerveWheelPositions,
-                        gyroRotations,
-                        OdometryThread.getInstance().getLatestTimestamps()
-                );
-    }
+        if (Optimizations.isColliding()) {
+            return;
+        }
 
-    protected void driveOrientationBased(double xPower, double yPower, double thetaPower, boolean robotCentric) {
-        if (robotCentric)
-            driveSelfRelative(xPower, yPower, thetaPower);
-        else
-            driveFieldRelative(xPower, yPower, thetaPower);
-    }
-
-    protected void driveWithTarget(double xPower, double yPower, Pose2d target, boolean robotCentric) {
-        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
-        final Rotation2d targetAngle = getAngleFromPoseToPose(RobotContainer.POSE_ESTIMATOR.getCurrentPose(), target);
-
-        final double controllerOutput = Units.degreesToRadians(
-                ROTATION_CONTROLLER.calculate(
-                        currentAngle.getDegrees(),
-                        targetAngle.getDegrees()
-                ));
-
-        if (robotCentric)
-            driveSelfRelative(xPower, yPower, controllerOutput);
-        else
-            driveFieldRelative(xPower, yPower, controllerOutput);
-    }
-
-    protected void driveToPose(Pose2d target) {
-        Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
-
-        driveFieldRelative(
-                translationController.calculate(
-                        currentPose.getX(),
-                        target.getX()
-                ),
-                translationController.calculate(
-                        currentPose.getY(),
-                        target.getY()
-                ),
-                rotationController.calculate(
-                        currentPose.getRotation().getDegrees(),
-                        target.getRotation().getDegrees()
-                )
+        POSE_ESTIMATOR.updatePoseEstimatorStates(
+                swerveWheelPositions,
+                gyroRotations,
+                OdometryThread.getInstance().getLatestTimestamps()
         );
     }
 
-    protected void driveFieldRelative(double xPower, double yPower, double thetaPower) {
-        ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
-        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
-
-        driveSelfRelative(speeds);
-    }
-
-    protected void driveSelfRelative(double xPower, double yPower, double thetaPower) {
-        final ChassisSpeeds speeds = proportionalSpeedToMps(new ChassisSpeeds(xPower, yPower, thetaPower));
-        driveSelfRelative(speeds);
-    }
-
-    protected void driveSelfRelative(ChassisSpeeds chassisSpeeds) {
+    public void driveRobotRelative(ChassisSpeeds chassisSpeeds, boolean shouldUseClosedLoop) {
         chassisSpeeds = discretize(chassisSpeeds);
-        chassisSpeeds = AdvancedSwerveKinematics.correctForDynamics(chassisSpeeds);
 
         if (Optimizations.isStill(chassisSpeeds)) {
             stop();
@@ -159,56 +127,117 @@ public class Swerve extends GenericSubsystem {
 
         final SwerveModuleState[] swerveModuleStates = SWERVE_KINEMATICS.toSwerveModuleStates(chassisSpeeds);
 
-        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, MAX_SPEED_MPS);
+        SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, ROBOT_CONFIG.moduleConfig.maxDriveVelocityMPS);
 
         for (int i = 0; i < MODULES.length; i++)
-            MODULES[i].setTargetState(swerveModuleStates[i]);
+            MODULES[i].setTargetState(swerveModuleStates[i], shouldUseClosedLoop);
     }
 
-    protected void initializeDrive(boolean openLoop) {
-        for (SwerveModule currentModule : MODULES)
-            currentModule.setOpenLoop(openLoop);
-
-        ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees());
+    public void rotateToTargetFromPresetGoal() {
+        driveFieldRelative(
+                0,
+                0,
+                SWERVE_ROTATION_CONTROLLER.calculate(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees()),
+                true
+        );
     }
 
-    protected SwerveDriveWheelPositions getSwerveWheelPositions(int odometryUpdateIndex) {
+    protected void driveOpenLoop(double xPower, double yPower, double thetaPower, boolean robotCentric) {
+        if (robotCentric)
+            driveRobotRelative(xPower, yPower, thetaPower, false);
+        else
+            driveFieldRelative(xPower, yPower, thetaPower, false);
+    }
+
+    protected void driveWithTarget(double xPower, double yPower, boolean robotCentric) {
+        final Rotation2d currentAngle = RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation();
+
+        final double controllerOutput = Units.degreesToRadians(SWERVE_ROTATION_CONTROLLER.calculate(currentAngle.getDegrees()));
+
+        if (robotCentric)
+            driveRobotRelative(xPower, yPower, controllerOutput, false);
+        else
+            driveFieldRelative(xPower, yPower, controllerOutput, false);
+    }
+
+    protected void driveToPosePID(Pose2d target) {
+        final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+
+        driveFieldRelative(
+                PID_TRANSLATION_X_CONTROLLER.calculate(
+                        currentPose.getX(),
+                        target.getX()),
+                PID_TRANSLATION_Y_CONTROLLER.calculate(
+                        currentPose.getY(),
+                        target.getY()),
+                SWERVE_ROTATION_CONTROLLER.calculate(currentPose.getRotation().getDegrees()),
+                true
+        );
+    }
+
+    protected void driveToPoseTrapezoidal(Pose2d target) {
+        final Pose2d currentPose = POSE_ESTIMATOR.getCurrentPose();
+
+        driveFieldRelative(
+                PROFILED_TRANSLATION_CONTROLLER.calculate(currentPose.getX(), target.getX()),
+                PROFILED_STRAFE_CONTROLLER.calculate(currentPose.getY(), target.getY()),
+                SWERVE_ROTATION_CONTROLLER.calculate(currentPose.getRotation().getDegrees()),
+                true
+        );
+    }
+
+    protected void driveFieldRelative(double xPower, double yPower, double thetaPower, boolean shouldUseClosedLoop) {
+        ChassisSpeeds speeds = powerSpeedsToChassisSpeeds(new ChassisSpeeds(xPower, yPower, thetaPower));
+        speeds = ChassisSpeeds.fromFieldRelativeSpeeds(speeds, RobotContainer.POSE_ESTIMATOR.getCurrentPose().getRotation());
+
+        driveRobotRelative(speeds, shouldUseClosedLoop);
+    }
+
+    public void driveRobotRelative(double xPower, double yPower, double thetaPower, boolean shouldUseClosedLoop) {
+        final ChassisSpeeds speeds = powerSpeedsToChassisSpeeds(new ChassisSpeeds(xPower, yPower, thetaPower));
+        driveRobotRelative(speeds, shouldUseClosedLoop);
+    }
+
+    protected void resetTranslationalControllers() {
+        PROFILED_TRANSLATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getX(), SWERVE.getFieldRelativeVelocity().vxMetersPerSecond);
+        PROFILED_STRAFE_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getY(), SWERVE.getFieldRelativeVelocity().vyMetersPerSecond);
+    }
+
+    protected void resetRotationController() {
+        SWERVE_ROTATION_CONTROLLER.reset(POSE_ESTIMATOR.getCurrentPose().getRotation().getDegrees(), getFieldRelativeVelocity().omegaRadiansPerSecond);
+    }
+
+    protected void setGoalTranslationalControllers(Pose2d target) {
+        PROFILED_TRANSLATION_CONTROLLER.setGoal(target.getX());
+        PROFILED_STRAFE_CONTROLLER.setGoal(target.getY());
+    }
+
+    protected void setGoalRotationController(Rotation2d target) {
+        SWERVE_ROTATION_CONTROLLER.setGoal(target.getDegrees());
+    }
+
+    protected SwerveModulePosition[] getSwerveWheelPositions(int odometryUpdateIndex) {
         final SwerveModulePosition[] swerveModulePositions = new SwerveModulePosition[MODULES.length];
 
         for (int i = 0; i < MODULES.length; i++) {
             swerveModulePositions[i] = MODULES[i].getOdometryPosition(odometryUpdateIndex);
+
             if (swerveModulePositions[i] == null) return null;
         }
 
-        return new SwerveDriveWheelPositions(swerveModulePositions);
+        return swerveModulePositions;
     }
 
-    protected void configurePathPlanner() {
-        AutoBuilder.configureHolonomic(
-                POSE_ESTIMATOR::getCurrentPose,
-                POSE_ESTIMATOR::resetPose,
-
-                this::getSelfRelativeVelocity,
-                this::driveSelfRelative,
-
-                HOLONOMIC_PATH_FOLLOWER_CONFIG,
-                Mirrorable::isRedAlliance,
-                this
-        );
-
-        PathfindingCommand.warmupCommand().schedule();
-    }
-
-    protected ChassisSpeeds proportionalSpeedToMps(ChassisSpeeds chassisSpeeds) {
+    protected ChassisSpeeds powerSpeedsToChassisSpeeds(ChassisSpeeds chassisSpeeds) {
         return new ChassisSpeeds(
-                proportionalPowerToMps(chassisSpeeds.vxMetersPerSecond, MAX_SPEED_MPS),
-                proportionalPowerToMps(chassisSpeeds.vyMetersPerSecond, MAX_SPEED_MPS),
+                chassisSpeeds.vxMetersPerSecond * MAX_SPEED_MPS,
+                chassisSpeeds.vyMetersPerSecond * MAX_SPEED_MPS,
                 chassisSpeeds.omegaRadiansPerSecond
         );
     }
 
     @AutoLogOutput(key = "Swerve/CurrentStates")
-    private SwerveModuleState[] getModuleStates() {
+    public SwerveModuleState[] getModuleStates() {
         final SwerveModuleState[] states = new SwerveModuleState[MODULES.length];
 
         for (int i = 0; i < MODULES.length; i++)
@@ -228,11 +257,34 @@ public class Swerve extends GenericSubsystem {
         return states;
     }
 
+    public void stop() {
+        for (SwerveModule currentModule : MODULES)
+            currentModule.stop();
+    }
+
+    /**
+     * When the robot drives while rotating it skews a bit to the side.
+     * This should fix the chassis speeds, so they won't make the robot skew while rotating.
+     *
+     * @param chassisSpeeds The chassis speeds to fix skewing for
+     * @return the fixed speeds
+     */
     protected ChassisSpeeds discretize(ChassisSpeeds chassisSpeeds) {
         final double currentTimestamp = Timer.getFPGATimestamp();
         final double difference = currentTimestamp - lastTimestamp;
+
         lastTimestamp = currentTimestamp;
 
         return ChassisSpeeds.discretize(chassisSpeeds, difference);
+    }
+
+    public double getTotalCurrent() {
+        double total = 0;
+
+        for (SwerveModule module : MODULES) {
+            total += module.getCurrent();
+        }
+
+        return total;
     }
 }

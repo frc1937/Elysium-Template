@@ -6,8 +6,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.generic.GenericSubsystem;
 import frc.robot.subsystems.swerve.SwerveCommands;
 import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.LoggedDashboardBoolean;
-import org.littletonrobotics.junction.networktables.LoggedDashboardNumber;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
+import org.littletonrobotics.junction.networktables.LoggedNetworkNumber;
 
 import java.util.Arrays;
 import java.util.function.DoubleConsumer;
@@ -15,9 +15,9 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 public class WheelRadiusCharacterization extends Command {
-    private static final LoggedDashboardNumber CHARACTERIZATION_SPEED = new LoggedDashboardNumber("RadiusCharacterization/SpeedRadiansPerSecond", 1.0);
-    private static final LoggedDashboardNumber ROTATION_RATE_LIMIT = new LoggedDashboardNumber("RadiusCharacterization/RotationRateLimit", 1.0);
-    private static final LoggedDashboardBoolean SHOULD_MOVE_CLOCKWISE = new LoggedDashboardBoolean("RadiusCharacterization/ShouldMoveClockwise", false);
+    private static final LoggedNetworkNumber CHARACTERIZATION_SPEED = new LoggedNetworkNumber("/SmartDashboard/RadiusCharacterization/SpeedRadiansPerSecond", 1.0);
+    private static final LoggedNetworkNumber ROTATION_RATE_LIMIT = new LoggedNetworkNumber("/SmartDashboard/RadiusCharacterization/RotationRateLimit", 1.0);
+    private static final LoggedNetworkBoolean SHOULD_MOVE_CLOCKWISE = new LoggedNetworkBoolean("/SmartDashboard/RadiusCharacterization/ShouldMoveClockwise", false);
 
     private final double[] wheelDistancesFromCenterMeters;
 
@@ -78,7 +78,11 @@ public class WheelRadiusCharacterization extends Command {
         if (accumulatedYawRadians <= 6.283185307179586) {
             System.out.println("Not enough data for characterization. Rotate at least a full rotation nigga.");
         } else {
-            System.out.println("Drive Wheel Radius: " + currentDriveWheelRadius + " meters");
+            for (int i = 0; i < 3; i++) {
+                System.out.println("-----------------------------------");
+                System.out.println("Drive Wheel Radius: " + currentDriveWheelRadius + " meters");
+                System.out.println("-----------------------------------");
+            }
         }
     }
 
@@ -92,7 +96,7 @@ public class WheelRadiusCharacterization extends Command {
             Logger.recordOutput("RadiusCharacterization/AccumulatedWheelRadians" + i, accumulatedWheelRadians);
         }
 
-        currentDriveWheelRadius = currentDriveWheelRadius /4.0 ;
+        currentDriveWheelRadius = currentDriveWheelRadius / 4.0 ;
     }
 
     private int getRotationDirection() {

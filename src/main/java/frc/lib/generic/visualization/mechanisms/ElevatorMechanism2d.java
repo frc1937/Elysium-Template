@@ -1,9 +1,9 @@
 package frc.lib.generic.visualization.mechanisms;
 
-import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
-import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
+import org.littletonrobotics.junction.mechanism.LoggedMechanismRoot2d;
 
 import static frc.lib.generic.visualization.mechanisms.MechanismConstants.*;
 import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.createDefaultRoot;
@@ -11,21 +11,21 @@ import static frc.lib.generic.visualization.mechanisms.MechanismUtilities.create
 
 public class ElevatorMechanism2d {
     private final String name;
-    private final Mechanism2d elevatorMechanism;
-    private final MechanismRoot2d
+    private final LoggedMechanism2d elevatorMechanism;
+    private final LoggedMechanismRoot2d
             root,
             targetRoot;
 
     public ElevatorMechanism2d(String name, double elevatorLength) {
         this.name = "Mechanism/" + name;
-        this.elevatorMechanism = new Mechanism2d(DEFAULT_CANVAS_WIDTH, 20);
+        this.elevatorMechanism = new LoggedMechanism2d(DEFAULT_CANVAS_WIDTH, 20);
 
         this.root = createDefaultRoot("elevatorRoot", elevatorMechanism);
         this.targetRoot = createDefaultRoot("elevatorTargetRoot", elevatorMechanism);
 
         createCurrentLigament(elevatorLength);
         createTargetLigament(elevatorLength);
-        createOutlineLigament();
+        createElevatorOutline(elevatorMechanism);
     }
 
     public void updateCurrentPosition(double position) {
@@ -39,22 +39,18 @@ public class ElevatorMechanism2d {
     }
 
     private void createCurrentLigament(double elevatorLength) {
-        final MechanismLigament2d currentRightLigament = new MechanismLigament2d("elevatorRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, RED);
-        final MechanismLigament2d currentLeftLigament = new MechanismLigament2d("elevatorLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, RED);
+        final LoggedMechanismLigament2d currentRightLigament = new LoggedMechanismLigament2d("elevatorRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, RED);
+        final LoggedMechanismLigament2d currentLeftLigament = new LoggedMechanismLigament2d("elevatorLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, RED);
 
         root.append(currentRightLigament);
         root.append(currentLeftLigament);
     }
 
     private void createTargetLigament(double elevatorLength) {
-        final MechanismLigament2d targetRightLigament = new MechanismLigament2d("targetRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, BLUE);
-        final MechanismLigament2d targetLeftLigament = new MechanismLigament2d("targetLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, BLUE);
+        final LoggedMechanismLigament2d targetRightLigament = new LoggedMechanismLigament2d("targetRightLigament", elevatorLength, 0, DEFAULT_LINE_WIDTH, BLUE);
+        final LoggedMechanismLigament2d targetLeftLigament = new LoggedMechanismLigament2d("targetLeftLigament", elevatorLength, 180, DEFAULT_LINE_WIDTH, BLUE);
 
         targetRoot.append(targetRightLigament);
         targetRoot.append(targetLeftLigament);
-    }
-
-    private void createOutlineLigament() {
-        createElevatorOutline(elevatorMechanism);
     }
 }

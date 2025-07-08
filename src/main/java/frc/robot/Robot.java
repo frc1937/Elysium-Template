@@ -1,28 +1,24 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import com.ctre.phoenix6.SignalLogger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.generic.hardware.HardwareManager;
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
 
-import static frc.robot.RobotContainer.POSE_ESTIMATOR;
-import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
+import static frc.lib.math.Optimizations.isColliding;
+import static frc.robot.RobotContainer.*;
+import static frc.robot.poseestimation.apriltagcamera.AprilTagCameraConstants.VISION_SIMULATION;
 
 public class Robot extends LoggedRobot {
-    private Command autonomousCommand;
     private final CommandScheduler commandScheduler = CommandScheduler.getInstance();
     private RobotContainer robotContainer;
-
-    final Field2d simulatedVisionField = VISION_SIMULATION.getDebugField();
 
     @Override
     public void robotInit() {
         robotContainer = new RobotContainer();
+        SignalLogger.enableAutoLogging(false);
         HardwareManager.initialize(this);
     }
 
@@ -32,11 +28,16 @@ public class Robot extends LoggedRobot {
         commandScheduler.run();
 
         POSE_ESTIMATOR.periodic();
-    }
 
-    @Override
-    public void disabledInit() {
+        final float xAccel = (float) ACCELEROMETER.getX();
+        final float yAccel = (float) ACCELEROMETER.getY();
+        final double totalAccel = Math.hypot(xAccel, yAccel) * 9.8015;
 
+        Logger.recordOutput("Robot/Accelerometer X", xAccel);
+        Logger.recordOutput("Robot/Accelerometer Y", yAccel);
+        Logger.recordOutput("Robot/Accelerometer G", totalAccel);
+        Logger.recordOutput("Robot/Is Colliding", isColliding());
+        Logger.recordOutput("Robot/TotalDriveCurrent", SWERVE.getTotalCurrent());
     }
 
     @Override
@@ -44,36 +45,11 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledExit() {
-    }
-
-    @Override
     public void autonomousInit() {
-        autonomousCommand = robotContainer.getAutonomousCommand();
+        final Command autonomousCommand = robotContainer.getAutonomousCommand();
 
-        if (autonomousCommand != null) {
+        if (autonomousCommand != null)
             autonomousCommand.schedule();
-        }
-    }
-
-    @Override
-    public void autonomousPeriodic() {
-    }
-
-    @Override
-    public void autonomousExit() {
-    }
-
-    @Override
-    public void teleopInit() {
-    }
-
-    @Override
-    public void teleopPeriodic() {
-    }
-
-    @Override
-    public void teleopExit() {
     }
 
     @Override
@@ -84,13 +60,8 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {
         HardwareManager.updateSimulation();
+        VISION_SIMULATION.update(POSE_ESTIMATOR.getOdometryPose());
 
-        VISION_SIMULATION.updateRobotPose(POSE_ESTIMATOR.getOdometryPose());
-        simulatedVisionField.getObject("EstimatedRobot").setPose(POSE_ESTIMATOR.getCurrentPose());
-    }
-
-    @Override
-    public void close() {
-        super.close();
+        robotContainer.updateComponentPoses();
     }
 }

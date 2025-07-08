@@ -1,29 +1,18 @@
 package frc.robot;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.HolonomicDriveController;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.utilities.ShooterPhysicsCalculations;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static frc.robot.GlobalConstants.BLUE_SPEAKER;
-import static frc.robot.utilities.ShooterPhysicsCalculations.PIVOT_POINT_Z_OFFSET_METRES;
 import static java.lang.Math.round;
 
 class ButtonTest {
@@ -35,23 +24,20 @@ class ButtonTest {
 //        System.out.println(rpm);
 //
         Map<Integer, Pose3d> TAG_ID_TO_POSE = new HashMap<>();
-
-        for (AprilTag aprilTag : AprilTagFields.k2024Crescendo.loadAprilTagLayoutField().getTags())
-            TAG_ID_TO_POSE.put(aprilTag.ID, aprilTag.pose);
-
-
-        for (Pose3d tagPosition : TAG_ID_TO_POSE.values()) {
-            System.out.println("Y:" + TAG_ID_TO_POSE.get(7).getY()); //Y:5.547868
-            System.out.println("X:" + TAG_ID_TO_POSE.get(7).getX()); //X:-0.0381
-        }
+//
+//        for (AprilTag aprilTag : AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape).getTags())
+//            TAG_ID_TO_POSE.put(aprilTag.ID, aprilTag.pose);
+//
+//        for (Pose3d tagPosition : TAG_ID_TO_POSE.values()) {
+//            System.out.println("Y:" + TAG_ID_TO_POSE.get(tagPosition).getY()); //Y:5.547868
+//            System.out.println("X:" + TAG_ID_TO_POSE.get(tagPosition).getX()); //X:-0.0381
+//        }
 //
     }
 
     @Test
     void testButton() {
         DriverStation.silenceJoystickConnectionWarning(true);
-        printPointsForDistancesFromTheta();
-        printPointsForDistanceFromPhysics();
 //        notWorkingMethod();
 //
 //        Random random = new Random();
@@ -60,31 +46,6 @@ class ButtonTest {
 //        for (int i = 0; i < 100; i++) {
 //            setpoint = testTrapezoidalPIDController((int) Math.pow(i, 2), setpoint);//* random.nextInt(10));
 //        }
-    }
-
-    private void printPointsForDistanceFromPhysics() {
-        double incrementedXYDistance = 0.5;
-
-        for (; incrementedXYDistance < 15; incrementedXYDistance+=0.02) {
-            double theta = ShooterPhysicsCalculations.zoneInOnShootingAngleGivenDistance(
-                    incrementedXYDistance
-                    ,BLUE_SPEAKER, 10).getDegrees();
-            System.out.println("(" + Math.floor(incrementedXYDistance*100) / 100 + ", " + theta + ")");
-        }
-    }
-
-    private void printPointsForDistancesFromTheta() {
-        double zDifference = BLUE_SPEAKER.getZ() - PIVOT_POINT_Z_OFFSET_METRES;
-
-        double incrementedXYDistance = 0;
-//\tanh\left(\frac{1.8}{x}\right)180\cdot\frac{1}{\pi} W function. works great.
-        for (; incrementedXYDistance < 5; incrementedXYDistance+=0.2) {
-            double thetaToReach = Units.radiansToDegrees(
-                    Math.tanh(zDifference / incrementedXYDistance)
-            );
-//            System.out.println("THETA TO REACH FROM DISTNACE " + incrementedXYDistance + " IS: " + thetaToReach);
-            System.out.println("(" + Math.floor(incrementedXYDistance*100) / 100 + ", " + Math.floor(thetaToReach * 1000) / 1000 + ")");
-        }
     }
 
     private void testProfiledPIDController(int additionToCurrentAngle) {
@@ -306,7 +267,8 @@ class ButtonTest {
 //TODO
 // * Look into traj generation.
 // * https://www.chiefdelphi.com/t/frc-6328-mechanical-advantage-2023-build-thread/420691/179?u=wihy
-// * ^ Coolest auton managing I've ever seen. Look into implementing something similar. Instead of having rigid routines, have setpoints to get to and performs actions at.
+// * ^ Coolest auton managing I've ever seen. Look into implementing something similar.
+// Instead of having rigid routines, have setpoints to get to and performs actions at.
 // * read when bored: https://docs.wpilib.org/en/stable/docs/software/telemetry/index.html might have useful info.
 // * End of MATCH LEDs flashing would be SOOO useful.
 // * A better LED system. Please!

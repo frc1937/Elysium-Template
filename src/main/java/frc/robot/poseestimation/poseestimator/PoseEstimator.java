@@ -1,58 +1,46 @@
 package frc.robot.poseestimation.poseestimator;
 
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.kinematics.SwerveDriveWheelPositions;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.lib.math.Optimizations;
-import frc.robot.GlobalConstants;
-import frc.robot.RobotContainer;
-import frc.robot.poseestimation.photoncamera.PhotonCameraIO;
+import frc.lib.util.flippable.Flippable;
+import frc.robot.poseestimation.apriltagcamera.AprilTagCamera;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 
-import static frc.robot.GlobalConstants.CURRENT_MODE;
-import static frc.robot.poseestimation.photoncamera.CameraFactory.VISION_SIMULATION;
-import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.*;
+import static frc.robot.RobotContainer.SWERVE;
+import static frc.robot.poseestimation.poseestimator.PoseEstimatorConstants.TAG_ID_TO_POSE;
+import static frc.robot.subsystems.swerve.SwerveConstants.SWERVE_KINEMATICS;
 
 /**
  * A class that estimates the robot's pose using team 6328's custom pose estimator.
  */
 public class PoseEstimator implements AutoCloseable {
+    private final SwerveDrivePoseEstimator swerveDrivePoseEstimator = createSwerveDrivePoseEstimator();
+    private final SwerveDriveOdometry swerveDriveOdometry = createSwerveDriveOdometry();
     private final Field2d field = new Field2d();
-
-    private final PhotonCameraIO[] robotPoseSources;
-
-    private final PoseEstimator6328 poseEstimator6328 = PoseEstimator6328.getInstance();
+    private final AprilTagCamera[] aprilTagCameras;
 
     /**
      * Constructs a new PoseEstimator.
+     * This constructor disables the use of a relative robot pose source and instead uses april tags cameras for pose estimation.
      *
-     * @param robotPoseSources the sources that should update the pose estimator apart from the odometry. This should be cameras etc.
+     * @param aprilTagCameras the cameras that should be used to update the pose estimator
      */
-    public PoseEstimator(PhotonCameraIO... robotPoseSources) {
-        this.robotPoseSources = robotPoseSources;
+    public PoseEstimator(AprilTagCamera... aprilTagCameras) {
+        this.aprilTagCameras = aprilTagCameras;
 
-        putAprilTagsOnFieldWidget();
-
-        SmartDashboard.putData("Field", field);
-
-        PathPlannerLogging.setLogActivePathCallback(pose -> {
-            field.getObject("path").setPoses(pose);
-            Logger.recordOutput("Path", pose.toArray(new Pose2d[0]));
-        });
+        initialize();
     }
 
     @Override
@@ -61,113 +49,153 @@ public class PoseEstimator implements AutoCloseable {
     }
 
     public void periodic() {
-        updateFromVision();
+        updateFromAprilTagCameras();
+
         field.setRobotPose(getCurrentPose());
+    }
+
+    public void resetHeading() {
+        final Rotation2d resetRotation = Flippable.isRedAlliance() ? Rotation2d.k180deg : Rotation2d.kZero;
+        swerveDrivePoseEstimator.resetRotation(resetRotation);
+        swerveDriveOdometry.resetRotation(resetRotation);
     }
 
     /**
      * Resets the pose estimator to the given pose, and the gyro to the given pose's heading.
      *
-     * @param currentPose the pose to reset to, relative to the blue alliance's driver station right corner
+     * @param newPose the pose to reset to, relative to the blue alliance's driver station right corner
      */
-    public void resetPose(Pose2d currentPose) {
-        RobotContainer.SWERVE.setGyroHeading(currentPose.getRotation());
-        poseEstimator6328.resetPose(currentPose);
+    public void resetPose(Pose2d newPose) {
+        SWERVE.setGyroHeading(newPose.getRotation());
+
+        swerveDrivePoseEstimator.resetPose(newPose); // TODO: Might not work as intended
+        swerveDriveOdometry.resetPose(newPose);
     }
 
     /**
      * @return the estimated pose of the robot, relative to the blue alliance's driver station right corner
      */
+    @AutoLogOutput(key = "Poses/Robot/PoseEstimator/EstimatedRobotPose")
     public Pose2d getCurrentPose() {
-        return poseEstimator6328.getEstimatedPose();
-    }
-
-    public Pose2d getOdometryPose() {
-        return poseEstimator6328.getOdometryPose();
+        return swerveDrivePoseEstimator.getEstimatedPosition();
     }
 
     /**
-     * Updates the pose estimator with the given swerve wheel positions and gyro rotations.
-     * This function accepts an array of swerve wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
+     * @return the odometry's estimated pose of the robot, relative to the blue alliance's driver station right corner
+     */
+    @AutoLogOutput(key = "Poses/Robot/PoseEstimator/EstimatedOdometryPose")
+    public Pose2d getOdometryPose() {
+        return swerveDriveOdometry.getPoseMeters();
+    }
+
+    /**
+     * Updates the pose estimator with the given SWERVE wheel positions and gyro rotations.
+     * This function accepts an array of SWERVE wheel positions and an array of gyro rotations because the odometry can be updated at a faster rate than the main loop (which is 50 hertz).
      * This means you could have a couple of odometry updates per main loop, and you would want to update the pose estimator with all of them.
      *
-     * @param swerveWheelPositions the swerve wheel positions accumulated since the last update
+     * @param swerveWheelPositions the SWERVE wheel positions accumulated since the last update
      * @param gyroRotations        the gyro rotations accumulated since the last update
      */
-    public void addOdometryObservations(SwerveDriveWheelPositions[] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
-        if (Optimizations.isColliding()) {
-            DriverStation.reportWarning("The robot collided! Discarding odometry at timestamp", false);
-            return;
-        }
-
+    public void updatePoseEstimatorStates(SwerveModulePosition[][] swerveWheelPositions, Rotation2d[] gyroRotations, double[] timestamps) {
         for (int i = 0; i < swerveWheelPositions.length; i++) {
-            if (swerveWheelPositions[i] == null) continue;
-
-            poseEstimator6328.addOdometryObservation(new PoseEstimator6328.OdometryObservation(
-                    swerveWheelPositions[i],
-                    gyroRotations[i],
-                    timestamps[i])
-            );
+            if (swerveWheelPositions[i] == null) return;
+            swerveDrivePoseEstimator.updateWithTime(timestamps[i], gyroRotations[i], swerveWheelPositions[i]);
+            swerveDriveOdometry.update(gyroRotations[i], swerveWheelPositions[i]);
         }
     }
 
-    private void updateFromVision() {
-        getViableVisionObservations().stream()
-                .sorted(Comparator.comparingDouble(PoseEstimator6328.VisionObservation::timestamp))
-                .forEach(poseEstimator6328::addVisionObservation);
+    /**
+     * Gets the estimated pose of the robot at the target timestamp.
+     *
+     * @param timestamp the target timestamp
+     * @return the robot's estimated pose at the timestamp
+     */
+    public Pose2d getEstimatedPoseAtTimestamp(double timestamp) {
+        return swerveDrivePoseEstimator.sampleAt(timestamp).orElse(null);
     }
 
-    private List<PoseEstimator6328.VisionObservation> getViableVisionObservations() {
-        List<PoseEstimator6328.VisionObservation> viableVisionObservations = new ArrayList<>();
-
-        for (PhotonCameraIO robotPoseSource : robotPoseSources) {
-            final PoseEstimator6328.VisionObservation visionObservation = getVisionObservation(robotPoseSource);
-
-            if (visionObservation != null)
-                viableVisionObservations.add(visionObservation);
-
-            if (CURRENT_MODE == GlobalConstants.Mode.SIMULATION) {
-                if (visionObservation != null && visionObservation.visionPose() != null)
-                    VISION_SIMULATION.getDebugField()
-                        .getObject("VisionEstimation")
-                        .setPose(visionObservation.visionPose());
-                else {
-                    VISION_SIMULATION.getDebugField().getObject("VisionEstimation").setPoses();
-                }
-            }
-        }
-
-        return viableVisionObservations;
-    }
-
-    private PoseEstimator6328.VisionObservation getVisionObservation(PhotonCameraIO robotPoseSource) {
-        robotPoseSource.refresh();
-
-        if (!robotPoseSource.hasNewResult())
-            return null;
-
-        final Pose2d robotPose = robotPoseSource.getRobotPose();
-
-        if (robotPose == null)
-            return null;
-
-        return new PoseEstimator6328.VisionObservation(
-                robotPose,
-                robotPoseSource.getLastResultTimestamp(),
-                averageDistanceToStdDevs(robotPoseSource.getAverageDistanceFromTags(), robotPoseSource.getVisibleTags())
-        );
-    }
-
-    private Matrix<N3, N1> averageDistanceToStdDevs(double averageDistance, int visibleTags) {
-        final double translationStd = TRANSLATION_STD_EXPONENT * Math.pow(averageDistance, 2) / (visibleTags * visibleTags);
-        final double thetaStd = ROTATION_STD_EXPONENT * Math.pow(averageDistance, 2) / visibleTags;
-
-        return VecBuilder.fill(translationStd, translationStd, thetaStd);
+    private void initialize() {
+        putAprilTagsOnFieldWidget();
+        SmartDashboard.putData("Field", field);
+        logTargetPath();
     }
 
     private void putAprilTagsOnFieldWidget() {
         for (Map.Entry<Integer, Pose3d> entry : TAG_ID_TO_POSE.entrySet()) {
-            field.getObject("Tag " + entry.getKey()).setPose(entry.getValue().toPose2d());
+            final Pose2d tagPose = entry.getValue().toPose2d();
+            field.getObject("Tag " + entry.getKey()).setPose(tagPose);
         }
+    }
+
+    /**
+     * Logs and updates the field widget with the target PathPlanner path as an array of Pose2ds.
+     */
+    private void logTargetPath() {
+        PathPlannerLogging.setLogActivePathCallback((pathPoses) -> {
+            field.getObject("path").setPoses(pathPoses);
+            Logger.recordOutput("PathPlanner/Path", pathPoses.toArray(new Pose2d[0]));
+        });
+
+        PathPlannerLogging.setLogTargetPoseCallback(pose -> Logger.recordOutput("PathPlanner/TargetPose", pose));
+    }
+
+    private void updateFromAprilTagCameras() {
+        final AprilTagCamera[] newResultCameras = getCamerasWithResults();
+
+        for (AprilTagCamera aprilTagCamera : newResultCameras) {
+            swerveDrivePoseEstimator.addVisionMeasurement(
+                    aprilTagCamera.getEstimatedRobotPose(),
+                    aprilTagCamera.getLatestResultTimestampSeconds(),
+                    aprilTagCamera.calculateStandardDeviations().toMatrix()
+            );
+        }
+    }
+
+    private AprilTagCamera[] getCamerasWithResults() {
+        final AprilTagCamera[] camerasWithNewResult = new AprilTagCamera[aprilTagCameras.length];
+        int index = 0;
+
+        for (AprilTagCamera aprilTagCamera : aprilTagCameras) {
+            aprilTagCamera.update();
+            if (aprilTagCamera.hasValidResult() && aprilTagCamera.getEstimatedRobotPose() != null) {
+                camerasWithNewResult[index] = aprilTagCamera;
+                index++;
+            }
+        }
+
+        return Arrays.copyOf(camerasWithNewResult, index);
+    }
+
+    private SwerveDriveOdometry createSwerveDriveOdometry() {
+        final SwerveModulePosition[] swerveModulePositions = {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
+        };
+
+        return new SwerveDriveOdometry(
+                SWERVE_KINEMATICS,
+                new Rotation2d(),
+                swerveModulePositions
+        );
+    }
+
+    private SwerveDrivePoseEstimator createSwerveDrivePoseEstimator() {
+        final SwerveModulePosition[] swerveModulePositions = {
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition(),
+                new SwerveModulePosition()
+        };
+
+        return new SwerveDrivePoseEstimator(
+                SWERVE_KINEMATICS,
+                new Rotation2d(),
+                swerveModulePositions,
+                new Pose2d(),
+                PoseEstimatorConstants.ODOMETRY_STANDARD_DEVIATIONS.toMatrix(),
+                VecBuilder.fill(0, 0, 0)
+        );
     }
 }

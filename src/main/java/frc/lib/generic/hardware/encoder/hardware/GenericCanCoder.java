@@ -5,14 +5,19 @@ import com.ctre.phoenix6.StatusCode;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.AbsoluteSensorRangeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.generic.OdometryThread;
+import frc.lib.generic.hardware.HardwareManager;
 import frc.lib.generic.hardware.encoder.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 
 import static frc.lib.generic.hardware.encoder.EncoderInputs.ENCODER_INPUTS_LENGTH;
+import static frc.lib.util.QueueUtilities.queueToDoubleArray;
 
 /**
  * Wrapper class for the CAN encoder.
@@ -27,8 +32,8 @@ public class GenericCanCoder extends Encoder {
 
     private final Map<String, Queue<Double>> signalQueueList = new HashMap<>();
 
-    private final List<StatusSignal<Double>> signalsToUpdateList = new ArrayList<>();
-    private final StatusSignal<Double> positionSignal, velocitySignal;
+    private final StatusSignal<Angle> positionSignal;
+    private final StatusSignal<AngularVelocity> velocitySignal;
 
     public GenericCanCoder(String name, int canCoderID, String canbusName) {
         super(name);
@@ -45,24 +50,22 @@ public class GenericCanCoder extends Encoder {
 
     @Override
     public void setupSignalUpdates(EncoderSignal signal, boolean useFasterThread) {
-        final int updateFrequency = useFasterThread ? 200 : 50;
-
         signalsToLog[signal.getId()] = true;
 
-        switch (signal) {
-            case POSITION -> setupSignal(positionSignal, updateFrequency);
-            case VELOCITY -> setupSignal(velocitySignal, updateFrequency);
+        if (!useFasterThread) {
+            switch (signal) {
+                case POSITION -> setupNonThreadedSignal(positionSignal);
+                case VELOCITY -> setupNonThreadedSignal(velocitySignal);
+            }
+
+            return;
         }
 
-        if (!useFasterThread) return;
-//        C:\Users\Public\wpilib\visualvm_2110\bin\visualvm.exe --jdkhome "C:\Program Files (x86)\Eclipse Adoptium\jdk-11.0.22.7-hotspot\bin\java.exe"
         signalsToLog[signal.getId() + ENCODER_INPUTS_LENGTH / 2] = true;
 
         switch (signal) {
-            case POSITION ->
-                    signalQueueList.put("position", OdometryThread.getInstance().registerSignal(this::getEncoderPositionPrivate));
-            case VELOCITY ->
-                    signalQueueList.put("velocity", OdometryThread.getInstance().registerSignal(this::getEncoderVelocityPrivate));
+            case POSITION -> setupThreadedSignal("position", positionSignal);
+            case VELOCITY -> setupThreadedSignal("velocity", velocitySignal);
         }
     }
 
@@ -73,8 +76,8 @@ public class GenericCanCoder extends Encoder {
         canCoderConfig.MagnetSensor.SensorDirection = encoderConfiguration.invert ?
                 SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive;
 
-        canCoderConfig.MagnetSensor.AbsoluteSensorRange = encoderConfiguration.sensorRange == EncoderProperties.SensorRange.ZeroToOne
-                ? AbsoluteSensorRangeValue.Unsigned_0To1 : AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
+        canCoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint =
+                encoderConfiguration.sensorRange == EncoderProperties.SensorRange.ZERO_TO_ONE ? 1 : 0.5;
 
         canCoder.optimizeBusUtilization();
 
@@ -104,31 +107,22 @@ public class GenericCanCoder extends Encoder {
 
         inputs.setSignalsToLog(signalsToLog);
 
-        BaseStatusSignal.refreshAll(signalsToUpdateList.toArray(new BaseStatusSignal[0]));
-
-        inputs.position = getEncoderPositionPrivate();
-        inputs.velocity = getEncoderVelocityPrivate();
+        inputs.position = positionSignal.getValueAsDouble();
+        inputs.velocity = velocitySignal.getValueAsDouble();
 
         if (signalQueueList.isEmpty()) return;
 
-        if (signalQueueList.get("position") != null)
-            inputs.threadPosition = signalQueueList.get("position").stream().mapToDouble(Double::doubleValue).toArray();
-        if (signalQueueList.get("velocity") != null)
-            inputs.threadVelocity = signalQueueList.get("velocity").stream().mapToDouble(Double::doubleValue).toArray();
-
-        signalQueueList.forEach((k, v) -> v.clear());
+        inputs.threadPosition = queueToDoubleArray(signalQueueList.get("position"));
+        inputs.threadVelocity = queueToDoubleArray(signalQueueList.get("velocity"));
     }
 
-    private double getEncoderPositionPrivate() {
-        return positionSignal.getValue();
+    private void setupNonThreadedSignal(final BaseStatusSignal correspondingSignal) {
+        correspondingSignal.setUpdateFrequency(50);
+        HardwareManager.registerCTREStatusSignal(correspondingSignal);
     }
 
-    private double getEncoderVelocityPrivate() {
-        return velocitySignal.getValue();
-    }
-
-    private void setupSignal(final StatusSignal<Double> correspondingSignal, int updateFrequency) {
-        signalsToUpdateList.add(correspondingSignal);
-        correspondingSignal.setUpdateFrequency(updateFrequency);
+    private void setupThreadedSignal(String name, BaseStatusSignal signal) {
+        signal.setUpdateFrequency(200);
+        signalQueueList.put(name, OdometryThread.getInstance().registerCTRESignal(signal));
     }
 }
